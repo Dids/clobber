@@ -8,7 +8,7 @@ A command line application for building [Clover](https://sourceforge.net/project
 
 ### Installation
 
-> brew tap dids/brewery  
+> brew tap Dids/brewery  
 > brew install clover-builder
 
 ### License
