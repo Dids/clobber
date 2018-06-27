@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/Dids/clover-builder-cli/cmd"
 )
 
 func main() {
-	fmt.Println("Not implemented.")
+	cmd.Execute()
 }
