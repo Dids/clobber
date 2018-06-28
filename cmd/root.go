@@ -31,9 +31,9 @@ func (writer logWriter) Write(bytes []byte) (int, error) {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "clover-builder",
-	Short: "Clover Builder is a command-line application for building Clover",
-	Long: `Clover Builder is a command-line application for building Clover.
+	Use:   "clobber",
+	Short: "Clobber is a command-line application for building Clover",
+	Long: `Clobber is a command-line application for building Clover.
 				 Built by @Dids, with tons and tons of love, sweat and tears.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Measure execution time
@@ -52,7 +52,7 @@ var rootCmd = &cobra.Command{
 
 		// https://github.com/tianocore/edk2 and the branch is UDK2018
 
-		srcRoot := "/tmp/clover-builder_go/src"
+		srcRoot := getHome() + "/.clobber/src"
 		udkRoot := srcRoot + "/edk2"
 		cloverRoot := udkRoot + "/clover"
 

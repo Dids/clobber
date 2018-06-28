@@ -1,23 +1,23 @@
-[![Build Status](https://travis-ci.org/Dids/clover-builder-cli.svg?branch=master)](https://travis-ci.org/Dids/clover-builder-cli)
+[![Build Status](https://travis-ci.org/Dids/clobber.svg?branch=master)](https://travis-ci.org/Dids/clobber)
 
-# Clover Builder CLI
+# Clobber
 
-Clover Builder is command-line application for building [Clover](https://sourceforge.net/projects/cloverefiboot/).
+Clobber is command-line application for building [Clover](https://sourceforge.net/projects/cloverefiboot/).
 
 **NOTICE:** _Work in progress._
 
 ### Installation
 
 > brew tap Dids/brewery  
-> brew install clover-builder  
+> brew install clobber  
 
 ### Usage
 
 Build Clover using default settings:  
-> clover-builder  
+> clobber  
 
 View available commands and flags:  
-> clover-builder --help  
+> clobber --help  
 
 ### License
 

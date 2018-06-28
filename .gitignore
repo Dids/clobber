@@ -13,7 +13,7 @@ debug
 release
 debug/
 release/
-clover-builder
+clobber
 
 # Test binary, build with `go test -c`
 *.test
