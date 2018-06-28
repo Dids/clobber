@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Dids/clover-builder-cli/cmd"
+	"github.com/Dids/clobber/cmd"
 )
 
 func main() {
