@@ -12,6 +12,7 @@ import (
 
 	git "github.com/gogits/git-module"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 )
 
@@ -87,7 +88,7 @@ var rootCmd = &cobra.Command{
 		log.Println("Verifying Clover is up to date..")
 		runCommand("svn up -r" + Revision + " " + getCloverPath())
 		runCommand("svn revert -R" + " " + getCloverPath())
-		runCommand("svn cleanup --remove-unversioned" + " " + getCloverPath())
+		runCommand("svn cleanup --remove-unversioned " + getCloverPath())
 
 		// Override HOME environment variable (use chroot-like logic for the build process)
 		log.Println("Overriding HOME..")
@@ -103,23 +104,31 @@ var rootCmd = &cobra.Command{
 		// make -C ${UDK2018_PATH}/BaseTools/Source/C
 		runCommand("make -C" + " " + getUdkPath() + "/BaseTools/Source/C")
 
-		// TODO: Setup UDK
+		// Setup UDK
 		log.Println("Setting up UDK..")
 		// source edksetup.sh
+		runCommand("cd " + getUdkPath() + " && " + "source edksetup.sh")
 
 		// TODO: Build gettext, mtoc and nasm (if necessary)
-		log.Println("Building gettext..")
-		log.Println("Building mtoc..")
-		log.Println("Building nasm..")
+		log.Println("Building gettext.. [NOT IMPLEMENTED]")
+		log.Println("Building mtoc.. [NOT IMPLEMENTED]")
+		log.Println("Building nasm.. [NOT IMPLEMENTED]")
 
-		// TODO: Apply UDK patches
+		// Apply UDK patches
 		log.Println("Applying patches for UDK..")
 		// cp -R ${CLOVER_PATH}/Patches_for_UDK2018/* ../
+		copyErr := copy.Copy(getCloverPath()+"/Patches_for_UDK2018", getUdkPath())
+		if copyErr != nil {
+			log.Fatal("Failed to copy UDK patches: ", copyErr)
+		}
 
+		// FIXME: These aren't working, most likely due to not being run as a proper shell command
 		// TODO: Build Clover (clean & build)
 		log.Println("Building Clover..")
 		// ./ebuild.sh -cleanall
 		// ./ebuild.sh -fr
+		runCommand(getCloverPath() + "/ebuild.sh -cleanall")
+		runCommand(getCloverPath() + "/ebuild.sh -fr")
 
 		// TODO: Implement the rest of the steps (they're mostly customization & package building steps anyway)
 
@@ -193,7 +202,7 @@ func runCommand(command string) {
 	)
 	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
 		//log.Fatal("Failed to run '" + cmd + strings.Join(args, " ") + "':\n" + string(cmdOut) + " (" + err.Error() + ")")
-		log.Fatal("Failed to run '" + cmd + strings.Join(args, " ") + "':\n" + string(cmdOut))
+		log.Fatal("Failed to run '" + cmd + " " + strings.Join(args, " ") + "':\n" + string(cmdOut))
 	}
 	if Verbose {
 		log.Println("Command finished with output:\n" + string(cmdOut))
