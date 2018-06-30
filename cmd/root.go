@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
 	"time"
 
 	"log"
@@ -16,18 +18,27 @@ import (
 // Verbose enables global verbose output
 var Verbose bool
 
+// Quiet enables silencing all output
+var Quiet bool
+
+// Revision is the default Clover revision to use
+var Revision string
+
 // Execute is the entrypoint for the command-line application
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
 
 type logWriter struct{}
 
 func (writer logWriter) Write(bytes []byte) (int, error) {
-	return fmt.Print(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " [VERBOSE] " + string(bytes))
+	// TODO: This is redundant, but perhaps it's possible to use this to determine if the message is an error or not?
+	if Quiet {
+		return 0, nil
+	}
+	return fmt.Print(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " " + string(bytes))
 }
 
 var rootCmd = &cobra.Command{
@@ -46,41 +57,71 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// FIXME: Ditch the "git" package and just use our custom exec-based logic, so it's more consistent across the app?
+
 		// TODO: Do we just blindly run everything here, or split stuff into their own packages and/or functions here?
 
 		// TODO: Do everything in a "chrooted" environment, which we might be able to do just by overriding $HOME?
 
-		// https://github.com/tianocore/edk2 and the branch is UDK2018
-
-		srcRoot := getHome() + "/.clobber/src"
-		udkRoot := srcRoot + "/edk2"
-		cloverRoot := udkRoot + "/clover"
-
 		// Make sure that the correct directory structure exists
 		log.Println("Verifying folder structure..")
-		mkdirErr := os.MkdirAll(srcRoot, 0755)
+		mkdirErr := os.MkdirAll(getSourcePath(), 0755)
 		if mkdirErr != nil {
-			fmt.Println(mkdirErr)
-			os.Exit(1)
+			log.Fatal("MkdirAll failed with error: ", mkdirErr)
 		}
 
 		// Download or update UDK2018
-		if _, err := os.Stat(udkRoot + "/.git"); os.IsNotExist(err) {
+		if _, err := os.Stat(getUdkPath() + "/.git"); os.IsNotExist(err) {
 			log.Println("UDK2018 is missing, downloading..")
-			git.Clone("https://github.com/tianocore/edk2", udkRoot, git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: false})
+			git.Clone("https://github.com/tianocore/edk2", getUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
 		}
 		log.Println("Verifying UDK2018 is up to date..")
-		git.Checkout(srcRoot, git.CheckoutOptions{Branch: "UDK2018"})
+		git.Checkout(getSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
+		runCommand("git clean -fdx --exclude=\"Clover/\"")
 
 		// Download or update Clover
-		if _, err := os.Stat(cloverRoot + "/.svn"); os.IsNotExist(err) {
+		if _, err := os.Stat(getCloverPath() + "/.svn"); os.IsNotExist(err) {
 			log.Println("Clover is missing, downloading..")
-			// TODO: Figure out how to do svn (probably need to use exec)
-			//git.Clone("https://github.com/tianocore/edk2", udkRoot, git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: false})
+			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + getCloverPath())
 		}
 		log.Println("Verifying Clover is up to date..")
-		// TODO: Figure out how to do svn (probably need to use exec)
-		//git.Checkout(srcRoot, git.CheckoutOptions{Branch: "UDK2018"})
+		runCommand("svn up -r" + Revision + " " + getCloverPath())
+		runCommand("svn revert -R" + " " + getCloverPath())
+		runCommand("svn cleanup --remove-unversioned" + " " + getCloverPath())
+
+		// Override HOME environment variable (use chroot-like logic for the build process)
+		log.Println("Overriding HOME..")
+		os.Setenv("HOME", getClobberPath())
+
+		// Override TOOLCHAIR_DIR environment variable
+		log.Println("Overriding TOOLCHAIN_DIR..")
+		// export TOOLCHAIN_DIR="$(echo ${SRC}/opt/local)"
+		os.Setenv("TOOLCHAIN_DIR", getSourcePath()+"/opt/local")
+
+		// Build base tools
+		log.Println("Building base tools..")
+		// make -C ${UDK2018_PATH}/BaseTools/Source/C
+		runCommand("make -C" + " " + getUdkPath() + "/BaseTools/Source/C")
+
+		// TODO: Setup UDK
+		log.Println("Setting up UDK..")
+		// source edksetup.sh
+
+		// TODO: Build gettext, mtoc and nasm (if necessary)
+		log.Println("Building gettext..")
+		log.Println("Building mtoc..")
+		log.Println("Building nasm..")
+
+		// TODO: Apply UDK patches
+		log.Println("Applying patches for UDK..")
+		// cp -R ${CLOVER_PATH}/Patches_for_UDK2018/* ../
+
+		// TODO: Build Clover (clean & build)
+		log.Println("Building Clover..")
+		// ./ebuild.sh -cleanall
+		// ./ebuild.sh -fr
+
+		// TODO: Implement the rest of the steps (they're mostly customization & package building steps anyway)
 
 		executionElapsedTime := time.Since(executionStartTime)
 		log.Printf("Finished in %s!", executionElapsedTime)
@@ -96,6 +137,8 @@ func init() {
 
 	// Add persistent flags that carry over to all commands
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "silence all output")
+	rootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
 }
 
 func customInit() {
@@ -103,12 +146,14 @@ func customInit() {
 	log.SetFlags(0)
 	log.SetOutput(new(logWriter))
 
-	// Disable logging if not running in verbose mode
-	if Verbose == false {
+	// FIXME: Ideally log.Fatal should still work when this is set, but not sure if the log package supports that?
+	// Disable logging if running in quiet mode
+	if Quiet == true {
 		log.SetOutput(ioutil.Discard)
 	}
 }
 
+// TODO: Implement some sort of persistent config (if we're planning on allowing customizable builds?)
 /* initConfig() {
 	// Don't forget to read config either from cfgFile or from home directory!
 	if cfgFile != "" {
@@ -133,12 +178,48 @@ func customInit() {
 	}
 }*/
 
-// TODO: Add helper functions for getting common paths, such as ~/, ~/src, ~/src/UDK2018 etc.
-func getHome() string {
+func runCommand(command string) {
+	splitArgs := strings.Split(command, " ")
+	cmd := splitArgs[0]
+	args := strings.Split(command[len(cmd)+1:len(command)], " ")
+
+	if Verbose {
+		log.Println("Running command: '" + cmd + " " + strings.Join(args, " ") + "'")
+	}
+
+	var (
+		cmdOut []byte
+		err    error
+	)
+	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
+		//log.Fatal("Failed to run '" + cmd + strings.Join(args, " ") + "':\n" + string(cmdOut) + " (" + err.Error() + ")")
+		log.Fatal("Failed to run '" + cmd + strings.Join(args, " ") + "':\n" + string(cmdOut))
+	}
+	if Verbose {
+		log.Println("Command finished with output:\n" + string(cmdOut))
+	}
+}
+
+func getCloverPath() string {
+	return getUdkPath() + "/Clover"
+}
+
+func getUdkPath() string {
+	return getSourcePath() + "/edk2"
+}
+
+func getSourcePath() string {
+	return getClobberPath() + "/src"
+}
+
+func getClobberPath() string {
+	return getHomePath() + "/.clobber"
+}
+
+func getHomePath() string {
 	home, err := homedir.Dir()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal("getHomePath failed with error: ", err)
 	}
 	return home
 }
