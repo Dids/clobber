@@ -11,6 +11,12 @@ go:
   - 1.8.x
   - master
 
+# Setup caching
+cache:
+  directories:
+    ## TODO: We might want to clean things up before caching..
+    - $HOME/.clobber/opt
+
 # Install dependencies
 before_install:
   - go get -t -v ./...

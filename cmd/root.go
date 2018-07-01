@@ -10,6 +10,7 @@ import (
 
 	"log"
 
+	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/otiai10/copy"
@@ -25,6 +26,9 @@ var Quiet bool
 // Revision is the default Clover revision to use
 var Revision string
 
+// Spinner is the CLI spinner/activity indicator
+var Spinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+
 // Execute is the entrypoint for the command-line application
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -39,6 +43,19 @@ func (writer logWriter) Write(bytes []byte) (int, error) {
 	if Quiet {
 		return 0, nil
 	}
+
+	// FIXME: Using suffix or prefix causes newlines, while FinalMsg doesn't, but it appears on a separate line with this logic..
+	if !Verbose {
+		spinnerSuffix := "" + string(bytes)
+		if Spinner.FinalMSG != spinnerSuffix {
+			Spinner.FinalMSG = spinnerSuffix
+			Spinner.Stop()
+			Spinner.Start()
+		}
+		//Spinner.Suffix = "  :" + string(bytes)
+		return 0, nil
+	}
+
 	return fmt.Print(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " " + string(bytes))
 }
 
@@ -51,8 +68,14 @@ var rootCmd = &cobra.Command{
 		// Measure execution time
 		executionStartTime := time.Now()
 
+		// Start the spinner
+		if !Verbose {
+			Spinner.Start()
+		}
+
 		if Verbose {
 			log.Println("Verbose mode is enabled")
+			log.Println("Target Clover revision:", Revision)
 			if args != nil && len(args) > 0 {
 				log.Println("Building with arguments:", args)
 			}
@@ -96,44 +119,65 @@ var rootCmd = &cobra.Command{
 
 		// Override TOOLCHAIR_DIR environment variable
 		log.Println("Overriding TOOLCHAIN_DIR..")
-		// export TOOLCHAIN_DIR="$(echo ${SRC}/opt/local)"
 		os.Setenv("TOOLCHAIN_DIR", getSourcePath()+"/opt/local")
 
 		// Build base tools
 		log.Println("Building base tools..")
-		// make -C ${UDK2018_PATH}/BaseTools/Source/C
 		runCommand("make -C" + " " + getUdkPath() + "/BaseTools/Source/C")
 
 		// Setup UDK
 		log.Println("Setting up UDK..")
 		// source edksetup.sh
-		runCommand("cd " + getUdkPath() + " && " + "source edksetup.sh")
+		runCommand("cd " + getUdkPath() + " && " + "source edksetup.sh") // TODO: Why does this work, because I thought "cd" didn't work with exec?
 
-		// TODO: Build gettext, mtoc and nasm (if necessary)
-		log.Println("Building gettext.. [NOT IMPLEMENTED]")
-		log.Println("Building mtoc.. [NOT IMPLEMENTED]")
-		log.Println("Building nasm.. [NOT IMPLEMENTED]")
+		// Build gettext, mtoc and nasm (if necessary)
+		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
+			log.Println("Building gettext..")
+			runCommand(getCloverPath() + "/buildgettext.sh")
+		}
+		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
+			log.Println("Building mtoc..")
+			runCommand(getCloverPath() + "/buildmtoc.sh")
+		}
+		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
+			log.Println("Building nasm..")
+			runCommand(getCloverPath() + "/buildnasm.sh")
+		}
 
 		// Apply UDK patches
 		log.Println("Applying patches for UDK..")
-		// cp -R ${CLOVER_PATH}/Patches_for_UDK2018/* ../
 		copyErr := copy.Copy(getCloverPath()+"/Patches_for_UDK2018", getUdkPath())
 		if copyErr != nil {
 			log.Fatal("Failed to copy UDK patches: ", copyErr)
 		}
 
-		// FIXME: These aren't working, most likely due to not being run as a proper shell command
-		// TODO: Build Clover (clean & build)
+		// Build Clover (clean & build)
 		log.Println("Building Clover..")
-		// ./ebuild.sh -cleanall
-		// ./ebuild.sh -fr
 		runCommand(getCloverPath() + "/ebuild.sh -cleanall")
 		runCommand(getCloverPath() + "/ebuild.sh -fr")
 
-		// TODO: Implement the rest of the steps (they're mostly customization & package building steps anyway)
+		// TODO: Modify credits
 
+		// TODO: Add custom drivers (apfs.efi, apfs_patched.efi, ntfs.efi, hfsplus.efi, AptioFixPkg, ApfsSupportPkg)
+
+		// TODO: Update template resource descriptions
+
+		// Build the Clover installer package
+		log.Println("Building Clover installer..")
+		runCommand(getCloverPath() + "/CloverPackage/makepkg")
+
+		// TODO: Would be nice to have a better formatting for the time string (eg. 1 minute and 20 seconds, instead of 1m20s)
+		// Stop the execution timer
 		executionElapsedTime := time.Since(executionStartTime)
-		log.Printf("Finished in %s!", executionElapsedTime)
+		executionResult := fmt.Sprintf("Finished in %s!\n", executionElapsedTime)
+
+		// Stop the spinner
+		if !Verbose {
+			Spinner.FinalMSG = executionResult
+			Spinner.Stop()
+		} else {
+			log.Printf(executionResult)
+		}
 	},
 }
 
@@ -188,12 +232,24 @@ func customInit() {
 }*/
 
 func runCommand(command string) {
-	splitArgs := strings.Split(command, " ")
-	cmd := splitArgs[0]
-	args := strings.Split(command[len(cmd)+1:len(command)], " ")
+	// If there are no args (or no spaces), we need to deal with those situations too
+	var (
+		cmd        string
+		args       []string
+		argsString string
+	)
+	if strings.Contains(command, " ") {
+		splitArgs := strings.Split(command, " ")
+		cmd = splitArgs[0]
+		args = strings.Split(command[len(cmd)+1:len(command)], " ")
+		argsString = strings.Join(args, " ")
+	} else {
+		cmd = command
+		argsString = ""
+	}
 
 	if Verbose {
-		log.Println("Running command: '" + cmd + " " + strings.Join(args, " ") + "'")
+		log.Println("Running command: '" + cmd + " " + argsString + "'")
 	}
 
 	var (
@@ -202,7 +258,7 @@ func runCommand(command string) {
 	)
 	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
 		//log.Fatal("Failed to run '" + cmd + strings.Join(args, " ") + "':\n" + string(cmdOut) + " (" + err.Error() + ")")
-		log.Fatal("Failed to run '" + cmd + " " + strings.Join(args, " ") + "':\n" + string(cmdOut))
+		log.Fatal("Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
 	}
 	if Verbose {
 		log.Println("Command finished with output:\n" + string(cmdOut))
@@ -231,4 +287,12 @@ func getHomePath() string {
 		log.Fatal("getHomePath failed with error: ", err)
 	}
 	return home
+}
+
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Minute)
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d / time.Minute
+	return fmt.Sprintf("%02d:%02d", h, m)
 }
