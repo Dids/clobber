@@ -289,10 +289,11 @@ func getHomePath() string {
 	return home
 }
 
-func fmtDuration(d time.Duration) string {
+// FIXME: d.Round doesn't exist in go versions <= 1.8
+/*func fmtDuration(d time.Duration) string {
 	d = d.Round(time.Minute)
 	h := d / time.Hour
 	d -= h * time.Hour
 	m := d / time.Minute
 	return fmt.Sprintf("%02d:%02d", h, m)
-}
+}/*
