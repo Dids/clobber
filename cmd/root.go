@@ -8,7 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"log"
+	"github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
 	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
@@ -29,6 +30,8 @@ var Revision string
 // Spinner is the CLI spinner/activity indicator
 var Spinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond)
 
+var log = logrus.New()
+
 // Execute is the entrypoint for the command-line application
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -36,7 +39,7 @@ func Execute() {
 	}
 }
 
-type logWriter struct{}
+/*type logWriter struct{}
 
 func (writer logWriter) Write(bytes []byte) (int, error) {
 	// TODO: This is redundant, but perhaps it's possible to use this to determine if the message is an error or not?
@@ -57,6 +60,15 @@ func (writer logWriter) Write(bytes []byte) (int, error) {
 	}
 
 	return fmt.Print(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " " + string(bytes))
+}*/
+
+// ClobberLogFormatter is a custom log formatter
+type ClobberLogFormatter struct {
+}
+
+// Format formats logs with the custom log format
+func (f *ClobberLogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	return []byte(entry.Message + "\n"), nil
 }
 
 var rootCmd = &cobra.Command{
@@ -69,15 +81,15 @@ var rootCmd = &cobra.Command{
 		executionStartTime := time.Now()
 
 		// Start the spinner
-		if !Verbose {
+		if !Verbose && !Quiet {
 			Spinner.Start()
 		}
 
 		if Verbose {
-			log.Println("Verbose mode is enabled")
-			log.Println("Target Clover revision:", Revision)
+			log.Debug("Verbose mode is enabled")
+			log.Debug("Target Clover revision:", Revision)
 			if args != nil && len(args) > 0 {
-				log.Println("Building with arguments:", args)
+				log.Debug("Building with arguments:", args)
 			}
 		}
 
@@ -88,7 +100,7 @@ var rootCmd = &cobra.Command{
 		// TODO: Do everything in a "chrooted" environment, which we might be able to do just by overriding $HOME?
 
 		// Make sure that the correct directory structure exists
-		log.Println("Verifying folder structure..")
+		log.Info("Verifying folder structure..")
 		mkdirErr := os.MkdirAll(getSourcePath(), 0755)
 		if mkdirErr != nil {
 			log.Fatal("MkdirAll failed with error: ", mkdirErr)
@@ -96,63 +108,63 @@ var rootCmd = &cobra.Command{
 
 		// Download or update UDK2018
 		if _, err := os.Stat(getUdkPath() + "/.git"); os.IsNotExist(err) {
-			log.Println("UDK2018 is missing, downloading..")
+			log.Warning("UDK2018 is missing, downloading..")
 			git.Clone("https://github.com/tianocore/edk2", getUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
 		}
-		log.Println("Verifying UDK2018 is up to date..")
+		log.Info("Verifying UDK2018 is up to date..")
 		git.Checkout(getSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
 		runCommand("cd " + getUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
 
 		// Download or update Clover
 		if _, err := os.Stat(getCloverPath() + "/.svn"); os.IsNotExist(err) {
-			log.Println("Clover is missing, downloading..")
+			log.Warning("Clover is missing, downloading..")
 			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + getCloverPath())
 		}
-		log.Println("Verifying Clover is up to date..")
+		log.Info("Verifying Clover is up to date..")
 		runCommand("svn up -r" + Revision + " " + getCloverPath())
 		runCommand("svn revert -R" + " " + getCloverPath())
 		runCommand("svn cleanup --remove-unversioned " + getCloverPath())
 
 		// Override HOME environment variable (use chroot-like logic for the build process)
-		log.Println("Overriding HOME..")
+		log.Info("Overriding HOME..")
 		os.Setenv("HOME", getClobberPath())
 
 		// Override TOOLCHAIR_DIR environment variable
-		log.Println("Overriding TOOLCHAIN_DIR..")
+		log.Info("Overriding TOOLCHAIN_DIR..")
 		os.Setenv("TOOLCHAIN_DIR", getSourcePath()+"/opt/local")
 
 		// Build base tools
-		log.Println("Building base tools..")
+		log.Info("Building base tools..")
 		runCommand("make -C" + " " + getUdkPath() + "/BaseTools/Source/C")
 
 		// Setup UDK
-		log.Println("Setting up UDK..")
+		log.Info("Setting up UDK..")
 		// source edksetup.sh
 		runCommand("cd " + getUdkPath() + " && " + "source edksetup.sh") // TODO: Why does this work, because I thought "cd" didn't work with exec?
 
 		// Build gettext, mtoc and nasm (if necessary)
 		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
-			log.Println("Building gettext..")
+			log.Warning("Building gettext..")
 			runCommand(getCloverPath() + "/buildgettext.sh")
 		}
 		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
-			log.Println("Building mtoc..")
+			log.Warning("Building mtoc..")
 			runCommand(getCloverPath() + "/buildmtoc.sh")
 		}
 		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
-			log.Println("Building nasm..")
+			log.Warning("Building nasm..")
 			runCommand(getCloverPath() + "/buildnasm.sh")
 		}
 
 		// Apply UDK patches
-		log.Println("Applying patches for UDK..")
+		log.Info("Applying patches for UDK..")
 		copyErr := copy.Copy(getCloverPath()+"/Patches_for_UDK2018", getUdkPath())
 		if copyErr != nil {
 			log.Fatal("Failed to copy UDK patches: ", copyErr)
 		}
 
 		// Build Clover (clean & build)
-		log.Println("Building Clover..")
+		log.Info("Building Clover..")
 		runCommand(getCloverPath() + "/ebuild.sh -cleanall")
 		runCommand(getCloverPath() + "/ebuild.sh -fr")
 
@@ -163,7 +175,7 @@ var rootCmd = &cobra.Command{
 		// TODO: Update template resource descriptions
 
 		// Build the Clover installer package
-		log.Println("Building Clover installer..")
+		log.Info("Building Clover installer..")
 		runCommand(getCloverPath() + "/CloverPackage/makepkg")
 
 		// TODO: Would be nice to have a better formatting for the time string (eg. 1 minute and 20 seconds, instead of 1m20s)
@@ -172,11 +184,11 @@ var rootCmd = &cobra.Command{
 		executionResult := fmt.Sprintf("Finished in %s!\n", executionElapsedTime)
 
 		// Stop the spinner
-		if !Verbose {
+		if !Verbose && !Quiet {
 			Spinner.FinalMSG = executionResult
 			Spinner.Stop()
 		} else {
-			log.Printf(executionResult)
+			log.Info(executionResult)
 		}
 	},
 }
@@ -195,14 +207,48 @@ func init() {
 }
 
 func customInit() {
-	// Initialize logging
-	log.SetFlags(0)
-	log.SetOutput(new(logWriter))
+	// Create a new log formatter
+	formatter := new(prefixed.TextFormatter)
+
+	// Change the log format based on the current verbosity
+	if Verbose {
+		// Enable showing a proper timestamp
+		formatter.FullTimestamp = true
+	} else {
+		// TODO: Customize for non-verbose running, so remove the timestamp for instance?
+		formatter.DisableTimestamp = true
+	}
+
+	// FIXME: The spinner isn't compatible with the current logging style, so we'll probably need some
+	//        custom logwriter magic when running in non-verbose and non-quiet mode (eg. standard mode)
+	/*if !Verbose && !Quiet {
+		log.SetOutput(new(logWriter))
+	}*/
+
+	// Set specific colors for prefix and timestamp
+	/*formatter.SetColorScheme(&prefixed.ColorScheme{
+		PrefixStyle:    "blue+b",
+		TimestampStyle: "white+h",
+	})*/
+
+	// TODO: Perhaps we just need a custom formatter to deal with the spinner integration?
+	// Assign our logger to use the custom formatter
+	if Verbose && !Quiet {
+		log.Formatter = formatter
+	} else if !Verbose && !Quiet {
+		log.Formatter = new(ClobberLogFormatter)
+	}
 
 	// FIXME: Ideally log.Fatal should still work when this is set, but not sure if the log package supports that?
 	// Disable logging if running in quiet mode
 	if Quiet == true {
 		log.SetOutput(ioutil.Discard)
+	} else if Verbose == true {
+		//log.SetLevel(log.DebugLevel)
+		log.Level = logrus.DebugLevel
+	} else {
+		//log.SetLevel(log.InfoLevel)
+		log.Level = logrus.InfoLevel
 	}
 }
 
@@ -249,7 +295,7 @@ func runCommand(command string) {
 	}
 
 	if Verbose {
-		log.Println("Running command: '" + cmd + " " + argsString + "'")
+		log.Debug("Running command: '" + cmd + " " + argsString + "'")
 	}
 
 	var (
@@ -261,7 +307,7 @@ func runCommand(command string) {
 		log.Fatal("Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
 	}
 	if Verbose {
-		log.Println("Command finished with output:\n" + string(cmdOut))
+		log.Debug("Command finished with output:\n" + string(cmdOut))
 	}
 }
 
