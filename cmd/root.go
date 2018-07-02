@@ -101,7 +101,7 @@ var rootCmd = &cobra.Command{
 		}
 		log.Println("Verifying UDK2018 is up to date..")
 		git.Checkout(getSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
-		runCommand("git clean -fdx --exclude=\"Clover/\"")
+		runCommand("git clean -fdx --exclude=\"Clover/\" " + getUdkPath())
 
 		// Download or update Clover
 		if _, err := os.Stat(getCloverPath() + "/.svn"); os.IsNotExist(err) {
