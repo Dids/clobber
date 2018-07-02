@@ -14,7 +14,6 @@ go:
 # Setup caching
 cache:
   directories:
-    ## TODO: We might want to clean things up before caching..
     - $HOME/.clobber/opt
 
 # Install dependencies
@@ -24,6 +23,10 @@ before_install:
 # Run tests and generate code coverage
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic
+  ## FIXME: We'd need to run these on a macOS VM if we wanted to test the brewing
+  #  - brew tap Dids/brewery
+  #- brew test clobber --HEAD
+  #- brew install clobber --HEAD
 
 # Upload code coverage
 after_success:

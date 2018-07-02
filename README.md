@@ -6,6 +6,12 @@ Clobber is command-line application for building [Clover](https://sourceforge.ne
 
 **NOTICE:** _Work in progress._
 
+### Requirements
+
+- [macOS](https://www.apple.com/lae/macos/) (only tested on macOS High Sierra)
+- [Xcode](https://developer.apple.com/xcode/) (available on the App Store)
+- [Homebrew](https://brew.sh/)
+
 ### Installation
 
 > brew tap Dids/brewery  
@@ -13,10 +19,13 @@ Clobber is command-line application for building [Clover](https://sourceforge.ne
 
 ### Usage
 
-Build Clover using default settings:  
+Build the latest version of Clover:  
 > clobber  
 
-View available commands and flags:  
+Build a specific Clover version/revision:  
+> clobber --revision 1234  
+
+View all the available options:  
 > clobber --help  
 
 ### License
