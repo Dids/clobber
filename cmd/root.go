@@ -18,6 +18,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NOTE: This can be overridden when compiling with "go build"
+var version = "0.0.1"
+
 // Verbose enables global verbose output
 var Verbose bool
 
@@ -166,7 +169,9 @@ var rootCmd = &cobra.Command{
 		// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 		log.Info("Building Clover..")
 		runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall")
-		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --ext-co")
+		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --vbios-patch-cloverefi --ext-co")
+
+		// TODO: Add HFSPlus.efi as an extra EFI driver
 
 		// Modify credits to differentiate between "official" and custom builds
 		log.Info("Updating package credits..")
@@ -201,7 +206,6 @@ func init() {
 
 	// Set the version field to add a "--version" flag automatically
 	//rootCmd.Version = "0.0.1"
-	var version = "0.0.1" // NOTE: This can be overridden when compiling with "go build"
 	rootCmd.Version = version
 
 	// Add persistent flags that carry over to all commands
