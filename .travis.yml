@@ -17,7 +17,8 @@ cache:
     - $HOME/.clobber/opt
 
 # Install dependencies
-before_install:
+#before_install:
+install:
   - go get -u github.com/kardianos/govendor
   - govendor sync
   #- go get -t -v ./...
