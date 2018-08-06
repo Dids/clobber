@@ -8,6 +8,9 @@ coverage.txt
 *.so
 *.dylib
 
+### Go Vendor Packages ###
+vendor/*/
+
 # Binaries for Go
 debug
 release

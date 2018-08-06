@@ -13,7 +13,7 @@ Clobber is command-line application for building [Clover](https://sourceforge.ne
 - [x] Target a specific Clover version/revision  
 - [x] See less/more build output (`--verbose`, `--quiet` flags etc.)  
 - [ ] Better logging (log to file, use colors to signify log type etc.)  
-- [ ] Support for additional drivers (AptioFixPkg, ApfsSupportPkg etc.)  
+- [x] Support for additional drivers (AptioFixPkg, ApfsSupportPkg etc.)  
 - [ ] Additional customization options (select to include/exclude drivers etc.)  
 
 ### Requirements

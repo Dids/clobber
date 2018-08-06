@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Dids/clobber/util"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
 	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 )
@@ -75,7 +75,7 @@ var rootCmd = &cobra.Command{
 	Use:   "clobber",
 	Short: "Clobber is a command-line application for building Clover",
 	Long: `Clobber is a command-line application for building Clover.
-				 Built by @Dids, with tons and tons of love, sweat and tears.`,
+				 Built by @Dids with tons of love, sweat and tears.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Measure execution time
 		executionStartTime := time.Now()
@@ -101,82 +101,84 @@ var rootCmd = &cobra.Command{
 
 		// Make sure that the correct directory structure exists
 		log.Info("Verifying folder structure..")
-		mkdirErr := os.MkdirAll(getSourcePath(), 0755)
+		mkdirErr := os.MkdirAll(util.GetSourcePath(), 0755)
 		if mkdirErr != nil {
 			log.Fatal("MkdirAll failed with error: ", mkdirErr)
 		}
 
 		// Download or update UDK2018
-		if _, err := os.Stat(getUdkPath() + "/.git"); os.IsNotExist(err) {
+		if _, err := os.Stat(util.GetUdkPath() + "/.git"); os.IsNotExist(err) {
 			log.Warning("UDK2018 is missing, downloading..")
-			git.Clone("https://github.com/tianocore/edk2", getUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
+			git.Clone("https://github.com/tianocore/edk2", util.GetUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
 		}
 		log.Info("Verifying UDK2018 is up to date..")
-		git.Checkout(getSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
-		runCommand("cd " + getUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
+		git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
+		runCommand("cd " + util.GetUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
 
 		// Download or update Clover
-		if _, err := os.Stat(getCloverPath() + "/.svn"); os.IsNotExist(err) {
+		if _, err := os.Stat(util.GetCloverPath() + "/.svn"); os.IsNotExist(err) {
 			log.Warning("Clover is missing, downloading..")
-			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + getCloverPath())
+			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + util.GetCloverPath())
 		}
 		log.Info("Verifying Clover is up to date..")
-		runCommand("svn up -r" + Revision + " " + getCloverPath())
-		runCommand("svn revert -R" + " " + getCloverPath())
-		runCommand("svn cleanup --remove-unversioned " + getCloverPath())
+		runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
+		runCommand("svn revert -R" + " " + util.GetCloverPath())
+		runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath())
 
 		// Override HOME environment variable (use chroot-like logic for the build process)
 		log.Info("Overriding HOME..")
-		os.Setenv("HOME", getClobberPath())
+		os.Setenv("HOME", util.GetClobberPath())
 
 		// Override TOOLCHAIR_DIR environment variable
 		log.Info("Overriding TOOLCHAIN_DIR..")
-		os.Setenv("TOOLCHAIN_DIR", getSourcePath()+"/opt/local")
+		os.Setenv("TOOLCHAIN_DIR", util.GetSourcePath()+"/opt/local")
 
 		// Build base tools
 		log.Info("Building base tools..")
-		runCommand("make -C" + " " + getUdkPath() + "/BaseTools/Source/C")
+		runCommand("make -C" + " " + util.GetUdkPath() + "/BaseTools/Source/C")
 
 		// Setup UDK
 		log.Info("Setting up UDK..")
 		// source edksetup.sh
-		runCommand("cd " + getUdkPath() + " && " + "source edksetup.sh") // TODO: Why does this work, because I thought "cd" didn't work with exec?
+		runCommand("cd " + util.GetUdkPath() + " && " + "source edksetup.sh") // TODO: Why does this work, because I thought "cd" didn't work with exec?
 
 		// Build gettext, mtoc and nasm (if necessary)
-		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
+		if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
 			log.Warning("Building gettext..")
-			runCommand(getCloverPath() + "/buildgettext.sh")
+			runCommand(util.GetCloverPath() + "/buildgettext.sh")
 		}
-		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
+		if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
 			log.Warning("Building mtoc..")
-			runCommand(getCloverPath() + "/buildmtoc.sh")
+			runCommand(util.GetCloverPath() + "/buildmtoc.sh")
 		}
-		if _, err := os.Stat(getSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
+		if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
 			log.Warning("Building nasm..")
-			runCommand(getCloverPath() + "/buildnasm.sh")
+			runCommand(util.GetCloverPath() + "/buildnasm.sh")
 		}
 
 		// Apply UDK patches
 		log.Info("Applying patches for UDK..")
-		copyErr := copy.Copy(getCloverPath()+"/Patches_for_UDK2018", getUdkPath())
+		copyErr := copy.Copy(util.GetCloverPath()+"/Patches_for_UDK2018", util.GetUdkPath())
 		if copyErr != nil {
 			log.Fatal("Failed to copy UDK patches: ", copyErr)
 		}
 
-		// Build Clover (clean & build)
+		// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 		log.Info("Building Clover..")
-		runCommand(getCloverPath() + "/ebuild.sh -cleanall")
-		runCommand(getCloverPath() + "/ebuild.sh -fr")
+		runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall")
+		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --ext-co")
 
-		// TODO: Modify credits
-
-		// TODO: Add custom drivers (apfs.efi, apfs_patched.efi, ntfs.efi, hfsplus.efi, AptioFixPkg, ApfsSupportPkg)
-
-		// TODO: Update template resource descriptions
+		// Modify credits to differentiate between "official" and custom builds
+		log.Info("Updating package credits..")
+		util.StringReplaceFile(util.GetCloverPath()+"/CloverPackage/CREDITS", "Chameleon team, crazybirdy, JrCs.", "Chameleon team, crazybirdy, JrCs. Custom package by Dids.")
 
 		// Build the Clover installer package
 		log.Info("Building Clover installer..")
-		runCommand(getCloverPath() + "/CloverPackage/makepkg")
+		runCommand(util.GetCloverPath() + "/CloverPackage/makepkg")
+
+		// Build the Clover ISO image
+		log.Info("Building Clover ISO image..")
+		runCommand(util.GetCloverPath() + "/CloverPackage/makeiso")
 
 		// TODO: Would be nice to have a better formatting for the time string (eg. 1 minute and 20 seconds, instead of 1m20s)
 		// Stop the execution timer
@@ -198,7 +200,9 @@ func init() {
 	cobra.OnInitialize(customInit)
 
 	// Set the version field to add a "--version" flag automatically
-	rootCmd.Version = "0.0.1"
+	//rootCmd.Version = "0.0.1"
+	var version = "0.0.1" // NOTE: This can be overridden when compiling with "go build"
+	rootCmd.Version = version
 
 	// Add persistent flags that carry over to all commands
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
@@ -309,30 +313,6 @@ func runCommand(command string) {
 	if Verbose {
 		log.Debug("Command finished with output:\n" + string(cmdOut))
 	}
-}
-
-func getCloverPath() string {
-	return getUdkPath() + "/Clover"
-}
-
-func getUdkPath() string {
-	return getSourcePath() + "/edk2"
-}
-
-func getSourcePath() string {
-	return getClobberPath() + "/src"
-}
-
-func getClobberPath() string {
-	return getHomePath() + "/.clobber"
-}
-
-func getHomePath() string {
-	home, err := homedir.Dir()
-	if err != nil {
-		log.Fatal("getHomePath failed with error: ", err)
-	}
-	return home
 }
 
 // FIXME: d.Round doesn't exist in go versions <= 1.8

@@ -1,0 +1,109 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "S2+ta+dGORvF6I4JfuxTPRYEodo=",
+			"path": "github.com/Unknwon/com",
+			"revision": "da59b551951d50441ca26b7a8cd81317f34df87f",
+			"revisionTime": "2018-06-17T00:39:50Z"
+		},
+		{
+			"checksumSHA1": "bEGciG3CjSmo1yMBBA3aERk04ZY=",
+			"path": "github.com/briandowns/spinner",
+			"revision": "5b875a9171af19dbde37e70a8fcbe2ebd7285e05",
+			"revisionTime": "2018-06-26T16:40:24Z"
+		},
+		{
+			"checksumSHA1": "HbOJxa+FsQ1TTsF+BkHAvzqqZv4=",
+			"path": "github.com/fatih/color",
+			"revision": "2d684516a8861da43017284349b7e303e809ac21",
+			"revisionTime": "2018-05-16T10:03:07Z"
+		},
+		{
+			"checksumSHA1": "bkTq+Y71T3akkgvSsnWcGbWIdrQ=",
+			"path": "github.com/gogits/git-module",
+			"revision": "73275fa99ef150d697b7fc81245e22b0319622ae",
+			"revisionTime": "2018-06-25T11:56:28Z"
+		},
+		{
+			"checksumSHA1": "SEnjvwVyfuU2xBaOfXfwPD5MZqk=",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "efa589957cd060542a26d2dd7832fd6a6c6c3ade",
+			"revisionTime": "2018-03-10T13:32:14Z"
+		},
+		{
+			"checksumSHA1": "w5RcOnfv5YDr3j2bd1YydkPiZx4=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c",
+			"revisionTime": "2017-11-07T05:05:31Z"
+		},
+		{
+			"checksumSHA1": "k1MUPpAbtF6JiyP80WTId1tX/Ns=",
+			"path": "github.com/mcuadros/go-version",
+			"revision": "6d5863ca60fa6fe914b5fd43ed8533d7567c5b0b",
+			"revisionTime": "2018-06-11T08:56:57Z"
+		},
+		{
+			"checksumSHA1": "CIK3BBNX3nuUQCmNqTQydNfMNKI=",
+			"path": "github.com/mgutz/ansi",
+			"revision": "9520e82c474b0a04dd04f8a40959027271bab992",
+			"revisionTime": "2017-02-06T15:57:36Z"
+		},
+		{
+			"checksumSHA1": "SvPS4zqZYImMcBu+dLgp6+9eeUo=",
+			"path": "github.com/mitchellh/go-homedir",
+			"revision": "3864e76763d94a6df2f9960b16a20a33da9f9a66",
+			"revisionTime": "2018-05-23T09:45:22Z"
+		},
+		{
+			"checksumSHA1": "CV5czG2T81+EFQJ6ptSpHopyOAw=",
+			"path": "github.com/otiai10/copy",
+			"revision": "c59d460454b7a0c318e59595cb3ea22a41ba2572",
+			"revisionTime": "2018-03-11T15:24:48Z"
+		},
+		{
+			"checksumSHA1": "93lbwRfMlPivHJ9VF3d/jkpD+Ko=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "e54a77765aca7bbdd8e56c1c54f60579968b2dc9",
+			"revisionTime": "2018-07-02T05:55:18Z"
+		},
+		{
+			"checksumSHA1": "Xnlls27MEcxIHhpRdsiUa2BqcFk=",
+			"path": "github.com/spf13/cobra",
+			"revision": "1e58aa3361fd650121dceeedc399e7189c05674a",
+			"revisionTime": "2018-05-31T18:03:38Z"
+		},
+		{
+			"checksumSHA1": "OJI0OgC5V8gZtfS1e0CDYMhkDNc=",
+			"path": "github.com/spf13/pflag",
+			"revision": "3ebe029320b2676d667ae88da602a5f854788a8a",
+			"revisionTime": "2018-06-01T13:25:42Z"
+		},
+		{
+			"checksumSHA1": "L1vKtjhZ2Lej0kfsLaTUm7ps/Yg=",
+			"path": "github.com/x-cray/logrus-prefixed-formatter",
+			"revision": "bb2702d423886830dee131692131d35648c382e2",
+			"revisionTime": "2017-07-31T09:11:26Z"
+		},
+		{
+			"checksumSHA1": "BGm8lKZmvJbf/YOJLeL1rw2WVjA=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "a49355c7e3f8fe157a85be2f77e6e269a0f89602",
+			"revisionTime": "2018-06-20T09:14:27Z"
+		},
+		{
+			"checksumSHA1": "HyvwgEh7Ja47KY376Mah02WDLEc=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "7138fd3d9dc8335c567ca206f4333fb75eb05d56",
+			"revisionTime": "2018-06-27T13:57:12Z"
+		},
+		{
+			"checksumSHA1": "zc2NI38L40/N4+pjd9P2ESz68/0=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "7138fd3d9dc8335c567ca206f4333fb75eb05d56",
+			"revisionTime": "2018-06-27T13:57:12Z"
+		}
+	],
+	"rootPath": "github.com/Dids/clobber"
+}
