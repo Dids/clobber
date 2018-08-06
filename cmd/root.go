@@ -18,8 +18,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NOTE: This can be overridden when compiling with "go build"
-var version = "0.0.1"
+// Version is set in main.go and is overridable when building
+var Version = "0.0.1"
 
 // Verbose enables global verbose output
 var Verbose bool
@@ -37,7 +37,7 @@ var log = logrus.New()
 
 // Execute is the entrypoint for the command-line application
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -74,7 +74,8 @@ func (f *ClobberLogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return []byte(entry.Message + "\n"), nil
 }
 
-var rootCmd = &cobra.Command{
+// RootCmd is the Cobra command object
+var RootCmd = &cobra.Command{
 	Use:   "clobber",
 	Short: "Clobber is a command-line application for building Clover",
 	Long: `Clobber is a command-line application for building Clover.
@@ -204,14 +205,10 @@ func init() {
 	// Custom initialization logic
 	cobra.OnInitialize(customInit)
 
-	// Set the version field to add a "--version" flag automatically
-	//rootCmd.Version = "0.0.1"
-	rootCmd.Version = version
-
 	// Add persistent flags that carry over to all commands
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
-	rootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "silence all output")
-	rootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
+	RootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
+	RootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "silence all output")
+	RootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
 }
 
 func customInit() {
