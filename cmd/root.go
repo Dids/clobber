@@ -170,9 +170,12 @@ var RootCmd = &cobra.Command{
 		// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 		log.Info("Building Clover..")
 		runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall")
-		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --vbios-patch-cloverefi --ext-co")
+		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
+		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
 
-		// TODO: Add HFSPlus.efi as an extra EFI driver
+		// Download and install extra EFI drivers
+		log.Info("Installing extra EFI drivers..")
+		util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/drivers-Off/drivers64UEFI/HFSPlus.efi")
 
 		// Modify credits to differentiate between "official" and custom builds
 		log.Info("Updating package credits..")
