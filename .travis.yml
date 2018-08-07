@@ -26,6 +26,8 @@ install:
 # Run tests and generate code coverage
 script:
   - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+  - go build -o clobber
+  - ./clobber --version
 
 # Upload code coverage
 after_success:
