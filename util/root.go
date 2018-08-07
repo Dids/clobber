@@ -87,7 +87,7 @@ func CheckForUpdates(version string) (bool, error) {
 		log.Println("Invalid or missing semver version:", err)
 		return false, err
 	}
-	log.Println("Current version:", semverVersion)
+	//log.Println("Current version:", semverVersion)
 	selfupdate.EnableLog()
 	latest, found, err := selfupdate.DetectLatest("Dids/clobber")
 	if err != nil {
@@ -95,15 +95,15 @@ func CheckForUpdates(version string) (bool, error) {
 		return false, err
 	}
 	if !found || latest == nil {
-		log.Println("No latest version found, assuming latest")
+		//log.Println("No latest version found, assuming latest")
 		return false, nil
 	}
 	log.Println("Latest version:", latest.Version)
 	if !found || latest.Version.Equals(semverVersion) {
-		log.Println("Current version is the latest")
+		//log.Println("Current version is the latest")
 		return false, nil
 	}
-	log.Println("New version is available", latest.Version)
-	log.Println("Release notes:\n", latest.ReleaseNotes)
+	//log.Println("New version is available", latest.Version)
+	//log.Println("Release notes:\n", latest.ReleaseNotes)
 	return true, nil
 }

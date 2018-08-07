@@ -3,6 +3,24 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "jlQJQkC6sGEqKyYolfeVaNfZ9FM=",
+			"path": "github.com/Dids/clobber",
+			"revision": "244ab4bdefe04a38ae1059b6c2bfed9e8f0be00f",
+			"revisionTime": "2018-08-07T07:08:01Z"
+		},
+		{
+			"checksumSHA1": "QgIp3uOHCyA+mnSf+4hUshkn0Ws=",
+			"path": "github.com/Dids/clobber/cmd",
+			"revision": "244ab4bdefe04a38ae1059b6c2bfed9e8f0be00f",
+			"revisionTime": "2018-08-07T07:08:01Z"
+		},
+		{
+			"checksumSHA1": "PG/19JLxhPMnM1JULxC630xIHfc=",
+			"path": "github.com/Dids/clobber/util",
+			"revision": "244ab4bdefe04a38ae1059b6c2bfed9e8f0be00f",
+			"revisionTime": "2018-08-07T07:08:01Z"
+		},
+		{
 			"checksumSHA1": "S2+ta+dGORvF6I4JfuxTPRYEodo=",
 			"path": "github.com/Unknwon/com",
 			"revision": "da59b551951d50441ca26b7a8cd81317f34df87f",
