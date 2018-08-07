@@ -41,6 +41,20 @@ Build a specific Clover version/revision:
 View all the available options:  
 > clobber --help  
 
+### Development
+
+Install `govendor`:  
+> go get -u github.com/kardianos/govendor  
+
+Install dependencies:  
+> govendor sync  
+
+Run the application:  
+> go run main.go  
+
+Run tests:  
+> go test  ./...  
+
 ### License
 
 See [LICENSE](LICENSE).

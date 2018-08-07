@@ -25,7 +25,7 @@ install:
 
 # Run tests and generate code coverage
 script:
-  - go test -race -coverprofile=coverage.txt -covermode=atomic
+  - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
   ## FIXME: We'd need to run these on a macOS VM if we wanted to test the brewing
   #  - brew tap Dids/brewery
   #- brew test clobber --HEAD

@@ -179,7 +179,10 @@ var RootCmd = &cobra.Command{
 
 		// Modify credits to differentiate between "official" and custom builds
 		log.Info("Updating package credits..")
-		util.StringReplaceFile(util.GetCloverPath()+"/CloverPackage/CREDITS", "Chameleon team, crazybirdy, JrCs.", "Chameleon team, crazybirdy, JrCs. Custom package by Dids.")
+		strReplaceErr := util.StringReplaceFile(util.GetCloverPath()+"/CloverPackage/CREDITS", "Chameleon team, crazybirdy, JrCs.", "Chameleon team, crazybirdy, JrCs. Custom package by Dids.")
+		if strReplaceErr != nil {
+			log.Fatal("Failed to update package credits: ", strReplaceErr)
+		}
 
 		// Build the Clover installer package
 		log.Info("Building Clover installer..")

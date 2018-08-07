@@ -8,6 +8,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/blang/semver"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
+
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -33,6 +36,7 @@ func GetClobberPath() string {
 
 // GetHomePath returns the full path to the user's home directory
 func GetHomePath() string {
+	// TODO: Comment the code
 	home, err := homedir.Dir()
 	if err != nil {
 		log.Fatal("GetHomePath failed with error: ", err)
@@ -41,21 +45,23 @@ func GetHomePath() string {
 }
 
 // StringReplaceFile allows you to replace a string in a file
-func StringReplaceFile(path string, find string, replace string) {
+func StringReplaceFile(path string, find string, replace string) error {
+	// TODO: Comment the code
 	fileContents, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatal("StringReplaceFile failed to read the file with error: ", err)
+		return err
 	}
 	newFileContents := strings.Replace(string(fileContents), find, replace, -1)
 	err = ioutil.WriteFile(path, []byte(newFileContents), 0)
 	if err != nil {
-		log.Fatal("StringReplaceFile failed to write the file with error: ", err)
+		return err
 	}
+	return nil
 }
 
 // DownloadFile will download a url to a local file
 func DownloadFile(url string, path string) error {
-	//fmt.Println("Downloading file from", url, "to", path)
+	// TODO: Comment the code
 	out, err := os.Create(path)
 	if err != nil {
 		return err
@@ -71,4 +77,33 @@ func DownloadFile(url string, path string) error {
 		return err
 	}
 	return nil
+}
+
+// CheckForUpdates checks GitHub for any version updates
+func CheckForUpdates(version string) (bool, error) {
+	// TODO: Comment the code
+	semverVersion, err := semver.Make(version)
+	if err != nil {
+		log.Println("Invalid or missing semver version:", err)
+		return false, err
+	}
+	log.Println("Current version:", semverVersion)
+	selfupdate.EnableLog()
+	latest, found, err := selfupdate.DetectLatest("Dids/clobber")
+	if err != nil {
+		log.Println("Error occurred while detecting version:", err)
+		return false, err
+	}
+	if !found || latest == nil {
+		log.Println("No latest version found, assuming latest")
+		return false, nil
+	}
+	log.Println("Latest version:", latest.Version)
+	if !found || latest.Version.Equals(semverVersion) {
+		log.Println("Current version is the latest")
+		return false, nil
+	}
+	log.Println("New version is available", latest.Version)
+	log.Println("Release notes:\n", latest.ReleaseNotes)
+	return true, nil
 }
