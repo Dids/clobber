@@ -31,7 +31,7 @@ var Quiet bool
 var Revision string
 
 // Spinner is the CLI spinner/activity indicator
-var Spinner = spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+var Spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
 var log = logrus.New()
 
@@ -104,7 +104,8 @@ var RootCmd = &cobra.Command{
 		// TODO: Do everything in a "chrooted" environment, which we might be able to do just by overriding $HOME?
 
 		// Make sure that the correct directory structure exists
-		log.Info("Verifying folder structure..")
+		//log.Info("Verifying folder structure..")
+		Spinner.Prefix = formatSpinnerText("Verifying folder structure", false)
 		mkdirErr := os.MkdirAll(util.GetSourcePath(), 0755)
 		if mkdirErr != nil {
 			log.Fatal("MkdirAll failed with error: ", mkdirErr)
@@ -112,90 +113,117 @@ var RootCmd = &cobra.Command{
 
 		// Download or update UDK2018
 		if _, err := os.Stat(util.GetUdkPath() + "/.git"); os.IsNotExist(err) {
-			log.Warning("UDK2018 is missing, downloading..")
+			//log.Warning("UDK2018 is missing, downloading..")
+			Spinner.Prefix = formatSpinnerText("Downloading UDK2018", false)
 			git.Clone("https://github.com/tianocore/edk2", util.GetUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
+			Spinner.Prefix = formatSpinnerText("Downloading UDK2018", true)
 		}
-		log.Info("Verifying UDK2018 is up to date..")
+		//log.Info("Verifying UDK2018 is up to date..")
+		Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", false)
 		git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
 		runCommand("cd " + util.GetUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
+		Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", true)
 
 		// Download or update Clover
 		if _, err := os.Stat(util.GetCloverPath() + "/.svn"); os.IsNotExist(err) {
-			log.Warning("Clover is missing, downloading..")
+			//log.Warning("Clover is missing, downloading..")
+			Spinner.Prefix = formatSpinnerText("Downloading Clover", false)
 			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + util.GetCloverPath())
+			Spinner.Prefix = formatSpinnerText("Downloading Clover", true)
 		}
-		log.Info("Verifying Clover is up to date..")
+		//log.Info("Verifying Clover is up to date..")
+		Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
 		runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
 		runCommand("svn revert -R" + " " + util.GetCloverPath())
 		runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath())
+		Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
 
 		// Override HOME environment variable (use chroot-like logic for the build process)
-		log.Info("Overriding HOME..")
+		//log.Info("Overriding HOME..")
 		os.Setenv("HOME", util.GetClobberPath())
 
 		// Override TOOLCHAIR_DIR environment variable
-		log.Info("Overriding TOOLCHAIN_DIR..")
+		//log.Info("Overriding TOOLCHAIN_DIR..")
 		os.Setenv("TOOLCHAIN_DIR", util.GetSourcePath()+"/opt/local")
 
 		// Build base tools
-		log.Info("Building base tools..")
+		//log.Info("Building base tools..")
+		Spinner.Prefix = formatSpinnerText("Building base tools", false)
 		runCommand("make -C" + " " + util.GetUdkPath() + "/BaseTools/Source/C")
+		Spinner.Prefix = formatSpinnerText("Building base tools", true)
 
 		// Setup UDK
-		log.Info("Setting up UDK..")
-		// source edksetup.sh
-		runCommand("cd " + util.GetUdkPath() + " && " + "source edksetup.sh") // TODO: Why does this work, because I thought "cd" didn't work with exec?
+		//log.Info("Setting up UDK..")
+		Spinner.Prefix = formatSpinnerText("Setting up UDK", false)
+		runCommand("cd " + util.GetUdkPath() + " && " + "source edksetup.sh")
+		Spinner.Prefix = formatSpinnerText("Setting up UDK", true)
 
 		// Build gettext, mtoc and nasm (if necessary)
 		if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
-			log.Warning("Building gettext..")
+			//log.Warning("Building gettext..")
+			Spinner.Prefix = formatSpinnerText("Building gettext", false)
 			runCommand(util.GetCloverPath() + "/buildgettext.sh")
+			Spinner.Prefix = formatSpinnerText("Building gettext", true)
 		}
 		if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
-			log.Warning("Building mtoc..")
+			//log.Warning("Building mtoc..")
+			Spinner.Prefix = formatSpinnerText("Building mtoc", false)
 			runCommand(util.GetCloverPath() + "/buildmtoc.sh")
+			Spinner.Prefix = formatSpinnerText("Building mtoc", true)
 		}
 		if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
-			log.Warning("Building nasm..")
+			//log.Warning("Building nasm..")
+			Spinner.Prefix = formatSpinnerText("Building nasm", false)
 			runCommand(util.GetCloverPath() + "/buildnasm.sh")
+			Spinner.Prefix = formatSpinnerText("Building nasm", true)
 		}
 
 		// Apply UDK patches
-		log.Info("Applying patches for UDK..")
+		//log.Info("Applying patches for UDK..")
+		Spinner.Prefix = formatSpinnerText("Applying UDK patches", false)
 		copyErr := copy.Copy(util.GetCloverPath()+"/Patches_for_UDK2018", util.GetUdkPath())
+		Spinner.Prefix = formatSpinnerText("Applying UDK patches", true)
 		if copyErr != nil {
 			log.Fatal("Failed to copy UDK patches: ", copyErr)
 		}
 
 		// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
-		log.Info("Building Clover..")
+		//log.Info("Building Clover..")
+		Spinner.Prefix = formatSpinnerText("Building Clover", false)
 		runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall")
 		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
 		runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
+		Spinner.Prefix = formatSpinnerText("Building Clover", true)
 
 		// Download and install extra EFI drivers
-		log.Info("Installing extra EFI drivers..")
+		//log.Info("Installing extra EFI drivers..")
+		Spinner.Prefix = formatSpinnerText("Installing extra EFI drivers", false)
 		util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/drivers-Off/drivers64UEFI/HFSPlus.efi")
+		Spinner.Prefix = formatSpinnerText("Installing extra EFI drivers", true)
 
 		// Modify credits to differentiate between "official" and custom builds
-		log.Info("Updating package credits..")
+		//log.Info("Updating package credits..")
 		strReplaceErr := util.StringReplaceFile(util.GetCloverPath()+"/CloverPackage/CREDITS", "Chameleon team, crazybirdy, JrCs.", "Chameleon team, crazybirdy, JrCs. Custom package by Dids.")
 		if strReplaceErr != nil {
 			log.Fatal("Failed to update package credits: ", strReplaceErr)
 		}
 
 		// Build the Clover installer package
-		log.Info("Building Clover installer..")
+		//log.Info("Building Clover installer..")
+		Spinner.Prefix = formatSpinnerText("Building Clover installer", false)
 		runCommand(util.GetCloverPath() + "/CloverPackage/makepkg")
+		Spinner.Prefix = formatSpinnerText("Building Clover installer", true)
 
 		// Build the Clover ISO image
-		log.Info("Building Clover ISO image..")
+		//log.Info("Building Clover ISO image..")
+		Spinner.Prefix = formatSpinnerText("Building Clover ISO image", false)
 		runCommand(util.GetCloverPath() + "/CloverPackage/makeiso")
+		Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
 
 		// TODO: Would be nice to have a better formatting for the time string (eg. 1 minute and 20 seconds, instead of 1m20s)
 		// Stop the execution timer
 		executionElapsedTime := time.Since(executionStartTime)
-		executionResult := fmt.Sprintf("Finished in %s!\n", executionElapsedTime)
+		executionResult := fmt.Sprintf("\nFinished in %s\n", executionElapsedTime)
 
 		// Stop the spinner
 		if !Verbose && !Quiet {
@@ -204,6 +232,7 @@ var RootCmd = &cobra.Command{
 		} else {
 			log.Info(executionResult)
 		}
+		fmt.Println()
 	},
 }
 
@@ -320,6 +349,14 @@ func runCommand(command string) {
 	if Verbose {
 		log.Debug("Command finished with output:\n" + string(cmdOut))
 	}
+}
+
+func formatSpinnerText(text string, done bool) string {
+	if done {
+		fmt.Printf("\r✔ %s  \n", text)
+		return fmt.Sprintf("\r✔ %s  \n", text)
+	}
+	return fmt.Sprintf("\r◌ %s ", text)
 }
 
 // FIXME: d.Round doesn't exist in go versions <= 1.8

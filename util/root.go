@@ -91,7 +91,7 @@ func CheckForUpdates(version string) (bool, error) {
 		return false, err
 	}
 	//log.Println("Current version:", semverVersion)
-	selfupdate.EnableLog()
+	//selfupdate.EnableLog()
 	latest, found, err := selfupdate.DetectLatest("Dids/clobber")
 	if err != nil {
 		log.Println("Error occurred while detecting version:", err)

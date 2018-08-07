@@ -3,24 +3,6 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "jlQJQkC6sGEqKyYolfeVaNfZ9FM=",
-			"path": "github.com/Dids/clobber",
-			"revision": "244ab4bdefe04a38ae1059b6c2bfed9e8f0be00f",
-			"revisionTime": "2018-08-07T07:08:01Z"
-		},
-		{
-			"checksumSHA1": "QgIp3uOHCyA+mnSf+4hUshkn0Ws=",
-			"path": "github.com/Dids/clobber/cmd",
-			"revision": "244ab4bdefe04a38ae1059b6c2bfed9e8f0be00f",
-			"revisionTime": "2018-08-07T07:08:01Z"
-		},
-		{
-			"checksumSHA1": "PG/19JLxhPMnM1JULxC630xIHfc=",
-			"path": "github.com/Dids/clobber/util",
-			"revision": "244ab4bdefe04a38ae1059b6c2bfed9e8f0be00f",
-			"revisionTime": "2018-08-07T07:08:01Z"
-		},
-		{
 			"checksumSHA1": "S2+ta+dGORvF6I4JfuxTPRYEodo=",
 			"path": "github.com/Unknwon/com",
 			"revision": "da59b551951d50441ca26b7a8cd81317f34df87f",
@@ -37,6 +19,12 @@
 			"path": "github.com/briandowns/spinner",
 			"revision": "5b875a9171af19dbde37e70a8fcbe2ebd7285e05",
 			"revisionTime": "2018-06-26T16:40:24Z"
+		},
+		{
+			"checksumSHA1": "Pr+MHBWtwA5Ml/G2pH9jBERx0M4=",
+			"path": "github.com/common-nighthawk/go-figure",
+			"revision": "18b2b544842cab16f3ff418fb5290d8f2896a069",
+			"revisionTime": "2018-06-19T03:18:29Z"
 		},
 		{
 			"checksumSHA1": "HbOJxa+FsQ1TTsF+BkHAvzqqZv4=",

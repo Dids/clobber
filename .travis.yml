@@ -7,6 +7,7 @@ language: go
 # Test against multiple versions of Go
 go:
   - 1.10.x
+  ## NOTE: Our test command doesn't work below 1.10, unfortunately..
   #- 1.9.x
   #- 1.8.x
   - master

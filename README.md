@@ -2,6 +2,16 @@
 
 # Clobber
 
+```
+ ___    _      _____  ___    ___    ___    ___
+(  _`\ ( )    (  _  )(  _`\ (  _`\ (  _`\ |  _`\
+| ( (_)| |    | ( ) || (_) )| (_) )| (_(_)| (_) )
+| |  _ | |  _ | | | ||  _ <'|  _ <'|  _)_ | ,  /
+| (_( )| |_( )| (_) || (_) )| (_) )| (_( )| |\ \
+(____/'(____/'(_____)(____/'(____/'(____/'(_) (_)
+                                         by @Dids
+```
+
 Clobber is command-line application for building [Clover](https://sourceforge.net/projects/cloverefiboot/).
 
 **NOTICE:** _Work in progress. Check the list below for details._
@@ -53,7 +63,7 @@ Run the application:
 > go run main.go  
 
 Run tests:  
-> go test  ./...  
+> go test ./...  
 
 ### License
 
