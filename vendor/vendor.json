@@ -39,7 +39,7 @@
 			"revisionTime": "2018-06-25T11:56:28Z"
 		},
 		{
-			"checksumSHA1": "5QCzjMSgmQhIwjnygGE8CxLBFKQ=",
+			"checksumSHA1": "zJ4ctSs7vL5ZWgYIZwMG95v3q54=",
 			"path": "github.com/google/go-github/github",
 			"revision": "fbd7fb9c7f3d27aa691e8421690e00be916f8d8d",
 			"revisionTime": "2018-08-06T15:33:34Z"
@@ -135,7 +135,7 @@
 			"revisionTime": "2015-05-05T15:10:06Z"
 		},
 		{
-			"checksumSHA1": "amJo1E3F0QxcfxSt+FxDiQbR1wU=",
+			"checksumSHA1": "xmr7xQnHDFh7vSDy+mEjMyxdxDw=",
 			"path": "github.com/ulikunitz/xz",
 			"revision": "636d36a76670e6c700f22fd5f4588679ff2896c4",
 			"revisionTime": "2018-07-03T11:21:13Z"
@@ -195,7 +195,7 @@
 			"revisionTime": "2018-07-24T11:17:51Z"
 		},
 		{
-			"checksumSHA1": "e66DmNWQKgI97tvj4BH7rHYnyJs=",
+			"checksumSHA1": "HyvwgEh7Ja47KY376Mah02WDLEc=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "7138fd3d9dc8335c567ca206f4333fb75eb05d56",
 			"revisionTime": "2018-06-27T13:57:12Z"
