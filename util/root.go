@@ -79,6 +79,9 @@ func DownloadFile(url string, path string) error {
 	return nil
 }
 
+// FIXME: Using GitHub API to check for updates might not be plausible,
+//        as we need a token, but we're using brew to compile, so we can't expose the token..
+
 // CheckForUpdates checks GitHub for any version updates
 func CheckForUpdates(version string) (bool, error) {
 	// TODO: Comment the code
