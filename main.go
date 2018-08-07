@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/Dids/clobber/cmd"
-	figure "github.com/common-nighthawk/go-figure"
 )
 
 // Version is set dynamically when building
@@ -22,12 +19,6 @@ func main() {
 		fmt.Println("NOTICE: A new version of Clobber is available. Please run 'brew upgrade clobber' to update.")
 		fmt.Println()
 	}*/
-
-	logo := figure.NewFigure("CLOBBER", "puffy", true)
-	logo.Print()
-	//fmt.Println()
-	fmt.Println("                                  v" + Version + " by @Dids")
-	fmt.Println()
 
 	cmd.RootCmd.Version = Version
 	cmd.Execute()

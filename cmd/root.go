@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Dids/clobber/util"
+	figure "github.com/common-nighthawk/go-figure"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
@@ -83,6 +84,12 @@ var RootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Measure execution time
 		executionStartTime := time.Now()
+
+		logo := figure.NewFigure("CLOBBER", "puffy", true)
+		logo.Print()
+		//fmt.Println()
+		fmt.Println("                                  v" + Version + " by @Dids")
+		fmt.Println()
 
 		// Start the spinner
 		if !Verbose && !Quiet {
