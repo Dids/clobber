@@ -31,6 +31,9 @@ var Quiet bool
 // Revision is the default Clover revision to use
 var Revision string
 
+// NoClean skips updating and cleaning of files
+var NoClean bool
+
 // Spinner is the CLI spinner/activity indicator
 var Spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
@@ -113,10 +116,12 @@ var RootCmd = &cobra.Command{
 		// Make sure that the correct directory structure exists
 		//log.Info("Verifying folder structure..")
 		Spinner.Prefix = formatSpinnerText("Verifying folder structure", false)
+		time.Sleep(100 * time.Millisecond)
 		mkdirErr := os.MkdirAll(util.GetSourcePath(), 0755)
 		if mkdirErr != nil {
 			log.Fatal("MkdirAll failed with error: ", mkdirErr)
 		}
+		Spinner.Prefix = formatSpinnerText("Verifying folder structure", true)
 
 		// Download or update UDK2018
 		if _, err := os.Stat(util.GetUdkPath() + "/.git"); os.IsNotExist(err) {
@@ -125,11 +130,13 @@ var RootCmd = &cobra.Command{
 			git.Clone("https://github.com/tianocore/edk2", util.GetUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
 			Spinner.Prefix = formatSpinnerText("Downloading UDK2018", true)
 		}
-		//log.Info("Verifying UDK2018 is up to date..")
-		Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", false)
-		git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
-		runCommand("cd " + util.GetUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
-		Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", true)
+		if !NoClean {
+			//log.Info("Verifying UDK2018 is up to date..")
+			Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", false)
+			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
+			runCommand("cd " + util.GetUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
+			Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", true)
+		}
 
 		// Download or update Clover
 		if _, err := os.Stat(util.GetCloverPath() + "/.svn"); os.IsNotExist(err) {
@@ -138,12 +145,14 @@ var RootCmd = &cobra.Command{
 			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + util.GetCloverPath())
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", true)
 		}
-		//log.Info("Verifying Clover is up to date..")
-		Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
-		runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
-		runCommand("svn revert -R" + " " + util.GetCloverPath())
-		runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath())
-		Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
+		if !NoClean {
+			//log.Info("Verifying Clover is up to date..")
+			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
+			runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
+			runCommand("svn revert -R" + " " + util.GetCloverPath())
+			runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath())
+			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
+		}
 
 		// Override HOME environment variable (use chroot-like logic for the build process)
 		//log.Info("Overriding HOME..")
@@ -251,6 +260,7 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
 	RootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "silence all output")
 	RootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
+	RootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip updating repositories and cleaning of dirty files")
 }
 
 func customInit() {
