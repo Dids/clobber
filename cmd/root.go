@@ -20,7 +20,7 @@ import (
 )
 
 // Version is set in main.go and is overridable when building
-var Version = "x.x.x"
+var Version = "0.0.0"
 
 // Verbose enables global verbose output
 var Verbose bool

@@ -5,7 +5,7 @@ import (
 )
 
 // Version is set dynamically when building
-var Version = "0.0.1"
+var Version = "0.0.0"
 
 func main() {
 	// TODO: Updates disabled for now
