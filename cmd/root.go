@@ -20,7 +20,7 @@ import (
 )
 
 // Version is set in main.go and is overridable when building
-var Version = "0.0.1"
+var Version = "x.x.x"
 
 // Verbose enables global verbose output
 var Verbose bool
@@ -53,29 +53,6 @@ func Execute() {
 	}
 }
 
-/*type logWriter struct{}
-
-func (writer logWriter) Write(bytes []byte) (int, error) {
-	// TODO: This is redundant, but perhaps it's possible to use this to determine if the message is an error or not?
-	if Quiet {
-		return 0, nil
-	}
-
-	// FIXME: Using suffix or prefix causes newlines, while FinalMsg doesn't, but it appears on a separate line with this logic..
-	if !Verbose {
-		spinnerSuffix := "" + string(bytes)
-		if Spinner.FinalMSG != spinnerSuffix {
-			Spinner.FinalMSG = spinnerSuffix
-			Spinner.Stop()
-			Spinner.Start()
-		}
-		//Spinner.Suffix = "  :" + string(bytes)
-		return 0, nil
-	}
-
-	return fmt.Print(time.Now().UTC().Format("2006-01-02T15:04:05.999Z") + " " + string(bytes))
-}*/
-
 // ClobberLogFormatter is a custom log formatter
 type ClobberLogFormatter struct {
 }
@@ -103,7 +80,7 @@ var RootCmd = &cobra.Command{
 
 		// Don't allow --build-only and --update-only to be used simultaneously
 		if BuildOnly && UpdateOnly {
-			log.Fatal("Error: Can't use --build-only and --update-only simultaneously")
+			log.Fatal("Error: Cannot use --build-only and --update-only simultaneously")
 		}
 
 		// Start the spinner
@@ -120,8 +97,6 @@ var RootCmd = &cobra.Command{
 		// FIXME: Ditch the "git" package and just use our custom exec-based logic, so it's more consistent across the app?
 
 		// TODO: Do we just blindly run everything here, or split stuff into their own packages and/or functions here?
-
-		// TODO: Do everything in a "chrooted" environment, which we might be able to do just by overriding $HOME?
 
 		// Make sure that the correct directory structure exists
 		//log.Info("Verifying folder structure..")
@@ -235,18 +210,23 @@ var RootCmd = &cobra.Command{
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
 			Spinner.Prefix = formatSpinnerText("Building Clover", false)
-			runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall")
+			runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall") // TODO: Should this technically be ignored when using --no-clean?
 			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
 			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
 			Spinner.Prefix = formatSpinnerText("Building Clover", true)
+		}
 
-			// TODO: Should this be considered a part of the update logic, hence controlled by UpdateOnly/BuildOnly flags?
+		// Handle special cases when using BuildOnly/UpdateOnly
+		if !BuildOnly {
+			// TODO: Add error handling for when HFSPlus.efi doesn't exist but running in BuildOnly mode?
 			// Download and install extra EFI drivers
-			log.Debug("Installing extra EFI drivers..")
-			Spinner.Prefix = formatSpinnerText("Installing extra EFI drivers", false)
+			log.Debug("Updating extra EFI drivers..")
+			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", false)
 			util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/drivers-Off/drivers64UEFI/HFSPlus.efi")
-			Spinner.Prefix = formatSpinnerText("Installing extra EFI drivers", true)
+			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", true)
+		}
 
+		if !UpdateOnly {
 			// Modify credits to differentiate between "official" and custom builds
 			log.Debug("Updating package credits..")
 			strReplaceErr := util.StringReplaceFile(util.GetCloverPath()+"/CloverPackage/CREDITS", "Chameleon team, crazybirdy, JrCs.", "Chameleon team, crazybirdy, JrCs. Custom package by Dids.")
@@ -267,9 +247,8 @@ var RootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
 		}
 
-		// TODO: Would be nice to have a better formatting for the time string (eg. 1 minute and 20 seconds, instead of 1m20s)
 		// Stop the execution timer
-		executionElapsedTime := time.Since(executionStartTime)
+		executionElapsedTime := util.GenerateTimeString(time.Since(executionStartTime))
 		executionResult := fmt.Sprintf("\nFinished in %s\n", executionElapsedTime)
 
 		// Stop the spinner
@@ -309,18 +288,6 @@ func customInit() {
 		formatter.DisableTimestamp = true
 	}
 
-	// FIXME: The spinner isn't compatible with the current logging style, so we'll probably need some
-	//        custom logwriter magic when running in non-verbose and non-quiet mode (eg. standard mode)
-	/*if !Verbose && !Quiet {
-		log.SetOutput(new(logWriter))
-	}*/
-
-	// Set specific colors for prefix and timestamp
-	/*formatter.SetColorScheme(&prefixed.ColorScheme{
-		PrefixStyle:    "blue+b",
-		TimestampStyle: "white+h",
-	})*/
-
 	// TODO: Perhaps we just need a custom formatter to deal with the spinner integration?
 	// Assign our logger to use the custom formatter
 	if Verbose && !Quiet {
@@ -329,43 +296,15 @@ func customInit() {
 		log.Formatter = new(ClobberLogFormatter)
 	}
 
-	// FIXME: Ideally log.Fatal should still work when this is set, but not sure if the log package supports that?
 	// Disable logging if running in quiet mode
 	if Quiet == true {
 		log.SetOutput(ioutil.Discard)
 	} else if Verbose == true {
-		//log.SetLevel(log.DebugLevel)
 		log.Level = logrus.DebugLevel
 	} else {
-		//log.SetLevel(log.InfoLevel)
 		log.Level = logrus.InfoLevel
 	}
 }
-
-// TODO: Implement some sort of persistent config (if we're planning on allowing customizable builds?)
-/* initConfig() {
-	// Don't forget to read config either from cfgFile or from home directory!
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".cobra")
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Can't read config:", err)
-		os.Exit(1)
-	}
-}*/
 
 func runCommand(command string) {
 	// If there are no args (or no spaces), we need to deal with those situations too
@@ -393,7 +332,6 @@ func runCommand(command string) {
 		err    error
 	)
 	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
-		//log.Fatal("Failed to run '" + cmd + strings.Join(args, " ") + "':\n" + string(cmdOut) + " (" + err.Error() + ")")
 		log.Fatal("Error: Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
 	}
 	if Verbose {
@@ -408,12 +346,3 @@ func formatSpinnerText(text string, done bool) string {
 	}
 	return fmt.Sprintf("\r◌ %s ", text)
 }
-
-// FIXME: d.Round doesn't exist in go versions <= 1.8
-/*func fmtDuration(d time.Duration) string {
-	d = d.Round(time.Minute)
-	h := d / time.Hour
-	d -= h * time.Hour
-	m := d / time.Minute
-	return fmt.Sprintf("%02d:%02d", h, m)
-}*/

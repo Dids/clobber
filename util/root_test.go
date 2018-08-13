@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestGetCloverPath(t *testing.T) {
@@ -121,7 +122,24 @@ func TestDownloadFile(t *testing.T) {
 }
 
 func TestGenerateTimeString(t *testing.T) {
-	// TODO: Implement
+	if GenerateTimeString(387683*time.Second) != "4 days, 11 hours, 41 minutes and 23 seconds" {
+		t.Errorf("Failed to generate a valid time string")
+	}
+	if GenerateTimeString(38768*time.Second) != "10 hours, 46 minutes and 8 seconds" {
+		t.Errorf("Failed to generate a valid time string")
+	}
+	if GenerateTimeString(3876*time.Second) != "1 hour, 4 minutes and 36 seconds" {
+		t.Errorf("Failed to generate a valid time string")
+	}
+	if GenerateTimeString(387*time.Second) != "6 minutes and 27 seconds" {
+		t.Errorf("Failed to generate a valid time string")
+	}
+	if GenerateTimeString(38*time.Second) != "38 seconds" {
+		t.Errorf("Failed to generate a valid time string")
+	}
+	if GenerateTimeString(3*time.Second) != "3 seconds" {
+		t.Errorf("Failed to generate a valid time string")
+	}
 }
 
 func TestCheckForUpdates(t *testing.T) {

@@ -1,12 +1,14 @@
 package util
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/rhysd/go-github-selfupdate/selfupdate"
@@ -80,9 +82,83 @@ func DownloadFile(url string, path string) error {
 }
 
 // GenerateTimeString generates a human readable time string (eg. "1 hour, 2 minutes and 12 seconds")
-func GenerateTimeString(time string) string {
-	// TODO: Implement
-	return "time"
+func GenerateTimeString(duration time.Duration) string {
+	// Create an empty time string
+	timeString := ""
+
+	// Convenience variables
+	inputSeconds := int(duration.Seconds())
+	secondsInAMinute := 60
+	secondsInAnHour := 60 * secondsInAMinute
+	secondsInADay := 24 * secondsInAnHour
+
+	// Parse the days
+	days := int(inputSeconds / secondsInADay)
+	if days > 0 {
+		timeString = timeString + fmt.Sprintf("%v", days)
+
+		// Suffix based on length
+		if days > 1 {
+			timeString = timeString + " days"
+		} else {
+			timeString = timeString + " day"
+		}
+	}
+
+	// Parse the hours
+	hourSeconds := inputSeconds % secondsInADay
+	hours := int(hourSeconds / secondsInAnHour)
+	if hours > 0 {
+		// Add separator if necessary
+		if len(timeString) > 0 {
+			timeString = timeString + ", "
+		}
+		timeString = timeString + fmt.Sprintf("%v", hours)
+
+		// Suffix based on length
+		if hours > 1 {
+			timeString = timeString + " hours"
+		} else {
+			timeString = timeString + " hour"
+		}
+	}
+
+	// Parse the minutes
+	minuteSeconds := hourSeconds % secondsInAnHour
+	minutes := int(minuteSeconds / secondsInAMinute)
+	if minutes > 0 {
+		// Add separator if necessary
+		if len(timeString) > 0 {
+			timeString = timeString + ", "
+		}
+		timeString = timeString + fmt.Sprintf("%v", minutes)
+
+		// Suffix based on length
+		if minutes > 1 {
+			timeString = timeString + " minutes"
+		} else {
+			timeString = timeString + " minute"
+		}
+	}
+
+	// Parse the seconds
+	seconds := int(minuteSeconds % secondsInAMinute)
+	if seconds > 0 {
+		// Add separator if necessary
+		if len(timeString) > 0 {
+			timeString = timeString + " and "
+		}
+		timeString = timeString + fmt.Sprintf("%v", seconds)
+
+		// Suffix based on length
+		if seconds > 1 {
+			timeString = timeString + " seconds"
+		} else {
+			timeString = timeString + " second"
+		}
+	}
+
+	return timeString
 }
 
 // FIXME: Using GitHub API to check for updates might not be plausible,
