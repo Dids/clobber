@@ -5,7 +5,7 @@ import (
 )
 
 // Version is set dynamically when building
-var Version = "x.x.x"
+var Version = "0.0.1"
 
 func main() {
 	// TODO: Updates disabled for now
@@ -20,6 +20,7 @@ func main() {
 		fmt.Println()
 	}*/
 
+	cmd.Version = Version
 	cmd.RootCmd.Version = Version
 	cmd.Execute()
 }
