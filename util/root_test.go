@@ -120,6 +120,10 @@ func TestDownloadFile(t *testing.T) {
 	os.Remove(file.Name())
 }
 
+func TestGenerateTimeString(t *testing.T) {
+	// TODO: Implement
+}
+
 func TestCheckForUpdates(t *testing.T) {
 	_, err := CheckForUpdates("0.0.1")
 	if err != nil {

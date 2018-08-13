@@ -79,6 +79,12 @@ func DownloadFile(url string, path string) error {
 	return nil
 }
 
+// GenerateTimeString generates a human readable time string (eg. "1 hour, 2 minutes and 12 seconds")
+func GenerateTimeString(time string) string {
+	// TODO: Implement
+	return "time"
+}
+
 // FIXME: Using GitHub API to check for updates might not be plausible,
 //        as we need a token, but we're using brew to compile, so we can't expose the token..
 
