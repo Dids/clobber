@@ -16,6 +16,19 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
+// TODO: Should we create a "GetLogPath" function that returns a STATIC log filename/path,
+//       with the current date/time appended to it, so it's the same file per each run?
+
+// GetLogFilePath returns the full path to the current log file
+func GetLogFilePath() string {
+	return GetLogsPath() + "/clobber.log"
+}
+
+// GetLogsPath returns the full path to the logs directory
+func GetLogsPath() string {
+	return GetClobberPath() + "/logs"
+}
+
 // GetCloverPath returns the full path to Clover
 func GetCloverPath() string {
 	return GetUdkPath() + "/Clover"

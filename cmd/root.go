@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -12,6 +13,7 @@ import (
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
@@ -249,7 +251,7 @@ var RootCmd = &cobra.Command{
 
 		// Stop the execution timer
 		executionElapsedTime := util.GenerateTimeString(time.Since(executionStartTime))
-		executionResult := fmt.Sprintf("\nFinished in %s\n", executionElapsedTime)
+		executionResult := fmt.Sprintf("\n🎉  Finished in %s 🎉\n", executionElapsedTime)
 
 		// Stop the spinner
 		if !Verbose && !Quiet {
@@ -284,11 +286,10 @@ func customInit() {
 		// Enable showing a proper timestamp
 		formatter.FullTimestamp = true
 	} else {
-		// TODO: Customize for non-verbose running, so remove the timestamp for instance?
+		// Hide timestamp when running in non-verbose mode
 		formatter.DisableTimestamp = true
 	}
 
-	// TODO: Perhaps we just need a custom formatter to deal with the spinner integration?
 	// Assign our logger to use the custom formatter
 	if Verbose && !Quiet {
 		log.Formatter = formatter
@@ -296,14 +297,36 @@ func customInit() {
 		log.Formatter = new(ClobberLogFormatter)
 	}
 
-	// Disable logging if running in quiet mode
-	if Quiet == true {
-		log.SetOutput(ioutil.Discard)
-	} else if Verbose == true {
+	// Ensure the log file folder exists
+	mkdirErr := os.MkdirAll(util.GetLogsPath(), 0755)
+	if mkdirErr != nil {
+		log.Fatal("Error: MkdirAll failed with error: ", mkdirErr)
+	}
+
+	// Setup logging with lumberjack support (log to stdout + log file)
+	lumberjackLogger := &lumberjack.Logger{
+		Filename:   util.GetLogFilePath(),
+		MaxSize:    15,    // Log file size in megabytes
+		MaxBackups: 5,     // Maximum amount of files to keep
+		MaxAge:     90,    // Days to keep files
+		Compress:   false, // Compress log files (disabled by default)
+	}
+	lumberjackLogger.Rotate()
+	logMultiWriter := io.MultiWriter(os.Stdout, lumberjackLogger)
+	if Quiet || !Verbose {
+		// Disable logging to console if running in quiet mode
+		logMultiWriter = io.MultiWriter(ioutil.Discard, lumberjackLogger)
+	}
+	log.SetOutput(logMultiWriter)
+	//log.WriterLevel(logrus.DebugLevel)
+
+	// Set log level
+	log.Level = logrus.DebugLevel
+	/*if Verbose == true {
 		log.Level = logrus.DebugLevel
 	} else {
 		log.Level = logrus.InfoLevel
-	}
+	}*/
 }
 
 func runCommand(command string) {
@@ -323,9 +346,9 @@ func runCommand(command string) {
 		argsString = ""
 	}
 
-	if Verbose {
-		log.Debug("Running command: '" + cmd + " " + argsString + "'")
-	}
+	//if Verbose {
+	log.Debug("Running command: '" + cmd + " " + argsString + "'")
+	//}
 
 	var (
 		cmdOut []byte
@@ -334,9 +357,9 @@ func runCommand(command string) {
 	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
 		log.Fatal("Error: Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
 	}
-	if Verbose {
-		log.Debug("Command finished with output:\n" + string(cmdOut))
-	}
+	//if Verbose {
+	log.Debug("Command finished with output:\n" + string(cmdOut))
+	//}
 }
 
 func formatSpinnerText(text string, done bool) string {
