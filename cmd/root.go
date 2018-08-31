@@ -90,7 +90,6 @@ var RootCmd = &cobra.Command{
 			Spinner.Start()
 		}
 
-		log.Debug("Verbose mode is enabled")
 		log.Debug("Target Clover revision:", Revision)
 		if args != nil && len(args) > 0 {
 			log.Debug("Building with arguments:", args)
@@ -255,6 +254,7 @@ var RootCmd = &cobra.Command{
 
 		// Stop the spinner
 		if !Verbose && !Quiet {
+			log.Debug(executionResult)
 			Spinner.FinalMSG = executionResult
 			Spinner.Stop()
 		} else {
@@ -281,21 +281,25 @@ func customInit() {
 	// Create a new log formatter
 	formatter := new(prefixed.TextFormatter)
 
-	// Change the log format based on the current verbosity
+	// Enable showing a proper timestamp
+	formatter.FullTimestamp = true
+
+	/*// Change the log format based on the current verbosity
 	if Verbose {
 		// Enable showing a proper timestamp
 		formatter.FullTimestamp = true
 	} else {
 		// Hide timestamp when running in non-verbose mode
 		formatter.DisableTimestamp = true
-	}
+	}*/
 
 	// Assign our logger to use the custom formatter
-	if Verbose && !Quiet {
+	log.Formatter = formatter
+	/*if Verbose && !Quiet {
 		log.Formatter = formatter
 	} else if !Verbose && !Quiet {
 		log.Formatter = new(ClobberLogFormatter)
-	}
+	}*/
 
 	// Ensure the log file folder exists
 	mkdirErr := os.MkdirAll(util.GetLogsPath(), 0755)
