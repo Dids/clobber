@@ -18,7 +18,9 @@ echo "pwd: $(pwd)"
 echo "ls: $(ls)"
 echo "GOPATH: $GOPATH"
 echo "ls GOPATH: $(ls $GOPATH)"
+BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/packr/main.go"
 
 # Build the application
 #go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
-packr build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
+#packr build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
+$BUILD_CMD build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
