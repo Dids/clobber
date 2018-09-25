@@ -280,10 +280,10 @@ var RootCmd = &cobra.Command{
 			}
 			file.Sync()
 			file.Close()
-			commandString := "if ! /usr/bin/patch -Rsf --dry-run ~/.clobber/src/edk2/Clover/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch 2>/dev/null ; then /usr/bin/patch --backup ~/.clobber/src/edk2/Clover/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch; fi"
-			_, commandErr := exec.Command("/usr/bin/env", "bash", "-c", commandString).CombinedOutput()
+			commandString := "if ! /usr/bin/patch -Rsf --dry-run " + util.GetCloverPath() + "/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch 2>/dev/null ; then /usr/bin/patch --backup " + util.GetCloverPath() + "/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch; fi"
+			commandOutBytes, commandErr := exec.Command("/usr/bin/env", "bash", "-c", commandString).CombinedOutput()
 			if commandErr != nil {
-				log.Fatal("Error: Failed to patch Clover installer (command failed): ", commandErr)
+				log.Fatal("Error: Failed to patch Clover installer (command failed): ", commandErr, ",", string(commandOutBytes))
 			}
 			deleteErr := os.Remove("/tmp/buildpkg.patch")
 			if deleteErr != nil {
