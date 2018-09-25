@@ -13,11 +13,7 @@ OUTPUT=${2:-clobber}
 # Make sure Packr is installed
 go get -u github.com/gobuffalo/packr/...
 
-## TODO: Remove these
-echo "pwd: $(pwd)"
-echo "ls: $(ls)"
-echo "GOPATH: $GOPATH"
-echo "ls GOPATH: $(ls $GOPATH)"
+# Prepare the Packr build command (this is a workaround for Homebrew)
 BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/packr/main.go"
 
 # Build the application
