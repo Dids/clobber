@@ -13,6 +13,12 @@ OUTPUT=${2:-clobber}
 # Make sure Packr is installed
 go get -u github.com/gobuffalo/packr/...
 
+## TODO: Remove these
+echo "pwd: $(pwd)"
+echo "ls: $(ls)"
+echo "GOPATH: $GOPATH"
+echo "ls GOPATH: $(ls $GOPATH)"
+
 # Build the application
 #go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
 packr build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
