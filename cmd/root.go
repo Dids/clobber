@@ -11,6 +11,7 @@ import (
 
 	"github.com/Dids/clobber/util"
 	figure "github.com/common-nighthawk/go-figure"
+	"github.com/gobuffalo/packr"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -39,13 +40,20 @@ var BuildOnly bool
 // UpdateOnly will only update repositories, but not build anything
 var UpdateOnly bool
 
+// InstallerOnly will only build the installer
+var InstallerOnly bool
+
 // NoClean skips cleaning of dirty files
 var NoClean bool
 
 // Spinner is the CLI spinner/activity indicator
 var Spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
+// Create a new logger
 var log = logrus.New()
+
+// Setup static assets using Packr
+var packedPatches = packr.NewBox("../patches")
 
 // Execute is the entrypoint for the command-line application
 func Execute() {
@@ -80,9 +88,18 @@ var RootCmd = &cobra.Command{
 		fmt.Println("                                  v" + Version + " by @Dids")
 		fmt.Println()
 
-		// Don't allow --build-only and --update-only to be used simultaneously
+		// Don't allow a mixture of --build-only, --update-only and --installer-only to be used simultaneously
 		if BuildOnly && UpdateOnly {
 			log.Fatal("Error: Cannot use --build-only and --update-only simultaneously")
+		}
+		if BuildOnly && InstallerOnly {
+			log.Fatal("Error: Cannot use --build-only and --installer-only simultaneously")
+		}
+		if UpdateOnly && InstallerOnly {
+			log.Fatal("Error: Cannot use --update-only and --installer-only simultaneously")
+		}
+		if BuildOnly && UpdateOnly && InstallerOnly {
+			log.Fatal("Error: Cannot use --build-only, --update-only and --installer-only simultaneously")
 		}
 
 		// Start the spinner
@@ -115,6 +132,9 @@ var RootCmd = &cobra.Command{
 			if BuildOnly {
 				log.Fatal("Error: UDK2018 is missing and using --build-only, cannot continue")
 			}
+			if InstallerOnly {
+				log.Fatal("Error: UDK2018 is missing and using --installer-only, cannot continue")
+			}
 			log.Debug("UDK2018 is missing, downloading..")
 			Spinner.Prefix = formatSpinnerText("Downloading UDK2018", false)
 			git.Clone("https://github.com/tianocore/edk2", util.GetUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
@@ -122,7 +142,7 @@ var RootCmd = &cobra.Command{
 		}
 
 		// Update UDK2018
-		if !BuildOnly {
+		if !BuildOnly && !InstallerOnly {
 			log.Debug("Verifying UDK2018 is up to date..")
 			Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", false)
 			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
@@ -139,6 +159,9 @@ var RootCmd = &cobra.Command{
 			if BuildOnly {
 				log.Fatal("Error: Clover is missing and using --build-only, cannot continue")
 			}
+			if InstallerOnly {
+				log.Fatal("Error: Clover is missing and using --installer-only, cannot continue")
+			}
 			log.Debug("Clover is missing, downloading..")
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", false)
 			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + util.GetCloverPath())
@@ -146,7 +169,7 @@ var RootCmd = &cobra.Command{
 		}
 
 		// Update Clover
-		if !BuildOnly {
+		if !BuildOnly && !InstallerOnly {
 			log.Debug("Verifying Clover is up to date..")
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
 			runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
@@ -158,7 +181,7 @@ var RootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
 		}
 
-		if !UpdateOnly {
+		if !UpdateOnly && !InstallerOnly {
 			// Override HOME environment variable (use chroot-like logic for the build process)
 			log.Debug("Overriding HOME..")
 			os.Setenv("HOME", util.GetClobberPath())
@@ -218,7 +241,7 @@ var RootCmd = &cobra.Command{
 		}
 
 		// Handle special cases when using BuildOnly/UpdateOnly
-		if !BuildOnly {
+		if !BuildOnly && !InstallerOnly {
 			// TODO: Add error handling for when HFSPlus.efi doesn't exist but running in BuildOnly mode?
 			// Download and install extra EFI drivers
 			log.Debug("Updating extra EFI drivers..")
@@ -230,10 +253,43 @@ var RootCmd = &cobra.Command{
 		if !UpdateOnly {
 			// Modify credits to differentiate between "official" and custom builds
 			log.Debug("Updating package credits..")
-			strReplaceErr := util.StringReplaceFile(util.GetCloverPath()+"/CloverPackage/CREDITS", "Chameleon team, crazybirdy, JrCs.", "Chameleon team, crazybirdy, JrCs. Custom package by Dids.")
-			if strReplaceErr != nil {
-				log.Fatal("Error: Failed to update package credits: ", strReplaceErr)
+			additionalCredits := "Custom package by Dids."
+			creditsFilePath := util.GetCloverPath() + "/CloverPackage/CREDITS"
+			fileBuffer, fileReadErr := ioutil.ReadFile(creditsFilePath)
+			if fileReadErr != nil {
+				log.Fatal("Error: Failed to update package credits: ", fileReadErr)
 			}
+			creditsString := string(fileBuffer)
+			if !strings.Contains(creditsString, additionalCredits) {
+				strReplaceErr := util.StringReplaceFile(creditsFilePath, "Chameleon team, crazybirdy, JrCs.", "Chameleon team, crazybirdy, JrCs. "+additionalCredits)
+				if strReplaceErr != nil {
+					log.Fatal("Error: Failed to update package credits: ", strReplaceErr)
+				}
+			}
+
+			// Patch the Clover installer package
+			log.Debug("Patching Clover installer..")
+			Spinner.Prefix = formatSpinnerText("Patching Clover installer", false)
+			file, fileErr := os.Create("/tmp/buildpkg.patch")
+			if fileErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (create file failed): ", fileErr)
+			}
+			_, writeErr := file.WriteString(packedPatches.String("buildpkg.patch"))
+			if writeErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (write file failed): ", writeErr)
+			}
+			file.Sync()
+			file.Close()
+			commandString := "if ! /usr/bin/patch -Rsf --dry-run ~/.clobber/src/edk2/Clover/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch 2>/dev/null ; then /usr/bin/patch --backup ~/.clobber/src/edk2/Clover/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch; fi"
+			_, commandErr := exec.Command("/usr/bin/env", "bash", "-c", commandString).CombinedOutput()
+			if commandErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (command failed): ", commandErr)
+			}
+			deleteErr := os.Remove("/tmp/buildpkg.patch")
+			if deleteErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (remove file failed): ", deleteErr)
+			}
+			Spinner.Prefix = formatSpinnerText("Patching Clover installer", true)
 
 			// Build the Clover installer package
 			log.Debug("Building Clover installer..")
@@ -241,11 +297,13 @@ var RootCmd = &cobra.Command{
 			runCommand(util.GetCloverPath() + "/CloverPackage/makepkg")
 			Spinner.Prefix = formatSpinnerText("Building Clover installer", true)
 
-			// Build the Clover ISO image
-			log.Debug("Building Clover ISO image..")
-			Spinner.Prefix = formatSpinnerText("Building Clover ISO image", false)
-			runCommand(util.GetCloverPath() + "/CloverPackage/makeiso")
-			Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
+			if !InstallerOnly {
+				// Build the Clover ISO image
+				log.Debug("Building Clover ISO image..")
+				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", false)
+				runCommand(util.GetCloverPath() + "/CloverPackage/makeiso")
+				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
+			}
 		}
 
 		// Stop the execution timer
@@ -274,6 +332,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
 	RootCmd.PersistentFlags().BoolVarP(&BuildOnly, "build-only", "b", false, "only build (no update)")
 	RootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
+	RootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
 	RootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
 }
 

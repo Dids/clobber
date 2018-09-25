@@ -42,6 +42,14 @@
   version = "v1.7.0"
 
 [[projects]]
+  digest = "1:c8ad4ba32ae8b71ef2bf5e1bad402aeb99ce77a1240f9b684db8b1ff5353e7ab"
+  name = "github.com/gobuffalo/packr"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5a2cbb54c4e7d482e3f518c56f1f86f133d5204f"
+  version = "v1.13.7"
+
+[[projects]]
   branch = "master"
   digest = "1:b86d4278dd9e2dd1bf451c82f8c2b7954cdc1e062061b1f4653e67f858856279"
   name = "github.com/gogits/git-module"
@@ -142,6 +150,14 @@
   revision = "7e9a647135a142c2669943d4a4d29be015ce9392"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   digest = "1:16e6fde687529deaefbeff14841b694cb6d67dfc31884bac6214313e96e107bc"
   name = "github.com/rhysd/go-github-selfupdate"
   packages = ["selfupdate"]
@@ -219,7 +235,7 @@
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "2f5d2388922f370f4355f327fcf4cfe9f5583908"
+  revision = "f04abc6bdfa7a0171a8a0c9fd2ada9391044d056"
 
 [[projects]]
   branch = "master"
@@ -274,6 +290,7 @@
     "github.com/blang/semver",
     "github.com/briandowns/spinner",
     "github.com/common-nighthawk/go-figure",
+    "github.com/gobuffalo/packr",
     "github.com/gogits/git-module",
     "github.com/mitchellh/go-homedir",
     "github.com/otiai10/copy",

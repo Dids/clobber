@@ -10,5 +10,9 @@ set -o xtrace    # Enable debugging (set -x)
 VERSION=${1:-0.0.1}
 OUTPUT=${2:-clobber}
 
+# Make sure Packr is installed
+go get -u github.com/gobuffalo/packr/...
+
 # Build the application
-go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
+#go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
+packr build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}

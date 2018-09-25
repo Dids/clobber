@@ -29,11 +29,13 @@ cache:
 install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   - dep ensure
+  - go get -u github.com/gobuffalo/packr/...
 
 # Run tests and generate code coverage
 script:
   - eval $TEST_COMMAND
-  - go build -o clobber
+  #- go build -o clobber
+  - packr build -o clobber
   - ./clobber --version
 
 # Upload code coverage
