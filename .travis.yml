@@ -4,13 +4,21 @@ sudo: false
 # Setup Go language support
 language: go
 
-# Test against multiple versions of Go
-go:
-  - 1.10.x
-  ## NOTE: Our test command doesn't work below 1.10, unfortunately..
-  #- 1.9.x
-  #- 1.8.x
-  - master
+# Setup global environment variables
+env:
+  - TEST_COMMAND="go test -race -coverprofile=coverage.txt -covermode=atomic ./..."
+
+# Setup Go version specific configurations
+matrix:
+  include:
+  - go: master
+  - go: 1.10.x
+  - go: 1.9.x
+    env:
+      - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
+  - go: 1.8.x
+    env:
+      - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
 
 # Setup caching
 cache:
@@ -18,14 +26,13 @@ cache:
     - $HOME/.clobber/opt
 
 # Install dependencies
-#before_install:
 install:
-  - go get -u github.com/kardianos/govendor
-  - govendor sync
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - dep ensure
 
 # Run tests and generate code coverage
 script:
-  - go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+  - eval $TEST_COMMAND
   - go build -o clobber
   - ./clobber --version
 

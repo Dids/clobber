@@ -53,11 +53,11 @@ View all the available options:
 
 ### Development
 
-Install `govendor`:  
-> go get -u github.com/kardianos/govendor  
+Install `dep`:  
+> curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh  
 
 Install dependencies:  
-> govendor sync  
+> dep ensure  
 
 Run the application:  
 > go run main.go  
