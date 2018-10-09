@@ -14,18 +14,6 @@
 
 Clobber is command-line application for building [Clover](https://sourceforge.net/projects/cloverefiboot/).
 
-**NOTICE:** _Work in progress. Check the list below for details._
-
-### Implemented vs. Missing
-
-- [x] An easy to install CLI application, distributed via `brew`  
-- [x] Ability to build Clover on any machine (as long as the requirements are met)  
-- [x] Target a specific Clover version/revision  
-- [x] See less/more build output (`--verbose`, `--quiet` flags etc.)  
-- [x] Better logging (log to file, use colors to signify log type etc.)  
-- [x] Support for additional drivers (AptioFixPkg, ApfsSupportPkg etc.)  
-- [ ] Additional customization options (select to include/exclude drivers etc.)  
-
 ### Requirements
 
 - [macOS](https://www.apple.com/lae/macos/) (only tested on macOS High Sierra)
@@ -64,6 +52,18 @@ Run the application:
 
 Run tests:  
 > go test ./...  
+
+Creating new `buildpkg.sh` patches:  
+1. Make a copy of `buildpkg.sh` and name it `buildpkg_patched.sh` (it can be found in `~/.clobber/src/edk2/Clover/CloverPackage/package`)  
+2. Make the required changes to `buildpkg_patched.sh`  
+3. Create a new patch with the following command:  
+   > `diff -Naru ~/.clobber/src/edk2/Clover/CloverPackage/package/buildpkg.sh ~/.clobber/src/edk2/Clover/CloverPackage/package/buildpkg_patched.sh > patches/buildpkg.patch`  
+
+Creating new `ebuild.sh` patches:  
+1. Make a copy of `ebuild.sh` and name it `ebuild_patched.sh` (it can be found in `~/.clobber/src/edk2/Clover`)  
+2. Make the required changes to `ebuild_patched.sh`  
+3. Create a new patch with the following command:  
+   > `diff -Naru ~/.clobber/src/edk2/Clover/ebuild.sh ~/.clobber/src/edk2/Clover/ebuild_patched.sh > patches/ebuild.patch`  
 
 ### License
 

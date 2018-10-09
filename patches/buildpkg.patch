@@ -1,28 +1,14 @@
 --- buildpkg.sh
 +++ buildpkg.sh
-@@ -1054,7 +1054,7 @@
-                             --subst="DRIVER_DIR=$(basename $driverDestDir)"   \
-                             "VBoxHfs"
+@@ -1109,7 +1109,10 @@
+                             "VirtualSMC"
+         fi
          buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
 -        addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ###   CLOBBER PATCH START   ###
++        #addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
 +        addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="choicePreviouslySelected('$packageRefId')" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ###    CLOBBER PATCH END    ###
          rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
-     done
- fi
-@@ -1078,9 +1078,15 @@
-         addTemplateScripts --pkg-rootdir="${PKG_BUILD_DIR}/${driverName}" \
-                            --subst="INSTALLER_CHOICE=$packageRefId" MarkChoice
-         buildpackage "$packageRefId" "${driverName}" "${PKG_BUILD_DIR}/${driverName}" "${driverDestDir}"
--        addChoice --group="Drivers64UEFI"  --title="$driverName"                \
-+        if [[ "$packageRefId" =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then
-+            addChoice --group="Drivers64UEFI"  --title="$driverName"                \
-+                  --start-selected="true"  \
-+                  --pkg-refs="$packageRefId"  "${driverName}"
-+        else
-+            addChoice --group="Drivers64UEFI"  --title="$driverName"                \
-                   --start-selected="choicePreviouslySelected('$packageRefId')"  \
-                   --pkg-refs="$packageRefId"  "${driverName}"
-+        fi
-         rm -R -f "${PKG_BUILD_DIR}/${driverName}"
      done
  fi

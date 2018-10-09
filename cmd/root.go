@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Dids/clobber/patches"
 	"github.com/Dids/clobber/util"
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/gobuffalo/packr"
@@ -231,6 +232,14 @@ var RootCmd = &cobra.Command{
 				log.Fatal("Error: Failed to copy UDK patches: ", copyErr)
 			}
 
+			// Patch the Clover build script
+			log.Debug("Patching Clover build script..")
+			Spinner.Prefix = formatSpinnerText("Patching Clover build script", false)
+			if err := patches.Patch(packedPatches, "ebuild", util.GetCloverPath()+"/ebuild.sh"); err != nil {
+				log.Fatal("Error: Failed to patch Clover build script: ", err)
+			}
+			Spinner.Prefix = formatSpinnerText("Patching Clover build script", true)
+
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
 			Spinner.Prefix = formatSpinnerText("Building Clover", false)
@@ -267,27 +276,17 @@ var RootCmd = &cobra.Command{
 				}
 			}
 
+			// FIXME: When using "log.Fatal(...)" and running non-verbosely, the errors aren't shown to the user,
+			//        but they are written to the log file, but we really need the user to know what's wrong too..
+
 			// Patch the Clover installer package
 			log.Debug("Patching Clover installer..")
 			Spinner.Prefix = formatSpinnerText("Patching Clover installer", false)
-			file, fileErr := os.Create("/tmp/buildpkg.patch")
-			if fileErr != nil {
-				log.Fatal("Error: Failed to patch Clover installer (create file failed): ", fileErr)
-			}
-			_, writeErr := file.WriteString(packedPatches.String("buildpkg.patch"))
-			if writeErr != nil {
-				log.Fatal("Error: Failed to patch Clover installer (write file failed): ", writeErr)
-			}
-			file.Sync()
-			file.Close()
-			commandString := "if ! /usr/bin/patch -Rsf --dry-run " + util.GetCloverPath() + "/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch 2>/dev/null ; then /usr/bin/patch --backup " + util.GetCloverPath() + "/CloverPackage/package/buildpkg.sh /tmp/buildpkg.patch; fi"
-			commandOutBytes, commandErr := exec.Command("/usr/bin/env", "bash", "-c", commandString).CombinedOutput()
-			if commandErr != nil {
-				log.Fatal("Error: Failed to patch Clover installer (command failed): ", commandErr, ",", string(commandOutBytes))
-			}
-			deleteErr := os.Remove("/tmp/buildpkg.patch")
-			if deleteErr != nil {
-				log.Fatal("Error: Failed to patch Clover installer (remove file failed): ", deleteErr)
+			// TODO: So for some reason the old patch is still working, even though running it manually fails SOMETIMES..
+			// FIXME: Re-enable the new patch once error handling has been properly fixed!
+			// if err := patches.PatchBuildpkg(packedPatches, "buildpkg", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
+			if err := patches.Patch(packedPatches, "buildpkg_old", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
+				log.Fatal("Error: Failed to patch Clover installer: ", err)
 			}
 			Spinner.Prefix = formatSpinnerText("Patching Clover installer", true)
 
