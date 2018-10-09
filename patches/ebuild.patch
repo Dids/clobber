@@ -1,28 +1,21 @@
 --- ebuild.sh
 +++ ebuild.sh
-@@ -801,7 +801,12 @@
+@@ -799,8 +799,8 @@
+     # add github links below to checkout packages
+     local extDriversDependecies=( 'https://github.com/acidanthera/AptioFixPkg'
                                    'https://github.com/acidanthera/AppleSupportPkg'
++                                  'https://github.com/acidanthera/OcSupportPkg'
                                    'https://github.com/CupertinoNet/CupertinoModulePkg'
-                                   'https://github.com/CupertinoNet/EfiMiscPkg'
--                                  'https://github.com/CupertinoNet/EfiPkg')
-+                                  'https://github.com/CupertinoNet/EfiPkg'
-+    ###   CLOBBER PATCH START   ###
-+                                  #'https://github.com/CupertinoNet/EfiPkg')
-+                                  'https://github.com/CupertinoNet/EfiPkg'
-+                                  'https://github.com/acidanthera/OcSupportPkg')
-+    ###   CLOBBER PATCH END   ###
+-                                  'https://github.com/CupertinoNet/EfiMiscPkg'
+                                   'https://github.com/CupertinoNet/EfiPkg')
      # add below drivers you want to build
      local externalDrivers=( AptioFixPkg AppleSupportPkg )
- 
-@@ -824,7 +829,10 @@
+@@ -824,7 +824,7 @@
          local branch=master
  
          case $pkg in
 -        CupertinoModulePkg | EfiMiscPkg | EfiPkg)
-+        ###   CLOBBER PATCH START   ###
-+        #CupertinoModulePkg | EfiMiscPkg | EfiPkg)
-+        CupertinoModulePkg | EfiMiscPkg)
-+        ###   CLOBBER PATCH END   ###
++        CupertinoModulePkg)
            branch=development
          ;;
          esac
