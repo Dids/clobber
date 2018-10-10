@@ -232,13 +232,14 @@ var RootCmd = &cobra.Command{
 				log.Fatal("Error: Failed to copy UDK patches: ", copyErr)
 			}
 
-			// Patch the Clover build script
+			// NOTE: Disabled because ebuild.sh was officially "fixed" again..
+			/* // Patch the Clover build script
 			log.Debug("Patching Clover build script..")
 			Spinner.Prefix = formatSpinnerText("Patching Clover build script", false)
 			if err := patches.Patch(packedPatches, "ebuild", util.GetCloverPath()+"/ebuild.sh"); err != nil {
 				log.Fatal("Error: Failed to patch Clover build script: ", err)
 			}
-			Spinner.Prefix = formatSpinnerText("Patching Clover build script", true)
+			Spinner.Prefix = formatSpinnerText("Patching Clover build script", true) */
 
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
