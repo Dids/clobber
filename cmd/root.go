@@ -55,6 +55,7 @@ var log = logrus.New()
 
 // Setup static assets using Packr
 var packedPatches = packr.NewBox("../patches")
+var packedAssets = packr.NewBox("../assets")
 
 // Execute is the entrypoint for the command-line application
 func Execute() {
@@ -287,6 +288,10 @@ var RootCmd = &cobra.Command{
 			// FIXME: Re-enable the new patch once error handling has been properly fixed!
 			// if err := patches.PatchBuildpkg(packedPatches, "buildpkg", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
 			if err := patches.Patch(packedPatches, "buildpkg_old", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
+				log.Fatal("Error: Failed to patch Clover installer: ", err)
+			}
+			// Replace the Clover installer background image with our own
+			if err := ioutil.WriteFile(util.GetCloverPath()+"/CloverPackage/package/Resources/background.tiff", packedAssets.Bytes("background.tiff"), 0644); err != nil {
 				log.Fatal("Error: Failed to patch Clover installer: ", err)
 			}
 			Spinner.Prefix = formatSpinnerText("Patching Clover installer", true)
