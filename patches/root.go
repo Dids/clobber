@@ -19,9 +19,14 @@ func Patch(packedPatches packr.Box, patchName string, fileToPatch string) error 
 		return fileErr
 	}
 
+	// Load the patch
+	patch, patchErr := packedPatches.FindString(patchName + ".patch")
+	if patchErr != nil {
+		return patchErr
+	}
+
 	// Write the patch contents to the temporary file
-	// if _, writeErr := file.WriteString(packedPatches.String("buildpkg.patch")); writeErr != nil {
-	if _, writeErr := file.WriteString(packedPatches.String(patchName + ".patch")); writeErr != nil {
+	if _, writeErr := file.WriteString(patch); writeErr != nil {
 		os.Remove(tempFilePath)
 		return writeErr
 	}
