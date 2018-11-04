@@ -291,8 +291,13 @@ var RootCmd = &cobra.Command{
 			if err := patches.Patch(packedPatches, "buildpkg_old", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
 				log.Fatal("Error: Failed to patch Clover installer: ", err)
 			}
+			// Load the patch
+			backgroundPatch, backgroundPatchErr := packedAssets.Find("background.tiff")
+			if backgroundPatchErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer: ", backgroundPatchErr)
+			}
 			// Replace the Clover installer background image with our own
-			if err := ioutil.WriteFile(util.GetCloverPath()+"/CloverPackage/package/Resources/background.tiff", packedAssets.Bytes("background.tiff"), 0644); err != nil {
+			if err := ioutil.WriteFile(util.GetCloverPath()+"/CloverPackage/package/Resources/background.tiff", backgroundPatch, 0644); err != nil {
 				log.Fatal("Error: Failed to patch Clover installer: ", err)
 			}
 			Spinner.Prefix = formatSpinnerText("Patching Clover installer", true)
