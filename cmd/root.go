@@ -147,11 +147,11 @@ var RootCmd = &cobra.Command{
 		if !BuildOnly && !InstallerOnly {
 			log.Debug("Verifying UDK2018 is up to date..")
 			Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", false)
-			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
 			// Disable cleaning up of extra files if the NoClean flag is set
 			if !NoClean {
 				runCommand("cd " + util.GetUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
 			}
+			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
 			Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", true)
 		}
 
@@ -174,12 +174,13 @@ var RootCmd = &cobra.Command{
 		if !BuildOnly && !InstallerOnly {
 			log.Debug("Verifying Clover is up to date..")
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
-			runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
 			// Disable cleaning up of extra files if the NoClean flag is set
 			if !NoClean {
-				runCommand("svn revert -R" + " " + util.GetCloverPath())
+				runCommand("svn cleanup " + util.GetCloverPath())
 				runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath())
+				runCommand("svn revert -R" + " " + util.GetCloverPath())
 			}
+			runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
 		}
 

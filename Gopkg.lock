@@ -42,12 +42,28 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:c8ad4ba32ae8b71ef2bf5e1bad402aeb99ce77a1240f9b684db8b1ff5353e7ab"
+  digest = "1:72139cbee5a41ff8a322681be104aa8d7e7c92a5f3ad5501ea3505042b050b57"
+  name = "github.com/gobuffalo/envy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e0b181c424e7ca1a36f6f2db4bdfd25ef3421e77"
+  version = "v1.6.7"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e726decbaa30a307ce03a576eb29fdd6ede54c8fc494628231a36bde2dd2d1f1"
+  name = "github.com/gobuffalo/packd"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "16c4ed88b2967c484265fd27d9e9d38dde6b3581"
+
+[[projects]]
+  digest = "1:24430e30c5fe94726058c1cb9c36f8fe891ae67c00ee73ee43da1e01528dad1c"
   name = "github.com/gobuffalo/packr"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5a2cbb54c4e7d482e3f518c56f1f86f133d5204f"
-  version = "v1.13.7"
+  revision = "cf1833a64494f56baea836890e2ee5e69c2092dc"
+  version = "v1.19.0"
 
 [[projects]]
   branch = "master"
@@ -102,12 +118,28 @@
   version = "v1.0"
 
 [[projects]]
+  digest = "1:ecd9aa82687cf31d1585d4ac61d0ba180e42e8a6182b85bd785fcca8dfeefc1b"
+  name = "github.com/joho/godotenv"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "23d116af351c84513e1946b527c88823e476be13"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
   version = "v1.0.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:598aa4555d1ea05a7b949e31e7db0e7b2df21f8772c53cc42f6543dc6bf9a35a"
+  name = "github.com/markbates/oncer"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "05fccaae8fc423476d98fd4c3e4699ba0fbbde48"
 
 [[projects]]
   digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
@@ -174,12 +206,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:3f53e9e4dfbb664cd62940c9c4b65a2171c66acd0b7621a1a6b8e78513525a52"
+  digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ad15b42461921f1fb3529b058c6786c6a45d5162"
-  version = "v1.1.1"
+  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
@@ -206,7 +238,7 @@
   version = "v0.1.2"
 
 [[projects]]
-  digest = "1:4aeb3860275fa1fd60cccfb5a6ef85da438bf17402e1e84412ade4d4b55066a0"
+  digest = "1:db345c377984d0907323c09a9b17f11d995a59649fd38f909727df358b5f9020"
   name = "github.com/ulikunitz/xz"
   packages = [
     ".",
@@ -215,8 +247,8 @@
     "lzma",
   ]
   pruneopts = "UT"
-  revision = "0c6b41e72360850ca4f98dc341fd999726ea007f"
-  version = "v0.5.4"
+  revision = "590df8077fbcb06ad62d7714da06c00e5dd2316d"
+  version = "v0.5.5"
 
 [[projects]]
   digest = "1:39a425f98fb19427061a693fe6bf0683c9bddec4b25b17067e34fdb465e39cb9"
@@ -232,7 +264,7 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb"
+  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
 
 [[projects]]
   branch = "master"
@@ -243,32 +275,32 @@
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "9b4f9f5ad5197c79fd623a3638e70d8b26cef344"
+  revision = "c10e9556a7bc0e7c942242b606f0acf024ad5d6a"
 
 [[projects]]
   branch = "master"
-  digest = "1:1bce229fad01cbad9bd00e70ca32afff25ac2cea3dd710d50f88c967c1c3df65"
+  digest = "1:a7b20b632c01d31a065ddfd4c4faaea60ed08861c961a71db219c19e2ba18908"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "9dcd33a902f40452422c2367fefcb95b54f9f8f8"
+  revision = "232e45548389bd9357411a6922a07c5fd4068bda"
 
 [[projects]]
   branch = "master"
-  digest = "1:899c684138eb2844811b7f97e264d3c65d533dbedc59549fa58fc2bf316f83a1"
+  digest = "1:417d27a82efb8473554234a282be33d23b0d6adc121e636b55950f913ac071d6"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "44b849a8bc13eb42e95e6c6c5e360481b73ec710"
+  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
 
 [[projects]]
-  digest = "1:6247f76e55a1e1a5c19a81e2d4b4dff6730461eeb5bbb0a16dd4a8ec8637ee93"
+  digest = "1:08206298775e5b462e6c0333f4471b44e63f1a70e42952b6ede4ecc9572281eb"
   name = "google.golang.org/appengine"
   packages = [
     "internal",
@@ -280,8 +312,8 @@
     "urlfetch",
   ]
   pruneopts = "UT"
-  revision = "ae0ab99deb4dc413a2b4bd6c8bdd0eb67f1e4d06"
-  version = "v1.2.0"
+  revision = "4a4468ece617fc8205e99368fa2200e9d1fad421"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:c805e517269b0ba4c21ded5836019ed7d16953d4026cb7d00041d039c7906be9"
