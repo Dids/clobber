@@ -16,9 +16,10 @@ matrix:
   - go: 1.9.x
     env:
       - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
-  - go: 1.8.x
-    env:
-      - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
+  # NOTE: Clobber is no longer compatible with version 1.8.x
+  #- go: 1.8.x
+  #  env:
+  #    - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
 
 # Setup caching
 cache:
