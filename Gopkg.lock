@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:f033a81755b461d605dd88a4eaaf35542db9b425ee504ef44cef810ff2b0f9d2"
+  digest = "1:b67d9fb93495f20c1650448395a35d8c8a05cc1744bdd9986f5bc69d5d114f22"
   name = "github.com/Unknwon/com"
   packages = ["."]
   pruneopts = "UT"
-  revision = "28b053d5a2923b87ce8c5a08f3af779894a72758"
-  version = "v1"
+  revision = "41959bdd855fb7db467f78865d5f9044507df1cd"
+  version = "v2"
 
 [[projects]]
   digest = "1:705c40022f5c03bf96ffeb6477858d88565064485a513abcd0f11a0911546cb6"
@@ -42,28 +42,28 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:72139cbee5a41ff8a322681be104aa8d7e7c92a5f3ad5501ea3505042b050b57"
+  digest = "1:ba4a13c1846fc9df263e43e61854e2ce530eadfdc10a7ea394cc3b76b42ddaed"
   name = "github.com/gobuffalo/envy"
   packages = ["."]
   pruneopts = "UT"
-  revision = "e0b181c424e7ca1a36f6f2db4bdfd25ef3421e77"
-  version = "v1.6.7"
+  revision = "b29bf6b8134f3398b9333ba1893c58620152edb0"
+  version = "v1.6.9"
 
 [[projects]]
   branch = "master"
-  digest = "1:e726decbaa30a307ce03a576eb29fdd6ede54c8fc494628231a36bde2dd2d1f1"
+  digest = "1:b73defe35e1810e7b7960c9515a99063c004751c11eb80432c987fb983cb7de4"
   name = "github.com/gobuffalo/packd"
   packages = ["."]
   pruneopts = "UT"
-  revision = "16c4ed88b2967c484265fd27d9e9d38dde6b3581"
+  revision = "f25c5d2471d797647acdd6179365a5c4a88cf534"
 
 [[projects]]
-  digest = "1:24430e30c5fe94726058c1cb9c36f8fe891ae67c00ee73ee43da1e01528dad1c"
+  digest = "1:4d3eacaf36227ae90a35bf4d36887298183ea481387992413c9efad57734c92f"
   name = "github.com/gobuffalo/packr"
   packages = ["."]
   pruneopts = "UT"
-  revision = "cf1833a64494f56baea836890e2ee5e69c2092dc"
-  version = "v1.19.0"
+  revision = "c3de6602e9f189d038a83a91c570c38a290bbe43"
+  version = "v1.21.0"
 
 [[projects]]
   branch = "master"
@@ -198,12 +198,12 @@
   version = "v0.8.0"
 
 [[projects]]
-  digest = "1:16e6fde687529deaefbeff14841b694cb6d67dfc31884bac6214313e96e107bc"
+  digest = "1:01bb0a58b86f4f816be2bcf0ae68dffd042b2d1c356b97b14dc1cd12a53fc731"
   name = "github.com/rhysd/go-github-selfupdate"
   packages = ["selfupdate"]
   pruneopts = "UT"
-  revision = "4bfc1aa0302c89605b9bf20a8bb4e1af625bc714"
-  version = "v1.0.0"
+  revision = "472a014a457bf6983bd5b28bdc4e7d14f352f187"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
@@ -264,40 +264,40 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
+  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
 
 [[projects]]
   branch = "master"
-  digest = "1:d6b719875cf8091fbab38527d81d34e71f4521b9ee9ccfbd4a32cff2ac5af96e"
+  digest = "1:f8b491a7c25030a895a0e579742d07136e6958e77ef2d46e769db8eec4e58fcd"
   name = "golang.org/x/net"
   packages = [
     "context",
     "context/ctxhttp",
   ]
   pruneopts = "UT"
-  revision = "c10e9556a7bc0e7c942242b606f0acf024ad5d6a"
+  revision = "adae6a3d119ae4890b46832a2e88a95adc62b8e7"
 
 [[projects]]
   branch = "master"
-  digest = "1:a7b20b632c01d31a065ddfd4c4faaea60ed08861c961a71db219c19e2ba18908"
+  digest = "1:bd33fb266abe5db1fb1c04e58e98192068f05a8d22fae2a9f22270c8422bb331"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "232e45548389bd9357411a6922a07c5fd4068bda"
+  revision = "f42d05182288abf10faef86d16c0d07b8d40ea2d"
 
 [[projects]]
   branch = "master"
-  digest = "1:417d27a82efb8473554234a282be33d23b0d6adc121e636b55950f913ac071d6"
+  digest = "1:6a875550c3b582f6c2d7e2ce44aba792511f00016d7c46b0a4fb26f730ef3058"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "9b800f95dbbc54abff0acf7ee32d88ba4e328c89"
+  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
 
 [[projects]]
   digest = "1:08206298775e5b462e6c0333f4471b44e63f1a70e42952b6ede4ecc9572281eb"
