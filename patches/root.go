@@ -5,11 +5,11 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/gobuffalo/packr/v2"
+	"github.com/gobuffalo/packr"
 )
 
 // Patch function for patching files
-func Patch(packedPatches *packr.Box, patchName string, fileToPatch string) error {
+func Patch(packedPatches packr.Box, patchName string, fileToPatch string) error {
 	// Parse the necessary patch information
 	tempFilePath := "/tmp/" + patchName + ".patch"
 
