@@ -10,14 +10,12 @@ set -o xtrace    # Enable debugging (set -x)
 VERSION=${1:-0.0.1}
 OUTPUT=${2:-clobber}
 
-# Ensure dependencies are installed
-dep ensure
-
 # Make sure Packr is installed
 #go get -u github.com/gobuffalo/packr/packr
 
 # Prepare the Packr build command (this is a workaround for Homebrew)
-BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/packr/main.go"
+#BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/packr/main.go"
+BUILD_CMD="go run vendor/github.com/gobuffalo/packr/packr/main.go"
 
 # Build the application
 #go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
