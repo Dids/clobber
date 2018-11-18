@@ -16,13 +16,6 @@ dep ensure
 # Make sure Packr is installed
 #go get -u github.com/gobuffalo/packr/packr
 
-ls $GOPATH
-ls $GOPATH/src
-ls $GOPATH/src/github.com
-ls $GOPATH/src/github.com/gobuffalo
-ls $GOPATH/src/github.com/gobuffalo/packr
-ls $GOPATH/bin
-
 # Prepare the Packr build command (this is a workaround for Homebrew)
 BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/packr/main.go"
 
