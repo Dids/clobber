@@ -13,6 +13,10 @@ OUTPUT=${2:-clobber}
 # Make sure Packr is installed
 #go get -u github.com/gobuffalo/packr/packr
 
+ls $GOPATH
+ls $GOPATH/src
+ls $GOPATH/bin
+
 # Prepare the Packr build command (this is a workaround for Homebrew)
 #BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/v2/packr2/main.go"
 BUILD_CMD="$GOPATH/bin/packr2"
