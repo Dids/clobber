@@ -10,6 +10,9 @@ set -o xtrace    # Enable debugging (set -x)
 VERSION=${1:-0.0.1}
 OUTPUT=${2:-clobber}
 
+# Ensure dependencies are installed
+dep ensure
+
 # Make sure Packr is installed
 #go get -u github.com/gobuffalo/packr/packr
 
