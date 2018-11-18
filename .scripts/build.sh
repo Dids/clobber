@@ -18,8 +18,8 @@ ls $GOPATH/src
 ls $GOPATH/bin
 
 # Prepare the Packr build command (this is a workaround for Homebrew)
-#BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/v2/packr2/main.go"
-BUILD_CMD="$GOPATH/bin/packr2"
+BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/v2/packr2/main.go"
+#BUILD_CMD="$GOPATH/bin/packr2"
 
 # Build the application
 #go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT}
