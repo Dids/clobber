@@ -10,6 +10,9 @@ set -o xtrace    # Enable debugging (set -x)
 VERSION=${1:-0.0.1}
 OUTPUT=${2:-clobber}
 
+# Define "GOBIN" path
+GOBIN=$GOPATH/bin
+
 # Remove intermediate files
 rm -fr clobber \
        packrd
@@ -23,4 +26,4 @@ go get -u github.com/gobuffalo/packr/v2/packr2
 
 # Build the application
 #$BUILD_CMD build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
-packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
+$GOBIN/packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
