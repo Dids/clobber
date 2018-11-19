@@ -19,9 +19,15 @@ go get -u github.com/gobuffalo/packr/v2/packr2
 # Clean the intermediate files
 $GOBIN/packr2 clean
 
-## FIXME: We're using the --legacy flag because packr2 has an issue with the "vendor/" directory
+# Generate the "packrd" files
+$GOBIN/packr2
+
+## FIXME: This is a temporary fix
+# Fix generated files
+sed -i '' -e 's/dids/Dids/g' cmd/cmd-packr.go
+
 # Build the application
-$GOBIN/packr2 --legacy build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
+go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
 
 # Clean the intermediate files
 $GOBIN/packr2 clean
