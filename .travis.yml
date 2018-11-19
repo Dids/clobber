@@ -4,6 +4,8 @@ sudo: false
 # Setup Go language support
 language: go
 
+## TODO: If we ever get Clobber support for building on linux,
+##       we might want to run this on BOTH "linux" and "osx" targets
 # Run builds specifically on macOS
 os: osx
 
@@ -27,22 +29,17 @@ cache:
 
 # Install dependencies
 install:
+  - mkdir -p $GOPATH/bin $GOPATH/pkg $GOPATH/src
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   - dep ensure
-  #- go get -u github.com/gobuffalo/packr/...
 
 # Run tests and generate code coverage
 script:
   - eval $TEST_COMMAND
-  #- go build -o clobber
-  #- packr build -o clobber
   - .scripts/build.sh
   - ./clobber --version
   - brew tap Dids/brewery
   - brew install clobber --HEAD
-
-## TODO: Could we add Homebrew and "brew install clobber --HEAD" support to these builds?
-##       Note that these should NOT be a part of the build matrix!
 
 # Upload code coverage
 after_success:
