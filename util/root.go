@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 
@@ -39,6 +41,11 @@ func GetUdkPath() string {
 	return GetSourcePath() + "/edk2"
 }
 
+// GetExtPath returns the full path to external packages
+func GetExtPath() string {
+	return GetSourcePath() + "/EXT_PACKAGES"
+}
+
 // GetSourcePath returns the full path to the source/work directory
 func GetSourcePath() string {
 	return GetClobberPath() + "/src"
@@ -57,6 +64,98 @@ func GetHomePath() string {
 		log.Fatal("GetHomePath failed with error: ", err)
 	}
 	return home
+}
+
+// GetVersionDump returns a multi-line string containing the versions/commits
+// for important dependencies and environments, like OS and LLVM versions
+func GetVersionDump() string {
+	// Start with an empty result string
+	var result = ""
+
+	// Get macOS version
+	macosVersionOutput, macosVersionErr := exec.Command("sw_vers", "-productVersion").CombinedOutput()
+	if macosVersionErr != nil {
+		log.Fatal("Failed to get macOS version:", macosVersionErr, string(macosVersionOutput))
+	}
+	result += "macOS " + string(macosVersionOutput) + "\n"
+
+	// Get Xcode version
+	xcodeVersionOutput, xcodeVersionErr := exec.Command("xcodebuild", "-version").CombinedOutput()
+	if xcodeVersionErr != nil {
+		log.Fatal("Failed to get Xcode version:", xcodeVersionErr, string(xcodeVersionOutput))
+	}
+	xcodeVersionSplit := strings.Split(string(xcodeVersionOutput), "\n")
+	xcodeVersion := xcodeVersionSplit[0]
+	result += string(xcodeVersion) + "\n"
+
+	// Get clang version
+	clangVersionOutput, clangVersionErr := exec.Command("clang", "-v").CombinedOutput()
+	if clangVersionErr != nil {
+		log.Fatal("Failed to get clang version:", clangVersionErr, string(clangVersionOutput))
+	}
+	clangVersionSplit := strings.Split(string(clangVersionOutput), "\n")
+	clangVersion := clangVersionSplit[0]
+	result += string(clangVersion) + "\n"
+
+	// Get EDK2/UDK2018 version
+	getEdkVersionCommand := exec.Command("git", "rev-parse", "HEAD")
+	getEdkVersionCommand.Dir = GetUdkPath()
+	edkVersionOutput, edkVersionErr := getEdkVersionCommand.CombinedOutput()
+	if edkVersionErr != nil {
+		log.Fatal("Failed to get edk2 version:", edkVersionErr, string(edkVersionOutput))
+	}
+	edkVersionSplit := strings.Split(string(edkVersionOutput), "\n")
+	edkPackageVersion := edkVersionSplit[0]
+	result += "EDK2 (" + string(edkPackageVersion) + ")\n"
+
+	// Get Clover version
+	getCloverVersionCommand := exec.Command("svn", "info", "--show-item", "revision")
+	getCloverVersionCommand.Dir = GetCloverPath()
+	cloverVersionOutput, cloverVersionErr := getCloverVersionCommand.CombinedOutput()
+	if cloverVersionErr != nil {
+		log.Fatal("Failed to get Clover version:", cloverVersionErr, string(cloverVersionOutput))
+	}
+	cloverVersion := strings.Replace(string(cloverVersionOutput), "\n", "", -1)
+	result += "Clover (" + string(cloverVersion) + ")\n"
+
+	// Check if the external packages directory exists
+	if _, extPackagePathExistsErr := os.Stat(GetExtPath()); !os.IsNotExist(extPackagePathExistsErr) {
+		if extPackagePathExistsErr != nil {
+			log.Fatal("Failed to check if external packages directory exists:", extPackagePathExistsErr)
+		} else {
+			// Loop through each external package and get their versions/commits,
+			// finally appending them to the result string
+			extPackagePaths, listExtPackagesErr := ioutil.ReadDir(GetExtPath())
+			if listExtPackagesErr != nil {
+				log.Fatal("Failed to list external packages:", listExtPackagesErr)
+			}
+			for _, extPackage := range extPackagePaths {
+				getExtPackageVersionCommand := exec.Command("git", "rev-parse", "HEAD")
+				getExtPackageVersionCommand.Dir = GetExtPath() + "/" + extPackage.Name()
+				extPackageVersionOutput, getVersionErr := getExtPackageVersionCommand.CombinedOutput()
+				if getVersionErr != nil {
+					log.Fatal("Failed to get version for external package:", getVersionErr, string(extPackageVersionOutput))
+				}
+
+				// Format the package version
+				extPackageVersionSplit := strings.Split(string(extPackageVersionOutput), "\n")
+				extPackageVersion := extPackageVersionSplit[0]
+
+				// Append the package name and version to the result, ending with a newline
+				result += extPackage.Name() + " (" + string(extPackageVersion) + ")\n"
+			}
+		}
+	}
+
+	// Remove empty lines from the result (if any)
+	removeEmptyLinesRegex, removeEmptyLinesErr := regexp.Compile("\n\n")
+	if removeEmptyLinesErr != nil {
+		log.Fatal("Failed to remove empty lines:", removeEmptyLinesErr)
+	}
+	result = removeEmptyLinesRegex.ReplaceAllString(result, "\n")
+
+	// Return the constructed result string
+	return result
 }
 
 // StringReplaceFile allows you to replace a string in a file

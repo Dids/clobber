@@ -263,6 +263,13 @@ var RootCmd = &cobra.Command{
 		}
 
 		if !UpdateOnly {
+			// Update the status, since this is a multi-step process anyway (and because our spinner freaks out otherwise)
+			log.Debug("Patching Clover installer..")
+			Spinner.Prefix = formatSpinnerText("Patching Clover installer", false)
+
+			// Log important version information
+			log.Debug("Listing environment version information:\n" + util.GetVersionDump())
+
 			// Modify credits to differentiate between "official" and custom builds
 			log.Debug("Updating package credits..")
 			additionalCredits := "Custom package by Dids."
@@ -279,12 +286,32 @@ var RootCmd = &cobra.Command{
 				}
 			}
 
+			// Modify the installer package description to contain all important environment information
+			log.Debug("Updating package description..")
+			additionalDescription := "<p><b>Dids's build details:</b></p>\n"
+			additionalDescription += "<ul>\n"
+			versionDump := util.GetVersionDump()
+			for _, line := range strings.Split(strings.TrimSuffix(versionDump, "\n"), "\n") {
+				additionalDescription += "<li>" + line + "</li>\n"
+			}
+			additionalDescription += "</ul>\n"
+			descriptionFilePath := util.GetCloverPath() + "/CloverPackage/package/Resources/templates/Description.html"
+			descriptionFileBuffer, descriptionFileReadErr := ioutil.ReadFile(descriptionFilePath)
+			if descriptionFileReadErr != nil {
+				log.Fatal("Error: Failed to update package description: ", descriptionFileReadErr)
+			}
+			descriptionString := string(descriptionFileBuffer)
+			if !strings.Contains(descriptionString, additionalDescription) && !strings.Contains(descriptionString, "Dids's build details:") {
+				strReplaceErr := util.StringReplaceFile(descriptionFilePath, "</body>\n</html>\n", additionalDescription+"</body>\n</html>\n")
+				if strReplaceErr != nil {
+					log.Fatal("Error: Failed to update package description: ", strReplaceErr)
+				}
+			}
+
 			// FIXME: When using "log.Fatal(...)" and running non-verbosely, the errors aren't shown to the user,
 			//        but they are written to the log file, but we really need the user to know what's wrong too..
 
 			// Patch the Clover installer package
-			log.Debug("Patching Clover installer..")
-			Spinner.Prefix = formatSpinnerText("Patching Clover installer", false)
 			// TODO: So for some reason the old patch is still working, even though running it manually fails SOMETIMES..
 			// FIXME: Re-enable the new patch once error handling has been properly fixed!
 			// if err := patches.PatchBuildpkg(packedPatches, "buildpkg", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
