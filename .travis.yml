@@ -29,7 +29,7 @@ cache:
 
 # Install dependencies
 install:
-  - mkdir -p $GOPATH/bin $GOPATH/pkg $GOPATH/src
+  - mkdir -p $GOPATH/{bin,pkg,src}
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   - dep ensure
 
