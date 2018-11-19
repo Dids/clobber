@@ -26,7 +26,10 @@ go get -u github.com/gobuffalo/packr/v2/packr2
 # Prepare the Packr build command (this is a workaround for Homebrew)
 #BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/v2/packr2/main.go"
 
+# Switch to the correct directory
+cd $GOPATH/src/github.com/Dids/clobber
+
 # Build the application
 #$BUILD_CMD build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
-#$GOBIN/packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
-$GOBIN/packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} ${CWD}
+$GOBIN/packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
+#$GOBIN/packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} ${CWD}
