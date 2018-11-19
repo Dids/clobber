@@ -18,6 +18,10 @@ debug/
 release/
 clobber
 
+# Packr
+packrd/
+*-packr.go
+
 # Test binary, build with `go test -c`
 *.test
 

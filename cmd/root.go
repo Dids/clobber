@@ -12,7 +12,7 @@ import (
 	"github.com/Dids/clobber/patches"
 	"github.com/Dids/clobber/util"
 	figure "github.com/common-nighthawk/go-figure"
-	"github.com/gobuffalo/packr"
+	"github.com/gobuffalo/packr/v2"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -54,8 +54,8 @@ var Spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 var log = logrus.New()
 
 // Setup static assets using Packr
-var packedPatches = packr.NewBox("../patches")
-var packedAssets = packr.NewBox("../assets")
+var packedPatches = packr.New("patches", "../patches")
+var packedAssets = packr.New("assets", "../assets")
 
 // Execute is the entrypoint for the command-line application
 func Execute() {
