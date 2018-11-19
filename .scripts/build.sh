@@ -12,33 +12,16 @@ OUTPUT=${2:-clobber}
 
 # Define necessary paths
 GOBIN=$GOPATH/bin
-#REAL_CWD=$(pwd)
-#CWD=${TRAVIS_BUILD_DIR:-$REAL_CWD}
-
-# Remove intermediate files
-#rm -fr clobber \
-#       packrd
-#find . -type f -name '*-packr.go' -delete
 
 # Make sure Packr is installed
 go get -u github.com/gobuffalo/packr/v2/packr2
 
-# Prepare the Packr build command (this is a workaround for Homebrew)
-#BUILD_CMD="go run $GOPATH/src/github.com/gobuffalo/packr/v2/packr2/main.go"
-
-# Switch to the correct directory
-#cd $GOPATH/src/github.com/Dids/clobber
-
 # Clean the intermediate files
 $GOBIN/packr2 clean
 
-## TODO: Why would we need to do this?
-rm -fr vendor
-
+## FIXME: We're using the --legacy flag because packr2 has an issue with the "vendor/" directory
 # Build the application
-#$BUILD_CMD build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
-$GOBIN/packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
-#$GOBIN/packr2 build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} ${CWD}
+$GOBIN/packr2 --legacy build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
 
 # Clean the intermediate files
 $GOBIN/packr2 clean
