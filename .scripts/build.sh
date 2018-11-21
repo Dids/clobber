@@ -22,10 +22,6 @@ $GOBIN/packr2 clean
 # Generate the "packrd" files
 $GOBIN/packr2
 
-## FIXME: This is a temporary fix
-# Fix generated files
-sed -i '' -e 's/dids/Dids/g' cmd/cmd-packr.go
-
 # Build the application
 go build -ldflags "-X main.Version=${VERSION}" -o ${OUTPUT} .
 

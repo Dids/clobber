@@ -50,15 +50,15 @@
   version = "v1.7.0"
 
 [[projects]]
-  digest = "1:c15a11a6ff529ac546279b35c1d05c6655f3b72c29c243a059cb03766dfcf167"
+  digest = "1:12ce94f264c39f89a60d9bcf33339276761489e97bef052b9f167a6e2bc9c12f"
   name = "github.com/gobuffalo/buffalo-plugins"
   packages = [
     "plugins",
     "plugins/plugdeps",
   ]
   pruneopts = "UT"
-  revision = "5d5bea9e3c0e09c17cfc3954d04fe9366b32622d"
-  version = "v1.6.12"
+  revision = "c3663ee8ec19ab5361dfb60cd26388dae0eeff78"
+  version = "v1.7.0"
 
 [[projects]]
   digest = "1:ba4a13c1846fc9df263e43e61854e2ce530eadfdc10a7ea394cc3b76b42ddaed"
@@ -89,7 +89,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:15aa90d66af664921a6ddd79a2e3cbaf8d465ad43de43a5c74d37a81eeb11185"
+  digest = "1:584c1400f63a3d7dc6b6b8f1c682eb77bc3c130e5674b53a1443775baa2c926f"
   name = "github.com/gobuffalo/genny"
   packages = [
     ".",
@@ -98,7 +98,7 @@
     "movinglater/gotools/gomods",
   ]
   pruneopts = "UT"
-  revision = "3d4f1ae84c6e5fde385a756a4ec323f03ab15dc4"
+  revision = "e8ff4adce8bbd7b8c776e2708ef620036369632e"
 
 [[projects]]
   branch = "master"
@@ -126,14 +126,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b73defe35e1810e7b7960c9515a99063c004751c11eb80432c987fb983cb7de4"
+  digest = "1:7c6a1822e4a22049b62beab49776703f626fd848fa1ac438401653e438eccf6d"
   name = "github.com/gobuffalo/packd"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f25c5d2471d797647acdd6179365a5c4a88cf534"
+  revision = "a1fb7d1c9873c1dae25b15ece2fceaaf445a24eb"
 
 [[projects]]
-  digest = "1:f4400be47c86211429fdbc7f704bff3f56ce2edff631aea9aa593f9b09b45e83"
+  digest = "1:39d62bfe670eb1567a37d6b096fcd0a9093443bb5f01457d71f799f2d4eea632"
   name = "github.com/gobuffalo/packr"
   packages = [
     "v2",
@@ -144,8 +144,16 @@
     "v2/plog",
   ]
   pruneopts = "UT"
-  revision = "46ffd423ce039e96a405253a150450ed2498f059"
-  version = "v1.21.1"
+  revision = "7c2dcc2885cf30cb864d25bb1a5f50e0f5c99acd"
+  version = "v1.21.3"
+
+[[projects]]
+  branch = "master"
+  digest = "1:da425896866b704cec05178819d7f31c7d5dad4d705403607b971b326bc7fea3"
+  name = "github.com/gobuffalo/syncx"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "558ac7de985fc4f4057bff27c7bdf99e92fe0750"
 
 [[projects]]
   branch = "master"
@@ -377,25 +385,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bd33fb266abe5db1fb1c04e58e98192068f05a8d22fae2a9f22270c8422bb331"
+  digest = "1:0142ef85bbc356750e329654ef29734ff05bd70ec9d8c1f46e39a3e97683318f"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "f42d05182288abf10faef86d16c0d07b8d40ea2d"
+  revision = "8f65e3013ebad444f13bc19536f7865efc793816"
 
 [[projects]]
   branch = "master"
-  digest = "1:a089387bbfcfa884e5aafeebb85929993195bb8959766b1d20102841d47e0b0e"
+  digest = "1:f343f077a5b0bc3a3788b3a04e24dd417e3e25b2acb529c413e212d2c42416ef"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "93218def8b18e66adbdab3eca8ec334700329f1f"
+  revision = "0cf1ed9e522b7dbb416f080a5c8003de9b702bf4"
 
 [[projects]]
   branch = "master"
@@ -408,7 +416,7 @@
     "internal/gopathwalk",
   ]
   pruneopts = "UT"
-  revision = "2ddaf7f79a0937ffa9072ede7b696fd084abfe86"
+  revision = "b5f2cae84da8243ade5d6a1d2b6c92ec1907be0f"
 
 [[projects]]
   digest = "1:08206298775e5b462e6c0333f4471b44e63f1a70e42952b6ede4ecc9572281eb"
