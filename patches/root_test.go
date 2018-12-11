@@ -1,16 +1,22 @@
 package patches
 
-/* import (
+import (
 	"testing"
 
-	"github.com/blang/semver"
+	"github.com/gobuffalo/packr/v2"
 )
 
-// TODO: Actually implement "cmd" tests
+var packedPatches = packr.New("patches", "../patches")
+var packedAssets = packr.New("assets", "../assets")
 
-func TestVersion(t *testing.T) {
-	_, err := semver.Make(Version)
-	if err != nil {
-		t.Errorf("Version failed to validate with error: %s", err)
+func TestPackedPatches(t *testing.T) {
+	if _, err := packedPatches.FindString("buildpkg_old.patch"); err != nil {
+		t.Errorf("Failed to load packr asset: %s", err)
 	}
-} */
+}
+
+func TestPackedAsssets(t *testing.T) {
+	if _, err := packedAssets.Find("background.tiff"); err != nil {
+		t.Errorf("Failed to load packr asset: %s", err)
+	}
+}
