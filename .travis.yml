@@ -1,47 +1,25 @@
-# Disable sudo to enable containerization
-sudo: false
-
-# Setup Go language support
 language: go
 
-## TODO: If we ever get Clobber support for building on linux,
-##       we might want to run this on BOTH "linux" and "osx" targets
-# Run builds specifically on macOS
 os: osx
 
-# Setup global environment variables
-env:
-  - TEST_COMMAND="go test -race -coverprofile=coverage.txt -covermode=atomic ./..."
-
-# Setup Go version specific configurations
 matrix:
   include:
   - go: master
+    script: make clean deps build test install version
+  - go: 1.11.x
+    script: make clean deps build test install version
   - go: 1.10.x
+    script: make clean deps build test install version EXTRA_FLAGS=
   - go: 1.9.x
-    env:
-      - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
+    script: make clean deps build install version EXTRA_FLAGS=
 
-# Setup caching
+env:
+  - GO111MODULE=on
+
+install: true
+
+after_success: bash <(curl -s https://codecov.io/bash)
+
 cache:
   directories:
     - $HOME/.clobber/opt
-
-# Install dependencies
-install:
-  - mkdir -p $GOPATH/{bin,pkg,src}
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep ensure
-
-# Run tests and generate code coverage
-script:
-  - eval $TEST_COMMAND
-  - .scripts/build.sh
-  - ./clobber --version
-  - brew tap Dids/brewery
-  - brew install clobber --HEAD
-  - clobber --version
-
-# Upload code coverage
-after_success:
-- bash <(curl -s https://codecov.io/bash)
