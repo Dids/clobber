@@ -5,6 +5,7 @@ export GOBIN := $(GOPATH)/bin
 export PATH := $(GOBIN):$(PATH)
 
 BINARY_VERSION?=0.0.1
+BINARY_OUTPUT?=clobber
 EXTRA_FLAGS?=-mod=vendor
 
 all: deps build
@@ -13,7 +14,7 @@ install:
 build:
 	$(shell $(GOBIN)/packr2)
 	ls
-	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
+	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT) ./...
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
 clean:
