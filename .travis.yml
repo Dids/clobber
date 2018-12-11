@@ -15,12 +15,20 @@ env:
     - GO111MODULE=on
   matrix:
     - TEST_COMMAND="go test -race -coverprofile=coverage.txt -covermode=atomic ./..."
+    - DEP_COMMAND="go get"
 
 # Setup Go version specific configurations
 matrix:
   include:
   - go: master
   - go: 1.11.x
+  - go: 1.10.x
+    env:
+      - DEP_COMMAND="go mod vendor"
+  - go: 1.9.x
+    env:
+      - DEP_COMMAND="go mod vendor"
+      - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
 
 # Setup caching
 cache:
