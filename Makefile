@@ -10,11 +10,10 @@ EXTRA_FLAGS?=-mod=vendor
 
 all: deps build
 install:
-	go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
+	go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
 build:
 	$(shell $(GOBIN)/packr2)
-	ls
-	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT) ./...
+	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT)
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
 clean:
@@ -27,9 +26,11 @@ deps:
 upgrade:
 	go get -u
 	go get -u github.com/gobuffalo/packr/v2/packr2
+	go mod vendor
 version:
 	clobber --version
 print:
 	@echo "PWD: $(shell pwd)"
 	@echo "PATH: $(PATH)"
 	@echo "GOPATH: $(GOPATH)"
+	@echo "GOBIN: $(GOBIN)"

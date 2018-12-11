@@ -35,8 +35,8 @@ github.com/gobuffalo/meta
 github.com/gobuffalo/packd
 # github.com/gobuffalo/packr/v2 v2.0.0-rc.12
 github.com/gobuffalo/packr/v2
-github.com/gobuffalo/packr/v2/file
 github.com/gobuffalo/packr/v2/file/resolver
+github.com/gobuffalo/packr/v2/file
 github.com/gobuffalo/packr/v2/jam/parser
 github.com/gobuffalo/packr/v2/plog
 github.com/gobuffalo/packr/v2/file/resolver/encoding/hex

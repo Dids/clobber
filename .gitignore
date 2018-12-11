@@ -11,6 +11,9 @@ coverage.txt
 ### Go Vendor Packages ###
 #vendor/
 
+# Other
+build/
+
 # Binaries for Go
 debug
 release
