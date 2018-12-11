@@ -14,14 +14,10 @@ install:
 	go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
 
 build:
-	ls
 	@$(GOPATH)/bin/packr2 clean
 	@$(GOPATH)/bin/packr2
-	ls
 	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT)
-	ls
 	@$(GOPATH)/bin/packr2 clean
-	ls
 
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
@@ -48,4 +44,3 @@ print:
 	@echo "PATH: $(PATH)"
 	@echo "GOPATH: $(GOPATH)"
 	@echo "GOBIN: $(GOBIN)"
-	@ls $(GOPATH)/bin
