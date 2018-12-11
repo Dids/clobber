@@ -1,4 +1,6 @@
 export GO111MODULE=on
+
+export GOPATH := $(GOPATH)
 export GOBIN := $(GOPATH)/bin
 export PATH := $(GOBIN):$(PATH)
 
