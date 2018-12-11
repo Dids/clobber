@@ -11,8 +11,10 @@ os: osx
 
 # Setup global environment variables
 env:
-  - GO111MODULE=on
-  - TEST_COMMAND="go test -race -coverprofile=coverage.txt -covermode=atomic ./..."
+  global:
+    - GO111MODULE=on
+  matrix:
+    - TEST_COMMAND="go test -race -coverprofile=coverage.txt -covermode=atomic ./..."
 
 # Setup Go version specific configurations
 matrix:
