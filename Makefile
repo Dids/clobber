@@ -1,4 +1,5 @@
 export GO111MODULE=on
+export PATH := $(HOME)/go/bin:$(PATH)
 
 BINARY_VERSION?=0.0.1
 EXTRA_FLAGS?=-mod=vendor
@@ -6,8 +7,7 @@ EXTRA_FLAGS?=-mod=vendor
 all: deps build
 install:
 	go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
-packr-install:
-	packr-deps
+packr-install: packr-deps
 	packr2 install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
 build:
 	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
@@ -26,3 +26,5 @@ upgrade:
 	go get -u
 version:
 	clobber --version
+print:
+	@echo "PATH: $(PATH)"
