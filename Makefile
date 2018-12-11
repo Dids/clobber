@@ -9,7 +9,7 @@ install:
 build:
 	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
 test:
-	go test -v $(EXTRA_FLAGS)-race -coverprofile=coverage.txt -covermode=atomic ./...
+	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
 clean:
 	go clean
 	rm -f $(BINARY_NAME)
