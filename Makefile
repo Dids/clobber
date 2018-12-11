@@ -1,8 +1,8 @@
 export GO111MODULE=on
 
-export GOPATH := $(GOPATH)
-export GOBIN := $(GOPATH)/bin
-export PATH := $(GOBIN):$(PATH)
+#export GOPATH := $(GOPATH)
+#export GOBIN := $(GOPATH)/bin
+#export PATH := $(GOBIN):$(PATH)
 
 BINARY_VERSION?=0.0.1
 BINARY_OUTPUT?=clobber
@@ -12,8 +12,8 @@ all: deps build
 install:
 	go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
 build:
-	$(shell $(GOBIN)/packr2 clean)
-	$(shell $(GOBIN)/packr2)
+	$(shell $(GOPATH)/bin/packr2 clean)
+	$(shell $(GOPATH)/bin/packr2)
 	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT)
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
