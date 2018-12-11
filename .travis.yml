@@ -5,13 +5,13 @@ os: osx
 matrix:
   include:
   - go: master
-    script: make clean deps build test
+    script: make clean deps build test install && clobber --version
   - go: 1.11.x
-    script: make clean deps build test
+    script: make clean deps build test install && clobber --version
   - go: 1.10.x
-    script: make clean deps build test-no-vendor
+    script: make clean deps build test-no-vendor install && clobber --version
   - go: 1.9.x
-    script: make clean deps build
+    script: make clean deps build install && clobber --version
 
 env:
   - GO111MODULE=on
