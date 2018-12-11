@@ -28,6 +28,9 @@ The reason for this prompt comes from building `gettext`, so it's an unfortunate
 > brew tap Dids/brewery  
 > brew install clobber  
 
+You can also install the latest development version:  
+> brew install clobber --HEAD  
+
 ### Usage
 
 Build the latest version of Clover:  
@@ -41,11 +44,8 @@ View all the available options:
 
 ### Development
 
-Install `dep`:  
-> curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh  
-
-Install dependencies:  
-> dep ensure  
+Install/build dependencies:  
+> go build -v ./...  
 
 Run the application:  
 > go run main.go  
