@@ -33,3 +33,4 @@ print:
 	@echo "PWD: $(shell pwd)"
 	@echo "PATH: $(PATH)"
 	@echo "GOPATH: $(GOPATH)"
+	@echo "GOBIN: $(GOBIN)"
