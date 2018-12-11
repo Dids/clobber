@@ -15,6 +15,7 @@ build:
 	$(shell $(GOPATH)/bin/packr2 clean)
 	$(shell $(GOPATH)/bin/packr2)
 	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT)
+	$(shell $(GOPATH)/bin/packr2 clean)
 
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
