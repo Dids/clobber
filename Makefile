@@ -1,18 +1,14 @@
 export GO111MODULE=on
-export PATH := $(HOME)/go/bin:$(PATH)
+export PATH := $(GOPATH)/go/bin:$(PATH)
 
 BINARY_VERSION?=0.0.1
 EXTRA_FLAGS?=-mod=vendor
 
 all: deps build
 install:
-	go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
-packr-install: packr-deps
-	packr2 install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
+	$(GOPATH)/bin/packr2 install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
 build:
-	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
-packr-build: packr-deps
-	packr2 build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
+	$(GOPATH)/bin/packr2 build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
 clean:
@@ -20,11 +16,12 @@ clean:
 	rm -f $(BINARY_NAME)
 deps:
 	go build -v $(EXTRA_FLAGS) ./...
-packr-deps:
-	go get -u github.com/gobuffalo/packr/v2/packr2
+	go get github.com/gobuffalo/packr/v2/packr2
 upgrade:
 	go get -u
+	go get -u github.com/gobuffalo/packr/v2/packr2
 version:
 	clobber --version
 print:
 	@echo "PATH: $(PATH)"
+	@echo "GOPATH: $(GOPATH)"
