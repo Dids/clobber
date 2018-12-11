@@ -1,5 +1,5 @@
 export GO111MODULE=on
-export PATH := $(GOPATH)/go/bin:$(PATH)
+export PATH := $(GOPATH)/bin:$(PATH)
 
 BINARY_VERSION?=0.0.1
 EXTRA_FLAGS?=-mod=vendor
