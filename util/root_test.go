@@ -142,7 +142,7 @@ func TestGenerateTimeString(t *testing.T) {
 	}
 }
 
-func TestCheckForUpdates(t *testing.T) {
+/* func TestCheckForUpdates(t *testing.T) {
 	_, err := CheckForUpdates("0.0.1")
 	if err != nil {
 		t.Errorf("Failed to check for updates: %s", err)
@@ -152,7 +152,7 @@ func TestCheckForUpdates(t *testing.T) {
 	if err == nil {
 		t.Errorf("Failed to handle invalid version strings")
 	}
-}
+} */
 
 func isValidPath(filePath string) bool {
 	return len(filePath) > 0
