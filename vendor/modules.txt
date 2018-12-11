@@ -1,0 +1,129 @@
+# github.com/BurntSushi/toml v0.3.1
+github.com/BurntSushi/toml
+# github.com/Unknwon/com v0.0.0-20181010210213-41959bdd855f
+github.com/Unknwon/com
+# github.com/blang/semver v3.5.1+incompatible
+github.com/blang/semver
+# github.com/briandowns/spinner v0.0.0-20181029155426-195c31b675a7
+github.com/briandowns/spinner
+# github.com/common-nighthawk/go-figure v0.0.0-20180619031829-18b2b544842c
+github.com/common-nighthawk/go-figure
+# github.com/fatih/color v1.7.0
+github.com/fatih/color
+# github.com/gobuffalo/buffalo-plugins v1.8.3
+github.com/gobuffalo/buffalo-plugins/plugins
+github.com/gobuffalo/buffalo-plugins/plugins/plugdeps
+# github.com/gobuffalo/envy v1.6.11
+github.com/gobuffalo/envy
+# github.com/gobuffalo/events v1.1.8
+github.com/gobuffalo/events
+# github.com/gobuffalo/flect v0.0.0-20181210151238-24a2b68e0316
+github.com/gobuffalo/flect/name
+github.com/gobuffalo/flect
+# github.com/gobuffalo/genny v0.0.0-20181207193730-587570ab2cf7
+github.com/gobuffalo/genny
+github.com/gobuffalo/genny/movinglater/gotools
+github.com/gobuffalo/genny/movinglater/gotools/goimports
+github.com/gobuffalo/genny/movinglater/gotools/gomods
+# github.com/gobuffalo/logger v0.0.0-20181127160119-5b956e21995c
+github.com/gobuffalo/logger
+# github.com/gobuffalo/mapi v1.0.1
+github.com/gobuffalo/mapi
+# github.com/gobuffalo/meta v0.0.0-20181127070345-0d7e59dd540b
+github.com/gobuffalo/meta
+# github.com/gobuffalo/packd v0.0.0-20181207120301-c49825f8f6f4
+github.com/gobuffalo/packd
+# github.com/gobuffalo/packr/v2 v2.0.0-rc.12
+github.com/gobuffalo/packr/v2
+github.com/gobuffalo/packr/v2/file
+github.com/gobuffalo/packr/v2/file/resolver
+github.com/gobuffalo/packr/v2/jam/parser
+github.com/gobuffalo/packr/v2/plog
+github.com/gobuffalo/packr/v2/file/resolver/encoding/hex
+# github.com/gobuffalo/syncx v0.0.0-20181120194010-558ac7de985f
+github.com/gobuffalo/syncx
+# github.com/gogits/git-module v0.0.0-20181023105832-dfc2c1e6d377
+github.com/gogits/git-module
+# github.com/golang/protobuf v1.2.0
+github.com/golang/protobuf/proto
+# github.com/google/go-github v17.0.0+incompatible
+github.com/google/go-github/github
+# github.com/google/go-querystring v1.0.0
+github.com/google/go-querystring/query
+# github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
+github.com/inconshreveable/go-update
+github.com/inconshreveable/go-update/internal/binarydist
+github.com/inconshreveable/go-update/internal/osext
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
+# github.com/joho/godotenv v1.3.0
+github.com/joho/godotenv
+# github.com/karrick/godirwalk v1.7.7
+github.com/karrick/godirwalk
+# github.com/konsorten/go-windows-terminal-sequences v1.0.1
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/markbates/oncer v0.0.0-20181203154359-bf2de49a0be2
+github.com/markbates/oncer
+# github.com/markbates/safe v1.0.1
+github.com/markbates/safe
+# github.com/mattn/go-colorable v0.0.9
+github.com/mattn/go-colorable
+# github.com/mattn/go-isatty v0.0.4
+github.com/mattn/go-isatty
+# github.com/mcuadros/go-version v0.0.0-20180611085657-6d5863ca60fa
+github.com/mcuadros/go-version
+# github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
+github.com/mgutz/ansi
+# github.com/mitchellh/go-homedir v1.0.0
+github.com/mitchellh/go-homedir
+# github.com/otiai10/copy v0.0.0-20180813032824-7e9a647135a1
+github.com/otiai10/copy
+# github.com/pkg/errors v0.8.0
+github.com/pkg/errors
+# github.com/rhysd/go-github-selfupdate v1.1.0
+github.com/rhysd/go-github-selfupdate/selfupdate
+# github.com/rogpeppe/go-internal v1.0.0
+github.com/rogpeppe/go-internal/modfile
+github.com/rogpeppe/go-internal/module
+github.com/rogpeppe/go-internal/semver
+# github.com/sirupsen/logrus v1.2.0
+github.com/sirupsen/logrus
+# github.com/spf13/cobra v0.0.3
+github.com/spf13/cobra
+# github.com/spf13/pflag v1.0.3
+github.com/spf13/pflag
+# github.com/tcnksm/go-gitconfig v0.1.2
+github.com/tcnksm/go-gitconfig
+# github.com/ulikunitz/xz v0.5.5
+github.com/ulikunitz/xz
+github.com/ulikunitz/xz/internal/xlog
+github.com/ulikunitz/xz/lzma
+github.com/ulikunitz/xz/internal/hash
+# github.com/x-cray/logrus-prefixed-formatter v0.5.2
+github.com/x-cray/logrus-prefixed-formatter
+# golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
+golang.org/x/crypto/ssh/terminal
+# golang.org/x/net v0.0.0-20181207154023-610586996380
+golang.org/x/net/context/ctxhttp
+golang.org/x/net/context
+# golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
+golang.org/x/oauth2
+golang.org/x/oauth2/internal
+# golang.org/x/sys v0.0.0-20181210030007-2a47403f2ae5
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/tools v0.0.0-20181210225255-6a3e9aa2ab77
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/imports
+golang.org/x/tools/internal/gopathwalk
+golang.org/x/tools/internal/fastwalk
+# google.golang.org/appengine v1.3.0
+google.golang.org/appengine/urlfetch
+google.golang.org/appengine/internal
+google.golang.org/appengine/internal/urlfetch
+google.golang.org/appengine/internal/base
+google.golang.org/appengine/internal/datastore
+google.golang.org/appengine/internal/log
+google.golang.org/appengine/internal/remote_api
+# gopkg.in/natefinch/lumberjack.v2 v2.0.0
+gopkg.in/natefinch/lumberjack.v2
