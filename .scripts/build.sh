@@ -14,7 +14,7 @@ OUTPUT=${2:-clobber}
 GOBIN=$GOPATH/bin
 
 # Make sure Packr is installed
-go get -u github.com/gobuffalo/packr/v2/packr2
+#go get -u github.com/gobuffalo/packr/v2/packr2
 
 # Clean the intermediate files
 $GOBIN/packr2 clean

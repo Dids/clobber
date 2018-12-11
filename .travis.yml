@@ -11,16 +11,14 @@ os: osx
 
 # Setup global environment variables
 env:
+  - GO111MODULE=on
   - TEST_COMMAND="go test -race -coverprofile=coverage.txt -covermode=atomic ./..."
 
 # Setup Go version specific configurations
 matrix:
   include:
   - go: master
-  - go: 1.10.x
-  - go: 1.9.x
-    env:
-      - TEST_COMMAND="echo \"Tests disabled for this version of Go\""
+  - go: 1.11.x
 
 # Setup caching
 cache:
@@ -31,16 +29,19 @@ cache:
 install:
   - mkdir -p $GOPATH/{bin,pkg,src}
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep ensure
+  #- dep ensure
+  - go get
+  ## TODO: On Go versions <1.11, run "go mod vendor"?
 
 # Run tests and generate code coverage
 script:
   - eval $TEST_COMMAND
   - .scripts/build.sh
   - ./clobber --version
-  - brew tap Dids/brewery
-  - brew install clobber --HEAD
-  - clobber --version
+  ## TODO: Re-enable once the "go mod" migration is done
+  #- brew tap Dids/brewery
+  #- brew install clobber --HEAD
+  #- clobber --version
 
 # Upload code coverage
 after_success:
