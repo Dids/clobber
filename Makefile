@@ -16,7 +16,9 @@ install:
 build:
 	packr2 clean
 	packr2
+	ls
 	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT)
+	ls
 	packr2 clean
 
 test:
@@ -44,3 +46,4 @@ print:
 	@echo "PATH: $(PATH)"
 	@echo "GOPATH: $(GOPATH)"
 	@echo "GOBIN: $(GOBIN)"
+	@ls $(GOPATH)/bin
