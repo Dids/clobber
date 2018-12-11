@@ -13,6 +13,7 @@ OUTPUT=${2:-clobber}
 # Define necessary paths
 GOBIN=$GOPATH/bin
 
+## FIXME: We REALLY don't want to rely on this, and should probably just rely on the vendor/ folder instead?
 # Make sure Packr is installed
 go get -u github.com/gobuffalo/packr/v2/packr2
 

@@ -12,10 +12,13 @@ matrix:
     script: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
   - go: 1.9.x
 
-cache:
-  directories:
-    - $HOME/.clobber/opt
+env:
+  - GO111MODULE=on
 
 install: true
 
 after_success: bash <(curl -s https://codecov.io/bash)
+
+cache:
+  directories:
+    - $HOME/.clobber/opt
