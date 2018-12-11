@@ -24,7 +24,7 @@ deps:
 	go build -v $(EXTRA_FLAGS) ./...
 	go get github.com/gobuffalo/packr/v2/packr2
 upgrade:
-	go get -u
+	go get -u ./...
 	go get -u github.com/gobuffalo/packr/v2/packr2
 	go mod vendor
 version:
