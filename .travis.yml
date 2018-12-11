@@ -5,13 +5,13 @@ os: osx
 matrix:
   include:
   - go: master
-    script: make clean deps build test install version
+    script: make clean deps packr-build test packr-install version
   - go: 1.11.x
-    script: make clean deps build test install version
+    script: make clean deps packr-build test packr-install version
   - go: 1.10.x
-    script: make clean deps build test install version EXTRA_FLAGS=
+    script: make clean deps packr-build test instpackr-installall version EXTRA_FLAGS=
   - go: 1.9.x
-    script: make clean deps build install version EXTRA_FLAGS=
+    script: make clean deps packr-build packr-install version EXTRA_FLAGS=
 
 env:
   - GO111MODULE=on
