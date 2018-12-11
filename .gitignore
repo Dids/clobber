@@ -12,17 +12,18 @@ coverage.txt
 #vendor/
 
 # Other
-build/
+/go/
+/build/
 
 # Binaries for Go
-debug
-release
-debug/
-release/
-clobber
+/debug
+/release
+/debug/
+/release/
+/clobber
 
 # Packr
-packrd/
+/packrd/
 *-packr.go
 
 # Test binary, build with `go test -c`
