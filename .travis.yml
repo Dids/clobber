@@ -5,12 +5,13 @@ os: osx
 matrix:
   include:
   - go: master
-    script: go test -v -mod=vendor -race -coverprofile=coverage.txt -covermode=atomic ./...
+    script: make clean deps build test
   - go: 1.11.x
-    script: go test -v -mod=vendor -race -coverprofile=coverage.txt -covermode=atomic ./...
+    script: make clean deps build test
   - go: 1.10.x
-    script: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+    script: make clean deps build test-no-vendor
   - go: 1.9.x
+    script: make clean deps build
 
 env:
   - GO111MODULE=on
