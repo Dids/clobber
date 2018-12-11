@@ -4,8 +4,8 @@ os: osx
 
 matrix:
   include:
-  - go: master
-    script: make deps build test install version
+  #- go: master
+  #  script: make deps build test install version
   - go: 1.11.x
     script: make deps build test install version
   - go: 1.10.x

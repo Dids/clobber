@@ -1,5 +1,7 @@
 export GO111MODULE=on
 
+export PATH := $(GOPATH)/bin:$(PATH)
+
 BINARY_VERSION?=0.0.1
 BINARY_OUTPUT?=clobber
 EXTRA_FLAGS?=-mod=vendor
@@ -12,10 +14,10 @@ install:
 	go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
 
 build:
-	$(shell $(GOPATH)/bin/packr2 clean)
-	$(shell $(GOPATH)/bin/packr2)
+	packr2 clean
+	packr2
 	go build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" -o $(BINARY_OUTPUT)
-	$(shell $(GOPATH)/bin/packr2 clean)
+	packr2 clean
 
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
