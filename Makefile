@@ -14,7 +14,7 @@ clean:
 	go clean
 	rm -f $(BINARY_NAME)
 deps:
-	go build -v ./...
+	go build -v $(EXTRA_FLAGS) ./...
 upgrade:
 	go get -u
 version:
