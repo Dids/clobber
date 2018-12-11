@@ -8,7 +8,7 @@ all: deps build
 install:
 	$(GOPATH)/bin/packr2 install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
 build:
-	$(GOPATH)/bin/packr2 build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"
+	$(GOPATH)/bin/packr2 build -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)" ./...
 test:
 	go test -v $(EXTRA_FLAGS) -race -coverprofile=coverage.txt -covermode=atomic ./...
 clean:
@@ -23,5 +23,6 @@ upgrade:
 version:
 	clobber --version
 print:
+	@echo "PWD: $(shell pwd)"
 	@echo "PATH: $(PATH)"
 	@echo "GOPATH: $(GOPATH)"
