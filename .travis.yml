@@ -5,13 +5,17 @@ os: osx
 matrix:
   fast_finish: true
   allow_failures:
-    #- go: master
+    - go: master
     - go: tip
   include:
-  #- go: master
-    #script: make deps build test install version
+  - go: master
+    script:
+      - make deps
+      - make build
+      - make test
+      - make install
+      - make version
   - go: tip
-    #script: make deps build test install version
     script:
       - make deps
       - make build
@@ -19,7 +23,6 @@ matrix:
       - make install
       - make version
   - go: 1.11.x
-    #script: make deps build test install version
     script:
       - make deps
       - make build
@@ -27,7 +30,6 @@ matrix:
       - make install
       - make version
   - go: 1.10.x
-    #script: make deps build test install version EXTRA_FLAGS=
     script:
       - make deps EXTRA_FLAGS=
       - make build EXTRA_FLAGS=
@@ -35,7 +37,6 @@ matrix:
       - make install EXTRA_FLAGS=
       - make version EXTRA_FLAGS=
   - go: 1.9.x
-    #script: make deps build install version EXTRA_FLAGS=
     script:
       - make deps EXTRA_FLAGS=
       - make build EXTRA_FLAGS=
