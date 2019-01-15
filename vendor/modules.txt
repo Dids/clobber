@@ -10,17 +10,17 @@ github.com/briandowns/spinner
 github.com/common-nighthawk/go-figure
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/gobuffalo/buffalo-plugins v1.8.3
+# github.com/gobuffalo/buffalo-plugins v1.11.0
 github.com/gobuffalo/buffalo-plugins/plugins
 github.com/gobuffalo/buffalo-plugins/plugins/plugdeps
 # github.com/gobuffalo/envy v1.6.11
 github.com/gobuffalo/envy
-# github.com/gobuffalo/events v1.1.8
+# github.com/gobuffalo/events v1.1.9
 github.com/gobuffalo/events
-# github.com/gobuffalo/flect v0.0.0-20181210151238-24a2b68e0316
+# github.com/gobuffalo/flect v0.0.0-20190104225346-d687a3953028
 github.com/gobuffalo/flect/name
 github.com/gobuffalo/flect
-# github.com/gobuffalo/genny v0.0.0-20181207193730-587570ab2cf7
+# github.com/gobuffalo/genny v0.0.0-20190112155932-f31a84fcacf5
 github.com/gobuffalo/genny
 github.com/gobuffalo/genny/movinglater/gotools
 github.com/gobuffalo/genny/movinglater/gotools/goimports
@@ -31,18 +31,18 @@ github.com/gobuffalo/logger
 github.com/gobuffalo/mapi
 # github.com/gobuffalo/meta v0.0.0-20181127070345-0d7e59dd540b
 github.com/gobuffalo/meta
-# github.com/gobuffalo/packd v0.0.0-20181207120301-c49825f8f6f4
+# github.com/gobuffalo/packd v0.0.0-20181212173646-eca3b8fd6687
 github.com/gobuffalo/packd
-# github.com/gobuffalo/packr/v2 v2.0.0-rc.12
+# github.com/gobuffalo/packr/v2 v2.0.0-rc.14
 github.com/gobuffalo/packr/v2
-github.com/gobuffalo/packr/v2/file/resolver
 github.com/gobuffalo/packr/v2/file
+github.com/gobuffalo/packr/v2/file/resolver
 github.com/gobuffalo/packr/v2/jam/parser
 github.com/gobuffalo/packr/v2/plog
 github.com/gobuffalo/packr/v2/file/resolver/encoding/hex
 # github.com/gobuffalo/syncx v0.0.0-20181120194010-558ac7de985f
 github.com/gobuffalo/syncx
-# github.com/gogits/git-module v0.0.0-20181023105832-dfc2c1e6d377
+# github.com/gogits/git-module v0.0.0-20181215045336-0b61102314d3
 github.com/gogits/git-module
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
@@ -58,7 +58,7 @@ github.com/inconshreveable/go-update/internal/osext
 github.com/inconshreveable/mousetrap
 # github.com/joho/godotenv v1.3.0
 github.com/joho/godotenv
-# github.com/karrick/godirwalk v1.7.7
+# github.com/karrick/godirwalk v1.7.8
 github.com/karrick/godirwalk
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
@@ -78,7 +78,7 @@ github.com/mgutz/ansi
 github.com/mitchellh/go-homedir
 # github.com/otiai10/copy v0.0.0-20180813032824-7e9a647135a1
 github.com/otiai10/copy
-# github.com/pkg/errors v0.8.0
+# github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # github.com/rhysd/go-github-selfupdate v1.1.0
 github.com/rhysd/go-github-selfupdate/selfupdate
@@ -86,7 +86,7 @@ github.com/rhysd/go-github-selfupdate/selfupdate
 github.com/rogpeppe/go-internal/modfile
 github.com/rogpeppe/go-internal/module
 github.com/rogpeppe/go-internal/semver
-# github.com/sirupsen/logrus v1.2.0
+# github.com/sirupsen/logrus v1.3.0
 github.com/sirupsen/logrus
 # github.com/spf13/cobra v0.0.3
 github.com/spf13/cobra
@@ -101,23 +101,29 @@ github.com/ulikunitz/xz/lzma
 github.com/ulikunitz/xz/internal/hash
 # github.com/x-cray/logrus-prefixed-formatter v0.5.2
 github.com/x-cray/logrus-prefixed-formatter
-# golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9
+# golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20181207154023-610586996380
+# golang.org/x/net v0.0.0-20190110200230-915654e7eabc
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/context
-# golang.org/x/oauth2 v0.0.0-20181203162652-d668ce993890
+# golang.org/x/oauth2 v0.0.0-20190111185915-36a7019397c4
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20181210030007-2a47403f2ae5
+# golang.org/x/sys v0.0.0-20190114130336-2be517255631
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/tools v0.0.0-20181210225255-6a3e9aa2ab77
+# golang.org/x/tools v0.0.0-20190114222345-bf090417da8b
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/imports
+golang.org/x/tools/go/packages
 golang.org/x/tools/internal/gopathwalk
+golang.org/x/tools/go/gcexportdata
+golang.org/x/tools/go/internal/cgo
+golang.org/x/tools/go/internal/packagesdriver
+golang.org/x/tools/internal/semver
 golang.org/x/tools/internal/fastwalk
-# google.golang.org/appengine v1.3.0
+golang.org/x/tools/go/internal/gcimporter
+# google.golang.org/appengine v1.4.0
 google.golang.org/appengine/urlfetch
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/urlfetch

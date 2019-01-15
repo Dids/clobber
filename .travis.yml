@@ -3,9 +3,15 @@ language: go
 os: osx
 
 matrix:
+  fast_finish: true
+  allow_failures:
+    #- go: master
+    - go: tip
   include:
   #- go: master
   #  script: make deps build test install version
+  - go: tip
+    script: make deps build test install version
   - go: 1.11.x
     script: make deps build test install version
   - go: 1.10.x
@@ -23,3 +29,4 @@ after_success: bash <(curl -s https://codecov.io/bash)
 cache:
   directories:
     - $HOME/.clobber/opt
+    - $GOPATH/bin

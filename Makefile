@@ -28,13 +28,15 @@ clean:
 
 deps:
 	go build -v $(EXTRA_FLAGS) ./...
-	## FIXME: This reinstalls every time when running on Go >= v1.11
 	go get github.com/gobuffalo/packr/v2/packr2
 
 upgrade:
 	go get -u ./...
 	go get -u github.com/gobuffalo/packr/v2/packr2
 	go mod vendor
+
+tidy:
+	go mod tidy
 
 version:
 	clobber --version

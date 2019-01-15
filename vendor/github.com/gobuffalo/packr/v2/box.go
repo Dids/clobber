@@ -39,37 +39,53 @@ func NewBox(path string) *Box {
 func resolutionDir(og string) string {
 	ng, _ := filepath.Abs(og)
 
-	exists := func(s string) bool {
-		_, err := os.Stat(s)
-		if err != nil {
-			return false
-		}
-		plog.Debug("packr", "resolutionDir", "original", og, "resolved", s)
-		return true
-	}
-
-	if exists(ng) {
+	if resolutionDirExists(ng, og) {
 		return ng
 	}
 
-	_, filename, _, _ := runtime.Caller(2)
+	// packr.New
+	_, filename, _, _ := runtime.Caller(3)
+	ng, ok := resolutionDirTestFilename(filename, og)
+	if ok {
+		return ng
+	}
 
-	ng = filepath.Join(filepath.Dir(filename), og)
+	// packr.NewBox (deprecated)
+	_, filename, _, _ = runtime.Caller(4)
+	ng, ok = resolutionDirTestFilename(filename, og)
+	if ok {
+		return ng
+	}
+
+	return og
+}
+
+func resolutionDirExists(s, og string) bool {
+	_, err := os.Stat(s)
+	if err != nil {
+		return false
+	}
+	plog.Debug("packr", "resolutionDir", "original", og, "resolved", s)
+	return true
+}
+
+func resolutionDirTestFilename(filename, og string) (string, bool) {
+	ng := filepath.Join(filepath.Dir(filename), og)
 
 	// // this little hack courtesy of the `-cover` flag!!
 	cov := filepath.Join("_test", "_obj_test")
 	ng = strings.Replace(ng, string(filepath.Separator)+cov, "", 1)
 
-	if exists(ng) {
-		return ng
+	if resolutionDirExists(ng, og) {
+		return ng, true
 	}
 
 	ng = filepath.Join(envy.GoPath(), "src", ng)
-	if exists(ng) {
-		return ng
+	if resolutionDirExists(ng, og) {
+		return ng, true
 	}
 
-	return og
+	return og, false
 }
 
 func construct(name string, path string) *Box {
@@ -201,9 +217,20 @@ func (b Box) List() []string {
 func (b *Box) Resolve(key string) (file.File, error) {
 	key = strings.TrimPrefix(key, "/")
 	b.moot.RLock()
-	r, ok := b.resolvers[resolver.Key(key)]
+
+	var r resolver.Resolver
+
+	for k, vr := range b.resolvers {
+		lk := strings.ToLower(resolver.Key(k))
+		lkey := strings.ToLower(resolver.Key(key))
+		if lk == lkey {
+			r = vr
+			break
+		}
+	}
 	b.moot.RUnlock()
-	if !ok {
+
+	if r == nil {
 		r = b.DefaultResolver
 		if r == nil {
 			r = resolver.DefaultResolver
