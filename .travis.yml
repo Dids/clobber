@@ -39,7 +39,6 @@ matrix:
     script:
       - make deps EXTRA_FLAGS=
       - make build EXTRA_FLAGS=
-      - make test EXTRA_FLAGS=
       - make install EXTRA_FLAGS=
       - make version EXTRA_FLAGS=
 
