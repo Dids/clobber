@@ -46,7 +46,7 @@ matrix:
 env:
   global:
     - GO111MODULE=on
-    - GOPROXY=https://go.didstopia.com
+    - GOPROXY=
 
 install: true
 
@@ -56,4 +56,4 @@ cache:
   directories:
     - $HOME/.clobber/opt
     - $GOPATH
-    #- $GOPATH/bin
+    - $GOPATH/bin
