@@ -29,4 +29,5 @@ after_success: bash <(curl -s https://codecov.io/bash)
 cache:
   directories:
     - $HOME/.clobber/opt
-    - $GOPATH/bin
+    - $GOPATH
+    #- $GOPATH/bin
