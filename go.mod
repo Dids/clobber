@@ -6,6 +6,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/briandowns/spinner v0.0.0-20181029155426-195c31b675a7
 	github.com/common-nighthawk/go-figure v0.0.0-20180619031829-18b2b544842c
+	github.com/coreos/etcd v3.3.11+incompatible // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/gobuffalo/buffalo-plugins v1.11.0 // indirect
 	github.com/gobuffalo/flect v0.0.0-20190104225346-d687a3953028 // indirect
@@ -26,6 +27,7 @@ require (
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/smartystreets/goconvey v0.0.0-20181108003508-044398e4856c // indirect
 	github.com/spf13/cobra v0.0.3
+	github.com/ugorji/go/codec v0.0.0-20181209151446-772ced7fd4c2 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 	golang.org/x/oauth2 v0.0.0-20190111185915-36a7019397c4 // indirect

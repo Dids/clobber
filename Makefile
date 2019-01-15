@@ -1,4 +1,6 @@
 export GO111MODULE=on
+#export GOPROXY=https://go.didstopia.com
+#export GOPROXY=
 
 export PATH := $(GOPATH)/bin:$(PATH)
 
@@ -31,9 +33,9 @@ deps:
 	go get github.com/gobuffalo/packr/v2/packr2
 
 upgrade:
-	go get -u ./...
-	go get -u github.com/gobuffalo/packr/v2/packr2
-	go mod vendor
+	GOPROXY= go get -u ./...
+	GOPROXY= go get -u github.com/gobuffalo/packr/v2/packr2
+	GOPROXY= go mod vendor
 
 tidy:
 	go mod tidy
@@ -46,3 +48,5 @@ print:
 	@echo "PATH: $(PATH)"
 	@echo "GOPATH: $(GOPATH)"
 	@echo "GOBIN: $(GOBIN)"
+	@echo "GOPROXY: $(GOPROXY)"
+	@echo "GO111MODULE: $(GO111MODULE)"

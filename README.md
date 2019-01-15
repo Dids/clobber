@@ -45,13 +45,13 @@ View all the available options:
 ### Development
 
 Install/build dependencies:  
-> go build -v ./...  
+> make deps  
 
 Run the application:  
 > go run main.go  
 
 Run tests:  
-> go test ./...  
+> make test  
 
 Creating new `buildpkg.sh` patches:  
 1. Make a copy of `buildpkg.sh` and name it `buildpkg_patched.sh` (it can be found in `~/.clobber/src/edk2/Clover/CloverPackage/package`)  

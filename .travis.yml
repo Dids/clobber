@@ -44,7 +44,9 @@ matrix:
       - make version EXTRA_FLAGS=
 
 env:
-  - GO111MODULE=on
+  global:
+    - GO111MODULE=on
+    - GOPROXY=https://go.didstopia.com
 
 install: true
 

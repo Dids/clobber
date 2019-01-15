@@ -6,12 +6,11 @@ import (
 	"os/exec"
 
 	"github.com/gobuffalo/packr/v2"
-
 	// FIXME: Doesn't actually work as we're still missing "main.go",
 	//        so we might just have to create a utility "program" of our own?
 	// HACK: Import the "cmd" package of the packr2 utility,
 	//       so it gets included in our vendor folder
-	_ "github.com/gobuffalo/packr/v2/packr2/cmd"
+	//_ "github.com/gobuffalo/packr/v2/packr2/cmd"
 )
 
 // Patch function for patching files
