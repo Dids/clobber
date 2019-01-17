@@ -15,7 +15,7 @@ import (
 	"github.com/gobuffalo/packr/v2"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
-	"gopkg.in/natefinch/lumberjack.v2"
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
@@ -312,10 +312,7 @@ var RootCmd = &cobra.Command{
 			//        but they are written to the log file, but we really need the user to know what's wrong too..
 
 			// Patch the Clover installer package
-			// TODO: So for some reason the old patch is still working, even though running it manually fails SOMETIMES..
-			// FIXME: Re-enable the new patch once error handling has been properly fixed!
-			// if err := patches.PatchBuildpkg(packedPatches, "buildpkg", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
-			if err := patches.Patch(packedPatches, "buildpkg_old", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
+			if err := patches.Patch(packedPatches, "buildpkg4", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
 				log.Fatal("Error: Failed to patch Clover installer: ", err)
 			}
 			// Load the patch

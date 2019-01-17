@@ -1,0 +1,98 @@
+--- buildpkg.sh
++++ buildpkg.sh
+@@ -843,7 +843,10 @@
+                            InstallTheme
+ 
+         buildpackage "$packageRefId" "${themeName}" "${PKG_BUILD_DIR}/${themeName}" "${themeDestDir}"
+-        addChoice --start-visible="false"  --start-selected="true"  --pkg-refs="$packageRefId" "${themeName}"
++        ### CLOBBER PATCH START ###
++        #addChoice --start-visible="false"  --start-selected="true"  --pkg-refs="$packageRefId" "${themeName}"
++        addChoice --start-visible="true"  --start-selected="choicePreviouslySelected('$packageRefId')"  --pkg-refs="$packageRefId" "${themeName}"
++        ### CLOBBER PATCH END   ###
+     done
+ fi
+ 
+@@ -897,7 +900,10 @@
+             buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
+             addChoice --start-visible="true" \
+                       --enabled="!choices['UEFI.only'].selected" \
+-                      --start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
++            ### CLOBBER PATCH START ###
++                      #--start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
++                      --start-selected="!choices['UEFI.only'].selected &amp;&amp; ($(if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then echo -n true; else echo -n false; fi) || choicePreviouslySelected('$packageRefId'))"  \
++            ### CLOBBER PATCH END   ###
+                       --visible="!choices['UEFI.only'].selected"     \
+                       --pkg-refs="$packageRefId"  "${driverChoice}"
+             rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+@@ -926,7 +932,10 @@
+             buildpackage "$packageRefId" "${driverName}" "${PKG_BUILD_DIR}/${driverName}" "${driverDestDir}"
+             addChoice --group="Drivers32" --title="$driverName"                                               \
+                     --enabled="!choices['UEFI.only'].selected"                                              \
+-                    --start-selected="choicePreviouslySelected('$packageRefId')"                            \
++            ### CLOBBER PATCH START ###
++                    #--start-selected="choicePreviouslySelected('$packageRefId')"                            \
++                    --start-selected="$(if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then echo -n true; else echo -n false; fi) || choicePreviouslySelected('$packageRefId')"                            \
++            ### CLOBBER PATCH END   ###
+                     --selected="!choices['UEFI.only'].selected &amp;&amp; choices['$driverName'].selected"  \
+                     --pkg-refs="$packageRefId"                                                              \
+                     "${driverName}"
+@@ -956,7 +965,10 @@
+                             --subst="DRIVER_DIR=$(basename $driverDestDir)"  \
+                             "VBoxHfs"
+         buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
+-        addChoice --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH START ###
++        #addChoice --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        addChoice --start-visible="true" --start-selected="$(if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then echo -n true; else echo -n false; fi) || choicePreviouslySelected('$packageRefId')" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH END   ###
+         rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+     done
+ # End mandatory drivers-ia32UEFI packages
+@@ -1002,7 +1014,10 @@
+         addChoice --group="Drivers64" \
+                   --start-visible="true" \
+                   --enabled="!choices['UEFI.only'].selected" \
+-                  --start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
++        ### CLOBBER PATCH START ###
++                  #--start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
++                  --start-selected="!choices['UEFI.only'].selected &amp;&amp; ($(if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then echo -n true; else echo -n false; fi) || choicePreviouslySelected('$packageRefId'))"  \
++        ### CLOBBER PATCH END   ###
+                   --visible="!choices['UEFI.only'].selected"     \
+                   --pkg-refs="$packageRefId"  "${driverChoice}"
+         rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+@@ -1029,7 +1044,10 @@
+         buildpackage "$packageRefId" "${driverName}" "${PKG_BUILD_DIR}/${driverName}" "${driverDestDir}"
+         addChoice --group="Drivers64" --title="$driverName"                                               \
+                   --enabled="!choices['UEFI.only'].selected"                                              \
+-                  --start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')"                            \
++        ### CLOBBER PATCH START ###
++                  #--start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')"                            \
++                  --start-selected="!choices['UEFI.only'].selected &amp;&amp; ($(if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then echo -n true; else echo -n false; fi) || choicePreviouslySelected('$packageRefId'))"                            \
++        ### CLOBBER PATCH END   ###
+                   --selected="choices['$driverName'].selected"  \
+                   --pkg-refs="$packageRefId"                                                              \
+                   "${driverName}"
+@@ -1109,7 +1127,10 @@
+                             "VirtualSMC"
+         fi
+         buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
+-        addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH START ###
++        #addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="$(if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then echo -n true; else echo -n false; fi) || choicePreviouslySelected('$packageRefId')" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH END   ###
+         rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+     done
+ fi
+@@ -1134,7 +1155,10 @@
+                            --subst="INSTALLER_CHOICE=$packageRefId" MarkChoice
+         buildpackage "$packageRefId" "${driverName}" "${PKG_BUILD_DIR}/${driverName}" "${driverDestDir}"
+         addChoice --group="Drivers64UEFI"  --title="$driverName"                \
+-                  --start-selected="choicePreviouslySelected('$packageRefId')"  \
++        ### CLOBBER PATCH START ###
++                  #--start-selected="choicePreviouslySelected('$packageRefId')"  \
++                  --start-selected="$(if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then echo -n true; else echo -n false; fi) || choicePreviouslySelected('$packageRefId')"  \
++        ### CLOBBER PATCH END   ###
+                   --pkg-refs="$packageRefId"  "${driverName}"
+         rm -R -f "${PKG_BUILD_DIR}/${driverName}"
+     done

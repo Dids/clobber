@@ -14,6 +14,7 @@ coverage.txt
 # Other
 /go/
 /build/
+/test.sh
 
 # Binaries for Go
 /debug
