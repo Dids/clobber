@@ -19,7 +19,7 @@ endef
 
 all: deps build
 
-install: deps build
+install:
 	$(call timed_function,'go install -v $(EXTRA_FLAGS) -ldflags "-X main.Version=$(BINARY_VERSION)"')
 
 uninstall:
