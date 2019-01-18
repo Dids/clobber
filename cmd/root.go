@@ -59,7 +59,10 @@ var packedAssets = packr.New("assets", "../assets")
 
 // Execute is the entrypoint for the command-line application
 func Execute() {
-	if err := RootCmd.Execute(); err != nil {
+	// Update the version
+	rootCmd.Version = Version
+
+	if err := rootCmd.Execute(); err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1) // Note that only 'go run' prints 'exit status X'
 	}
@@ -74,8 +77,8 @@ func (f *ClobberLogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return []byte(entry.Message + "\n"), nil
 }
 
-// RootCmd is the Cobra command object
-var RootCmd = &cobra.Command{
+// rootCmd is the Cobra command object
+var rootCmd = &cobra.Command{
 	Use:   "clobber",
 	Short: "Clobber is a command-line application for building Clover",
 	Long: `Clobber is a command-line application for building Clover.
@@ -362,13 +365,13 @@ func init() {
 	cobra.OnInitialize(customInit)
 
 	// Add persistent flags that carry over to all commands
-	RootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
-	RootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "silence all output")
-	RootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
-	RootCmd.PersistentFlags().BoolVarP(&BuildOnly, "build-only", "b", false, "only build (no update)")
-	RootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
-	RootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
-	RootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "silence all output")
+	rootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
+	rootCmd.PersistentFlags().BoolVarP(&BuildOnly, "build-only", "b", false, "only build (no update)")
+	rootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
+	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
+	rootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
 }
 
 func customInit() {

@@ -21,6 +21,6 @@ func main() {
 	}*/
 
 	cmd.Version = Version
-	cmd.RootCmd.Version = Version
+	//cmd.RootCmd.Version = Version
 	cmd.Execute()
 }

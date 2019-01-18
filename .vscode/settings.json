@@ -5,5 +5,11 @@
   "[go]": {
     "editor.formatOnSave": true
   },
-  "git.ignoreLimitWarning": true
+  "go.autocompleteUnimportedPackages": true,
+  "go.lintOnSave": "package",
+  "go.vetOnSave": "package",
+  "go.buildOnSave": "package",
+  "go.testOnSave": true,
+  "go.coverOnSave": true,
+  "git.ignoreLimitWarning": true,
 }

@@ -1,11 +1,11 @@
 package name
 
 import (
-	"path/filepath"
+	"regexp"
 	"strings"
-
-	"github.com/gobuffalo/flect"
 )
+
+var alphanum = regexp.MustCompile("[^a-zA-Z0-9_\\-\\/]+")
 
 // Folder creates a suitable folder name
 //	admin/widget = admin/widget
@@ -22,9 +22,14 @@ func Folder(s string, exts ...string) string {
 func (i Ident) Folder(exts ...string) Ident {
 	var parts []string
 
-	for _, part := range strings.Split(i.Original, "/") {
-		part = flect.Underscore(part)
-		part = strings.Replace(part, "_", string(filepath.Separator), -1)
+	s := i.Original
+	if i.Pascalize().String() == s {
+		s = i.Underscore().String()
+		s = strings.Replace(s, "_", "/", -1)
+	}
+	for _, part := range strings.Split(s, "/") {
+		part = strings.ToLower(part)
+		part = alphanum.ReplaceAllString(part, "")
 		parts = append(parts, part)
 	}
 	return New(strings.Join(parts, "/") + strings.Join(exts, ""))

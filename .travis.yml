@@ -6,7 +6,6 @@ matrix:
   fast_finish: true
   allow_failures:
     - go: master
-    - go: tip
   include:
   - go: master
     script:
@@ -15,13 +14,7 @@ matrix:
       - make test
       - make install
       - make version
-  - go: tip
-    script:
-      - make deps
-      - make build
-      - make test
-      - make install
-      - make version
+      - make uninstall
   - go: 1.11.x
     script:
       - make deps
@@ -29,6 +22,7 @@ matrix:
       - make test
       - make install
       - make version
+      - make uninstall
   - go: 1.10.x
     script:
       - make deps EXTRA_FLAGS=
@@ -36,12 +30,14 @@ matrix:
       - make test EXTRA_FLAGS=
       - make install EXTRA_FLAGS=
       - make version EXTRA_FLAGS=
+      - make uninstall EXTRA_FLAGS=
   - go: 1.9.x
     script:
       - make deps EXTRA_FLAGS=
       - make build EXTRA_FLAGS=
       - make install EXTRA_FLAGS=
       - make version EXTRA_FLAGS=
+      - make uninstall EXTRA_FLAGS=
 
 env:
   global:

@@ -1,5 +1,6 @@
 {
   "recommendations": [
-    "ms-vscode.go"
+    "ms-vscode.go",
+    "windmilleng.vscode-go-autotest"
   ]
 }
