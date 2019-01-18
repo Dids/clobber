@@ -51,5 +51,8 @@ after_success: bash <(curl -s https://codecov.io/bash)
 cache:
   directories:
     - $HOME/.clobber/opt
-    #- $GOPATH ## FIXME: This is bad, because it caches our project too (afaik)
+    - !$GOPATH/src/Dids/clobber
+    - $GOPATH/src
+    - !$GOPATH/bin/clobber
     - $GOPATH/bin
+    - $GOPATH/pkg

@@ -40,7 +40,7 @@ clean:
 
 deps:
 	$(call timed_function,'go build -v $(EXTRA_FLAGS) ./...')
-	$(call timed_function,'go get github.com/gobuffalo/packr/v2/packr2')
+	$(call timed_function,'packr2 version >/dev/null 2>&1 || { go get github.com/gobuffalo/packr/v2/packr2; }')
 
 upgrade:
 	$(call timed_function,'go get -u ./...')
