@@ -19,6 +19,7 @@ import (
 
 	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
+	"github.com/mholt/archiver"
 	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 )
@@ -315,17 +316,40 @@ var rootCmd = &cobra.Command{
 			//        but they are written to the log file, but we really need the user to know what's wrong too..
 
 			// Patch the Clover installer package
-			if err := patches.Patch(packedPatches, "buildpkg4", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); err != nil {
-				log.Fatal("Error: Failed to patch Clover installer: ", err)
+			if patchErr := patches.Patch(packedPatches, "buildpkg4", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (patch buildpkg.sh): ", patchErr)
 			}
 			// Load the patch
 			backgroundPatch, backgroundPatchErr := packedAssets.Find("background.tiff")
 			if backgroundPatchErr != nil {
-				log.Fatal("Error: Failed to patch Clover installer: ", backgroundPatchErr)
+				log.Fatal("Error: Failed to patch Clover installer (load background.tiff): ", backgroundPatchErr)
 			}
 			// Replace the Clover installer background image with our own
-			if err := ioutil.WriteFile(util.GetCloverPath()+"/CloverPackage/package/Resources/background.tiff", backgroundPatch, 0644); err != nil {
-				log.Fatal("Error: Failed to patch Clover installer: ", err)
+			if writeErr := ioutil.WriteFile(util.GetCloverPath()+"/CloverPackage/package/Resources/background.tiff", backgroundPatch, 0644); writeErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (replace background.tiff): ", writeErr)
+			}
+			// Load the compressed Metal theme
+			metalTheme, metalThemeErr := packedAssets.Find("metal_theme.tar.gz")
+			if metalThemeErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (load metal_theme.tar.gz): ", metalThemeErr)
+			}
+			// Copy the compressed Metal theme to a temporary directory
+			tempDir, tempDirErr := ioutil.TempDir("", "")
+			if tempDirErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (get temp dir): ", tempDirErr)
+			}
+			defer os.Remove(tempDir)
+			metalThemeTemp, metalThemeTempErr := ioutil.TempFile(tempDir, "clobber_metal_theme.*.tar.gz")
+			if metalThemeTempErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (create metal_theme.tar.gz): ", metalThemeTempErr)
+			}
+			defer os.Remove(metalThemeTemp.Name())
+			if writeErr := ioutil.WriteFile(metalThemeTemp.Name(), metalTheme, 0644); writeErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (write metal_theme.tar.gz): ", writeErr)
+			}
+			// Extract and install the Metal theme to the Clover installer
+			if unarchiveErr := archiver.Unarchive(metalThemeTemp.Name(), util.GetCloverPath()+"/CloverPackage/CloverV2/themespkg"); unarchiveErr != nil {
+				log.Fatal("Error: Failed to patch Clover installer (extract metal_theme.tar.gz): ", unarchiveErr)
 			}
 			Spinner.Prefix = formatSpinnerText("Patching Clover installer", true)
 

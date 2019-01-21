@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gobuffalo/envy"
@@ -15,6 +16,7 @@ import (
 
 func Named(name string, root string) App {
 	pwd, _ := os.Getwd()
+	pwd = strings.TrimPrefix(root, "/private")
 	if root == "." {
 		root = pwd
 	}

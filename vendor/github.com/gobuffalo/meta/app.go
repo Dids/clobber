@@ -9,7 +9,6 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/gobuffalo/envy"
@@ -54,21 +53,18 @@ func resolvePackageName(name string, pwd string) string {
 	if filepath.Base(result) != name {
 		result = path.Join(result, name)
 	}
-
 	if envy.Mods() {
-		if !strings.HasPrefix(pwd, filepath.Join(envy.GoPath(), "src")) {
-			result = name
-		}
-
 		//Extract package from go.mod
-		if f, err := os.Open(filepath.Join(pwd, "go.mod")); err == nil {
+		p := filepath.Join(pwd, "go.mod")
+		if f, err := os.Open(p); err == nil {
 			if s, err := ioutil.ReadAll(f); err == nil {
 				re := regexp.MustCompile("module (.*)")
 				res := re.FindAllStringSubmatch(string(s), 1)
 
 				if len(res) == 1 && len(res[0]) == 2 {
-					result = res[0][1]
+					return res[0][1]
 				}
+				result = filepath.Base(pwd)
 			}
 		}
 	}
