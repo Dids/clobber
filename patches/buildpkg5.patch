@@ -1,0 +1,207 @@
+--- buildpkg.sh
++++ buildpkg.sh
+@@ -460,6 +460,17 @@
+     choice_group_exclusive[$idx]="$exclusive_function"
+ }
+ 
++### CLOBBER PATCH START ###
++isDefaultPackage () {
++    local packageRefId="${1}"
++    if [[ $packageRefId =~ ^(.*)(apfsdriverloader|aptiomemoryfix|hfsplus)(.*)$ ]]; then
++        return 0
++    else
++        return 1
++    fi
++}
++### CLOBBER PATCH END   ###
++
+ exclusive_one_choice () {
+     # $1 Current choice (ie: test1)
+     # $2..$n Others choice(s) (ie: "test2" "test3"). Current can or can't be in the others choices
+@@ -832,8 +843,10 @@
+     local currentMonth=$(date -j +'%-m')
+     for (( i = 0 ; i < ${#specialThemes[@]} ; i++ )); do
+         local themeName=${specialThemes[$i]##*/}
++        ### CLOBBER PATCH START ###
+         # Don't add christmas and newyear themes if month < 11
+-        [[ $currentMonth -lt 11 ]] && [[ "$themeName" == christmas || "$themeName" == newyear ]] && continue
++        #[[ $currentMonth -lt 11 ]] && [[ "$themeName" == christmas || "$themeName" == newyear ]] && continue
++        ### CLOBBER PATCH END   ###
+         mkdir -p "${PKG_BUILD_DIR}/${themeName}/Root/"
+         rsync -r --exclude=.svn --exclude="*~" "$artwork/${specialThemes[$i]}/" "${PKG_BUILD_DIR}/${themeName}/Root/${themeName}"
+         packageRefId=$(getPackageRefId "${packagesidentity}" "${themeName}")
+@@ -843,7 +856,10 @@
+                            InstallTheme
+ 
+         buildpackage "$packageRefId" "${themeName}" "${PKG_BUILD_DIR}/${themeName}" "${themeDestDir}"
+-        addChoice --start-visible="false"  --start-selected="true"  --pkg-refs="$packageRefId" "${themeName}"
++        ### CLOBBER PATCH START ###
++        #addChoice --start-visible="false"  --start-selected="true"  --pkg-refs="$packageRefId" "${themeName}"
++        addChoice --group="Themes" --start-visible="true"  --start-selected="choicePreviouslySelected('$packageRefId')"  --pkg-refs="$packageRefId" "${themeName}"
++        ### CLOBBER PATCH END   ###
+     done
+ fi
+ 
+@@ -895,11 +911,18 @@
+                                 --subst="DRIVER_DIR=$(basename $driverDestDir)"   \
+                                 "VBoxHfs"
+             buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
++            ### CLOBBER PATCH START ###
++            #addChoice --start-visible="true" \
++            #          --enabled="!choices['UEFI.only'].selected" \
++            #          --start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
++            #          --visible="!choices['UEFI.only'].selected"     \
++            #          --pkg-refs="$packageRefId"  "${driverChoice}"
+             addChoice --start-visible="true" \
+                       --enabled="!choices['UEFI.only'].selected" \
+-                      --start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
+-                      --visible="!choices['UEFI.only'].selected"     \
++                      --start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')" \
++                      --visible="!choices['UEFI.only'].selected" \
+                       --pkg-refs="$packageRefId"  "${driverChoice}"
++            ### CLOBBER PATCH END   ###
+             rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+         done
+         # End mandatory drivers-ia32 packages
+@@ -924,12 +947,28 @@
+             addTemplateScripts --pkg-rootdir="${PKG_BUILD_DIR}/${driverName}" \
+                             --subst="INSTALLER_CHOICE=$packageRefId" MarkChoice
+             buildpackage "$packageRefId" "${driverName}" "${PKG_BUILD_DIR}/${driverName}" "${driverDestDir}"
+-            addChoice --group="Drivers32" --title="$driverName"                                               \
+-                    --enabled="!choices['UEFI.only'].selected"                                              \
+-                    --start-selected="choicePreviouslySelected('$packageRefId')"                            \
+-                    --selected="!choices['UEFI.only'].selected &amp;&amp; choices['$driverName'].selected"  \
+-                    --pkg-refs="$packageRefId"                                                              \
+-                    "${driverName}"
++            ### CLOBBER PATCH START ###
++            #addChoice --group="Drivers32" --title="$driverName"                                               \
++            #        --enabled="!choices['UEFI.only'].selected"                                              \
++            #        --start-selected="choicePreviouslySelected('$packageRefId')"                            \
++            #        --selected="!choices['UEFI.only'].selected &amp;&amp; choices['$driverName'].selected"  \
++            #        --pkg-refs="$packageRefId"                                                              \
++            #        "${driverName}"
++            if isDefaultPackage "$packageRefId"; then
++                addChoice --group="Drivers32" --title="$driverName" \
++                          --enabled="!choices['UEFI.only'].selected" \
++                          --start-selected="!choices['UEFI.only'].selected" \
++                          --pkg-refs="$packageRefId" \
++                          "${driverName}"
++            else
++                addChoice --group="Drivers32" --title="$driverName" \
++                          --enabled="!choices['UEFI.only'].selected" \
++                          --start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')" \
++                          --selected="!choices['UEFI.only'].selected &amp;&amp; choices['$driverName'].selected" \
++                          --pkg-refs="$packageRefId" \
++                          "${driverName}"
++            fi
++            ### CLOBBER PATCH END   ###
+             rm -R -f "${PKG_BUILD_DIR}/${driverName}"
+         done
+         # End build drivers-ia32 packages
+@@ -956,7 +995,10 @@
+                             --subst="DRIVER_DIR=$(basename $driverDestDir)"  \
+                             "VBoxHfs"
+         buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
+-        addChoice --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH START ###
++        #addChoice --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        addChoice --start-visible="true" --start-selected="choicePreviouslySelected('$packageRefId')" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH END   ###
+         rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+     done
+ # End mandatory drivers-ia32UEFI packages
+@@ -999,12 +1041,20 @@
+         # (i.e. Clover package never run on that target partition).
+         # Otherwise each single choice start selected only for legacy Clover and only if you previously selected it
+         buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
++        ### CLOBBER PATCH START ###
++        #addChoice --group="Drivers64" \
++        #          --start-visible="true" \
++        #          --enabled="!choices['UEFI.only'].selected" \
++        #          --start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
++        #          --visible="!choices['UEFI.only'].selected"     \
++        #          --pkg-refs="$packageRefId"  "${driverChoice}"
+         addChoice --group="Drivers64" \
+                   --start-visible="true" \
+                   --enabled="!choices['UEFI.only'].selected" \
+-                  --start-selected="!choices['UEFI.only'].selected &amp;&amp; (cloverPackageFirstRun() || choicePreviouslySelected('$packageRefId'))"  \
+-                  --visible="!choices['UEFI.only'].selected"     \
++                  --start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')" \
++                  --visible="!choices['UEFI.only'].selected" \
+                   --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH END   ###
+         rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+     done
+ fi
+@@ -1027,12 +1077,29 @@
+         addTemplateScripts --pkg-rootdir="${PKG_BUILD_DIR}/${driverName}" \
+                            --subst="INSTALLER_CHOICE=$packageRefId" MarkChoice
+         buildpackage "$packageRefId" "${driverName}" "${PKG_BUILD_DIR}/${driverName}" "${driverDestDir}"
+-        addChoice --group="Drivers64" --title="$driverName"                                               \
+-                  --enabled="!choices['UEFI.only'].selected"                                              \
+-                  --start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')"                            \
+-                  --selected="choices['$driverName'].selected"  \
+-                  --pkg-refs="$packageRefId"                                                              \
+-                  "${driverName}"
++        ### CLOBBER PATCH START ###
++        #addChoice --group="Drivers64" --title="$driverName"                                               \
++        #          --enabled="!choices['UEFI.only'].selected"                                              \
++        #          --start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')"                            \
++        #          --selected="choices['$driverName'].selected"  \
++        #          --pkg-refs="$packageRefId"                                                              \
++        #          "${driverName}"
++        if isDefaultPackage "$packageRefId"; then
++            addChoice --group="Drivers64" --title="$driverName" \
++                      --enabled="!choices['UEFI.only'].selected" \
++                      --start-selected="!choices['UEFI.only'].selected" \
++                      --selected="choices['$driverName'].selected" \
++                      --pkg-refs="$packageRefId" \
++                      "${driverName}"
++        else
++            addChoice --group="Drivers64" --title="$driverName" \
++                      --enabled="!choices['UEFI.only'].selected" \
++                      --start-selected="!choices['UEFI.only'].selected &amp;&amp; choicePreviouslySelected('$packageRefId')" \
++                      --selected="choices['$driverName'].selected" \
++                      --pkg-refs="$packageRefId" \
++                      "${driverName}"
++        fi
++        ### CLOBBER PATCH END   ###
+         rm -R -f "${PKG_BUILD_DIR}/${driverName}"
+     done
+ fi
+@@ -1109,7 +1176,10 @@
+                             "VirtualSMC"
+         fi
+         buildpackage "$packageRefId" "${driverChoice}" "${PKG_BUILD_DIR}/${driverChoice}" "${driverDestDir}"
+-        addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH START ###
++        #addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="true" --pkg-refs="$packageRefId"  "${driverChoice}"
++        addChoice --group="Drivers64UEFI" --start-visible="true" --start-selected="choicePreviouslySelected('$packageRefId')" --pkg-refs="$packageRefId"  "${driverChoice}"
++        ### CLOBBER PATCH END   ###
+         rm -R -f "${PKG_BUILD_DIR}/${driverChoice}"
+     done
+ fi
+@@ -1133,9 +1203,20 @@
+         addTemplateScripts --pkg-rootdir="${PKG_BUILD_DIR}/${driverName}" \
+                            --subst="INSTALLER_CHOICE=$packageRefId" MarkChoice
+         buildpackage "$packageRefId" "${driverName}" "${PKG_BUILD_DIR}/${driverName}" "${driverDestDir}"
+-        addChoice --group="Drivers64UEFI"  --title="$driverName"                \
+-                  --start-selected="choicePreviouslySelected('$packageRefId')"  \
+-                  --pkg-refs="$packageRefId"  "${driverName}"
++        ### CLOBBER PATCH START ###
++        #addChoice --group="Drivers64UEFI"  --title="$driverName"                \
++        #          --start-selected="choicePreviouslySelected('$packageRefId')"  \
++        #          --pkg-refs="$packageRefId"  "${driverName}"
++        if isDefaultPackage "$packageRefId"; then
++            addChoice --group="Drivers64UEFI"  --title="$driverName" \
++                      --start-selected="true" \
++                      --pkg-refs="$packageRefId"  "${driverName}"
++        else
++            addChoice --group="Drivers64UEFI"  --title="$driverName" \
++                      --start-selected="choicePreviouslySelected('$packageRefId')" \
++                      --pkg-refs="$packageRefId"  "${driverName}"
++        fi
++        ### CLOBBER PATCH EMD   ###
+         rm -R -f "${PKG_BUILD_DIR}/${driverName}"
+     done
+ fi

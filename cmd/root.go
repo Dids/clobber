@@ -316,7 +316,7 @@ var rootCmd = &cobra.Command{
 			//        but they are written to the log file, but we really need the user to know what's wrong too..
 
 			// Patch the Clover installer package
-			if patchErr := patches.Patch(packedPatches, "buildpkg4", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
+			if patchErr := patches.Patch(packedPatches, "buildpkg5", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
 				log.Fatal("Error: Failed to patch Clover installer (patch buildpkg.sh): ", patchErr)
 			}
 			// Load the patch
