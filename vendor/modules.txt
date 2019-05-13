@@ -1,12 +1,12 @@
-# github.com/Unknwon/com v0.0.0-20181010210213-41959bdd855f
+# github.com/Unknwon/com v0.0.0-20190321035513-0fed4efef755
 github.com/Unknwon/com
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
-# github.com/briandowns/spinner v0.0.0-20181029155426-195c31b675a7
+# github.com/briandowns/spinner v0.0.0-20190319032542-ac46072a5a91
 github.com/briandowns/spinner
 # github.com/common-nighthawk/go-figure v0.0.0-20180619031829-18b2b544842c
 github.com/common-nighthawk/go-figure
-# github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76
+# github.com/dsnet/compress v0.0.1
 github.com/dsnet/compress/bzip2
 github.com/dsnet/compress/bzip2/internal/sais
 github.com/dsnet/compress/internal
@@ -38,11 +38,11 @@ github.com/gobuffalo/packr/v2/plog
 github.com/gobuffalo/packr/v2/file/resolver/encoding/hex
 # github.com/gobuffalo/syncx v0.0.0-20190224160051-33c29581e754
 github.com/gobuffalo/syncx
-# github.com/gogits/git-module v0.0.0-20181215045336-0b61102314d3
+# github.com/gogits/git-module v0.0.0-20190412001904-d1773fe06f37
 github.com/gogits/git-module
-# github.com/golang/protobuf v1.2.0
+# github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
-# github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db
+# github.com/golang/snappy v0.0.1
 github.com/golang/snappy
 # github.com/google/go-github v17.0.0+incompatible
 github.com/google/go-github/github
@@ -56,7 +56,7 @@ github.com/inconshreveable/go-update/internal/osext
 github.com/inconshreveable/mousetrap
 # github.com/joho/godotenv v1.3.0
 github.com/joho/godotenv
-# github.com/karrick/godirwalk v1.8.2
+# github.com/karrick/godirwalk v1.10.3
 github.com/karrick/godirwalk
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
@@ -64,21 +64,21 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/markbates/oncer
 # github.com/markbates/safe v1.0.1
 github.com/markbates/safe
-# github.com/mattn/go-colorable v0.0.9
+# github.com/mattn/go-colorable v0.1.1
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.4
+# github.com/mattn/go-isatty v0.0.7
 github.com/mattn/go-isatty
-# github.com/mcuadros/go-version v0.0.0-20180611085657-6d5863ca60fa
+# github.com/mcuadros/go-version v0.0.0-20190308113854-92cdf37c5b75
 github.com/mcuadros/go-version
 # github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 github.com/mgutz/ansi
 # github.com/mholt/archiver v3.1.1+incompatible
 github.com/mholt/archiver
-# github.com/mitchellh/go-homedir v1.0.0
+# github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/otiai10/copy v0.0.0-20180813032824-7e9a647135a1
+# github.com/otiai10/copy v1.0.1
 github.com/otiai10/copy
 # github.com/pierrec/lz4 v2.0.5+incompatible
 github.com/pierrec/lz4
@@ -99,7 +99,7 @@ github.com/spf13/cobra
 github.com/spf13/pflag
 # github.com/tcnksm/go-gitconfig v0.1.2
 github.com/tcnksm/go-gitconfig
-# github.com/ulikunitz/xz v0.5.5
+# github.com/ulikunitz/xz v0.5.6
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
@@ -108,18 +108,18 @@ github.com/ulikunitz/xz/internal/hash
 github.com/x-cray/logrus-prefixed-formatter
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 github.com/xi2/xz
-# golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734
+# golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c
+# golang.org/x/net v0.0.0-20190509222800-a4d6f7feada5
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/context
-# golang.org/x/oauth2 v0.0.0-20190115181402-5dab4167f31c
+# golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20190502175342-a43fa875dd82
+# golang.org/x/sys v0.0.0-20190509141414-a5b02f93d862
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/tools v0.0.0-20190503185657-3b6f9c0030f7
+# golang.org/x/tools v0.0.0-20190511041617-99f201b6807e
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/imports
 golang.org/x/tools/go/packages
@@ -130,7 +130,7 @@ golang.org/x/tools/go/internal/packagesdriver
 golang.org/x/tools/internal/semver
 golang.org/x/tools/internal/fastwalk
 golang.org/x/tools/go/internal/gcimporter
-# google.golang.org/appengine v1.4.0
+# google.golang.org/appengine v1.5.0
 google.golang.org/appengine/urlfetch
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/urlfetch

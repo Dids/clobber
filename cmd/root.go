@@ -211,10 +211,13 @@ var rootCmd = &cobra.Command{
 
 			// Build gettext, mtoc and nasm (if necessary)
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
-				log.Debug("Building gettext..")
-				Spinner.Prefix = formatSpinnerText("Building gettext", false)
-				runCommand(util.GetCloverPath() + "/buildgettext.sh")
-				Spinner.Prefix = formatSpinnerText("Building gettext", true)
+				log.Debug("Linking gettext..")
+				Spinner.Prefix = formatSpinnerText("Linking gettext", false)
+				runCommand("brew link gettext --force")
+				defer runCommand("brew unlink gettext")
+				runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin")
+				runCommand("ln -sf /usr/local/bin/gettext " + util.GetSourcePath() + "/opt/local/bin/gettext")
+				Spinner.Prefix = formatSpinnerText("Linking gettext", true)
 			}
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
 				log.Debug("Building mtoc..")
