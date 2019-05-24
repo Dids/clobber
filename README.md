@@ -1,16 +1,6 @@
 [![Build Status](https://travis-ci.org/Dids/clobber.svg?branch=master)](https://travis-ci.org/Dids/clobber)
 
-# Clobber
-
-```
- ___    _      _____  ___    ___    ___    ___
-(  _`\ ( )    (  _  )(  _`\ (  _`\ (  _`\ |  _`\
-| ( (_)| |    | ( ) || (_) )| (_) )| (_(_)| (_) )
-| |  _ | |  _ | | | ||  _ <'|  _ <'|  _)_ | ,  /
-| (_( )| |_( )| (_) || (_) )| (_) )| (_( )| |\ \
-(____/'(____/'(_____)(____/'(____/'(____/'(_) (_)
-                                         by @Dids
-```
+<img alt="Clobber" src="https://repository-images.githubusercontent.com/138838737/0b263100-7e70-11e9-8223-f6d177e88cca" width="640" height="320"/>
 
 Clobber is command-line application for building [Clover](https://sourceforge.net/projects/cloverefiboot/).
 
