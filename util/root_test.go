@@ -14,8 +14,8 @@ func TestGetCloverPath(t *testing.T) {
 	}
 }
 
-func TestGetUdkPath(t *testing.T) {
-	path := GetUdkPath()
+func TestGetEdkPath(t *testing.T) {
+	path := GetEdkPath()
 	if !isValidPath(path) {
 		t.Errorf("Invalid path: %s", path)
 	}

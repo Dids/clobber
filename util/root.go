@@ -33,11 +33,11 @@ func GetLogsPath() string {
 
 // GetCloverPath returns the full path to Clover
 func GetCloverPath() string {
-	return GetUdkPath() + "/Clover"
+	return GetEdkPath() + "/Clover"
 }
 
-// GetUdkPath returns the full path to EDK/UDK
-func GetUdkPath() string {
+// GetEdkPath returns the full path to EDK
+func GetEdkPath() string {
 	return GetSourcePath() + "/edk2"
 }
 
@@ -97,9 +97,9 @@ func GetVersionDump() string {
 	clangVersion := clangVersionSplit[0]
 	result += string(clangVersion) + "\n"
 
-	// Get EDK2/UDK2018 version
+	// Get EDK
 	getEdkVersionCommand := exec.Command("git", "rev-parse", "HEAD")
-	getEdkVersionCommand.Dir = GetUdkPath()
+	getEdkVersionCommand.Dir = GetEdkPath()
 	edkVersionOutput, edkVersionErr := getEdkVersionCommand.CombinedOutput()
 	if edkVersionErr != nil {
 		log.Fatal("Failed to get edk2 version:", edkVersionErr, string(edkVersionOutput))

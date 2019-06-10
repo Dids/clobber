@@ -132,31 +132,33 @@ var rootCmd = &cobra.Command{
 		}
 		Spinner.Prefix = formatSpinnerText("Verifying folder structure", true)
 
-		// Download UDK2018
-		if _, err := os.Stat(util.GetUdkPath() + "/.git"); os.IsNotExist(err) {
-			// If UDK2018 is missing and we're only supposed to build, we can't continue any further
+		// Download EDK
+		if _, err := os.Stat(util.GetEdkPath() + "/.git"); os.IsNotExist(err) {
+			// If EDK is missing and we're only supposed to build, we can't continue any further
 			if BuildOnly {
-				log.Fatal("Error: UDK2018 is missing and using --build-only, cannot continue")
+				log.Fatal("Error: EDK is missing and using --build-only, cannot continue")
 			}
 			if InstallerOnly {
-				log.Fatal("Error: UDK2018 is missing and using --installer-only, cannot continue")
+				log.Fatal("Error: EDK is missing and using --installer-only, cannot continue")
 			}
-			log.Debug("UDK2018 is missing, downloading..")
-			Spinner.Prefix = formatSpinnerText("Downloading UDK2018", false)
-			git.Clone("https://github.com/tianocore/edk2", util.GetUdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
-			Spinner.Prefix = formatSpinnerText("Downloading UDK2018", true)
+			log.Debug("EDK is missing, downloading..")
+			Spinner.Prefix = formatSpinnerText("Downloading EDK", false)
+			// git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
+			git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "edk2-stable201903", Bare: false, Quiet: Verbose})
+			// git.Clone("https://github.com/acidanthera/audk", util.GetEdkPath(), git.CloneRepoOptions{Branch: "master", Bare: false, Quiet: Verbose})
+			Spinner.Prefix = formatSpinnerText("Downloading EDK", true)
 		}
 
-		// Update UDK2018
+		// Update EDK
 		if !BuildOnly && !InstallerOnly {
-			log.Debug("Verifying UDK2018 is up to date..")
-			Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", false)
+			log.Debug("Verifying EDK is up to date..")
+			Spinner.Prefix = formatSpinnerText("Verifying EDK is up to date", false)
 			// Disable cleaning up of extra files if the NoClean flag is set
 			if !NoClean {
-				runCommand("cd " + util.GetUdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
+				runCommand("cd " + util.GetEdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
 			}
-			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "UDK2018"})
-			Spinner.Prefix = formatSpinnerText("Verifying UDK2018 is up to date", true)
+			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "EDK"})
+			Spinner.Prefix = formatSpinnerText("Verifying EDK is up to date", true)
 		}
 
 		// Download Clover
@@ -200,14 +202,14 @@ var rootCmd = &cobra.Command{
 			// Build base tools
 			log.Debug("Building base tools..")
 			Spinner.Prefix = formatSpinnerText("Building base tools", false)
-			runCommand("make -C" + " " + util.GetUdkPath() + "/BaseTools/Source/C")
+			runCommand("make -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C")
 			Spinner.Prefix = formatSpinnerText("Building base tools", true)
 
-			// Setup UDK
-			log.Debug("Setting up UDK..")
-			Spinner.Prefix = formatSpinnerText("Setting up UDK", false)
-			runCommand("cd " + util.GetUdkPath() + " && " + "source edksetup.sh")
-			Spinner.Prefix = formatSpinnerText("Setting up UDK", true)
+			// Setup EDK
+			log.Debug("Setting up EDK..")
+			Spinner.Prefix = formatSpinnerText("Setting up EDK", false)
+			runCommand("cd " + util.GetEdkPath() + " && " + "source edksetup.sh")
+			Spinner.Prefix = formatSpinnerText("Setting up EDK", true)
 
 			// Build gettext, mtoc and nasm (if necessary)
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
@@ -232,13 +234,13 @@ var rootCmd = &cobra.Command{
 				Spinner.Prefix = formatSpinnerText("Building nasm", true)
 			}
 
-			// Apply UDK patches
-			log.Debug("Applying patches for UDK..")
-			Spinner.Prefix = formatSpinnerText("Applying UDK patches", false)
-			copyErr := copy.Copy(util.GetCloverPath()+"/Patches_for_UDK2018", util.GetUdkPath())
-			Spinner.Prefix = formatSpinnerText("Applying UDK patches", true)
+			// Apply EDK patches
+			log.Debug("Applying patches for EDK..")
+			Spinner.Prefix = formatSpinnerText("Applying EDK patches", false)
+			copyErr := copy.Copy(util.GetCloverPath()+"/Patches_for_EDK2", util.GetEdkPath())
+			Spinner.Prefix = formatSpinnerText("Applying EDK patches", true)
 			if copyErr != nil {
-				log.Fatal("Error: Failed to copy UDK patches: ", copyErr)
+				log.Fatal("Error: Failed to copy EDK patches: ", copyErr)
 			}
 
 			// NOTE: Disabled because ebuild.sh was officially "fixed" again..
