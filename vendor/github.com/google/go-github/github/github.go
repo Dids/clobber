@@ -378,4 +378,617 @@ type Response struct {
 	Rate
 }
 
-// newResponse creates a new Response 
+// newResponse creates a new Response for the provided http.Response.
+// r must not be nil.
+func newResponse(r *http.Response) *Response {
+	response := &Response{Response: r}
+	response.populatePageValues()
+	response.Rate = parseRate(r)
+	return response
+}
+
+// populatePageValues parses the HTTP Link response headers and populates the
+// various pagination link values in the Response.
+func (r *Response) populatePageValues() {
+	if links, ok := r.Response.Header["Link"]; ok && len(links) > 0 {
+		for _, link := range strings.Split(links[0], ",") {
+			segments := strings.Split(strings.TrimSpace(link), ";")
+
+			// link must at least have href and rel
+			if len(segments) < 2 {
+				continue
+			}
+
+			// ensure href is properly formatted
+			if !strings.HasPrefix(segments[0], "<") || !strings.HasSuffix(segments[0], ">") {
+				continue
+			}
+
+			// try to pull out page parameter
+			url, err := url.Parse(segments[0][1 : len(segments[0])-1])
+			if err != nil {
+				continue
+			}
+			page := url.Query().Get("page")
+			if page == "" {
+				continue
+			}
+
+			for _, segment := range segments[1:] {
+				switch strings.TrimSpace(segment) {
+				case `rel="next"`:
+					r.NextPage, _ = strconv.Atoi(page)
+				case `rel="prev"`:
+					r.PrevPage, _ = strconv.Atoi(page)
+				case `rel="first"`:
+					r.FirstPage, _ = strconv.Atoi(page)
+				case `rel="last"`:
+					r.LastPage, _ = strconv.Atoi(page)
+				}
+
+			}
+		}
+	}
+}
+
+// parseRate parses the rate related headers.
+func parseRate(r *http.Response) Rate {
+	var rate Rate
+	if limit := r.Header.Get(headerRateLimit); limit != "" {
+		rate.Limit, _ = strconv.Atoi(limit)
+	}
+	if remaining := r.Header.Get(headerRateRemaining); remaining != "" {
+		rate.Remaining, _ = strconv.Atoi(remaining)
+	}
+	if reset := r.Header.Get(headerRateReset); reset != "" {
+		if v, _ := strconv.ParseInt(reset, 10, 64); v != 0 {
+			rate.Reset = Timestamp{time.Unix(v, 0)}
+		}
+	}
+	return rate
+}
+
+// Do sends an API request and returns the API response. The API response is
+// JSON decoded and stored in the value pointed to by v, or returned as an
+// error if an API error has occurred. If v implements the io.Writer
+// interface, the raw response body will be written to v, without attempting to
+// first decode it. If rate limit is exceeded and reset time is in the future,
+// Do returns *RateLimitError immediately without making a network API call.
+//
+// The provided ctx must be non-nil. If it is canceled or times out,
+// ctx.Err() will be returned.
+func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Response, error) {
+	req = withContext(ctx, req)
+
+	rateLimitCategory := category(req.URL.Path)
+
+	// If we've hit rate limit, don't make further requests before Reset time.
+	if err := c.checkRateLimitBeforeDo(req, rateLimitCategory); err != nil {
+		return &Response{
+			Response: err.Response,
+			Rate:     err.Rate,
+		}, err
+	}
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		// If we got an error, and the context has been canceled,
+		// the context's error is probably more useful.
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+
+		// If the error type is *url.Error, sanitize its URL before returning.
+		if e, ok := err.(*url.Error); ok {
+			if url, err := url.Parse(e.URL); err == nil {
+				e.URL = sanitizeURL(url).String()
+				return nil, e
+			}
+		}
+
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	response := newResponse(resp)
+
+	c.rateMu.Lock()
+	c.rateLimits[rateLimitCategory] = response.Rate
+	c.rateMu.Unlock()
+
+	err = CheckResponse(resp)
+	if err != nil {
+		// Even though there was an error, we still return the response
+		// in case the caller wants to inspect it further.
+		// However, if the error is AcceptedError, decode it below before
+		// returning from this function and closing the response body.
+		if _, ok := err.(*AcceptedError); !ok {
+			return response, err
+		}
+	}
+
+	if v != nil {
+		if w, ok := v.(io.Writer); ok {
+			io.Copy(w, resp.Body)
+		} else {
+			decErr := json.NewDecoder(resp.Body).Decode(v)
+			if decErr == io.EOF {
+				decErr = nil // ignore EOF errors caused by empty response body
+			}
+			if decErr != nil {
+				err = decErr
+			}
+		}
+	}
+
+	return response, err
+}
+
+// checkRateLimitBeforeDo does not make any network calls, but uses existing knowledge from
+// current client state in order to quickly check if *RateLimitError can be immediately returned
+// from Client.Do, and if so, returns it so that Client.Do can skip making a network API call unnecessarily.
+// Otherwise it returns nil, and Client.Do should proceed normally.
+func (c *Client) checkRateLimitBeforeDo(req *http.Request, rateLimitCategory rateLimitCategory) *RateLimitError {
+	c.rateMu.Lock()
+	rate := c.rateLimits[rateLimitCategory]
+	c.rateMu.Unlock()
+	if !rate.Reset.Time.IsZero() && rate.Remaining == 0 && time.Now().Before(rate.Reset.Time) {
+		// Create a fake response.
+		resp := &http.Response{
+			Status:     http.StatusText(http.StatusForbidden),
+			StatusCode: http.StatusForbidden,
+			Request:    req,
+			Header:     make(http.Header),
+			Body:       ioutil.NopCloser(strings.NewReader("")),
+		}
+		return &RateLimitError{
+			Rate:     rate,
+			Response: resp,
+			Message:  fmt.Sprintf("API rate limit of %v still exceeded until %v, not making remote request.", rate.Limit, rate.Reset.Time),
+		}
+	}
+
+	return nil
+}
+
+/*
+An ErrorResponse reports one or more errors caused by an API request.
+
+GitHub API docs: https://developer.github.com/v3/#client-errors
+*/
+type ErrorResponse struct {
+	Response *http.Response // HTTP response that caused this error
+	Message  string         `json:"message"` // error message
+	Errors   []Error        `json:"errors"`  // more detail on individual errors
+	// Block is only populated on certain types of errors such as code 451.
+	// See https://developer.github.com/changes/2016-03-17-the-451-status-code-is-now-supported/
+	// for more information.
+	Block *struct {
+		Reason    string     `json:"reason,omitempty"`
+		CreatedAt *Timestamp `json:"created_at,omitempty"`
+	} `json:"block,omitempty"`
+	// Most errors will also include a documentation_url field pointing
+	// to some content that might help you resolve the error, see
+	// https://developer.github.com/v3/#client-errors
+	DocumentationURL string `json:"documentation_url,omitempty"`
+}
+
+func (r *ErrorResponse) Error() string {
+	return fmt.Sprintf("%v %v: %d %v %+v",
+		r.Response.Request.Method, sanitizeURL(r.Response.Request.URL),
+		r.Response.StatusCode, r.Message, r.Errors)
+}
+
+// TwoFactorAuthError occurs when using HTTP Basic Authentication for a user
+// that has two-factor authentication enabled. The request can be reattempted
+// by providing a one-time password in the request.
+type TwoFactorAuthError ErrorResponse
+
+func (r *TwoFactorAuthError) Error() string { return (*ErrorResponse)(r).Error() }
+
+// RateLimitError occurs when GitHub returns 403 Forbidden response with a rate limit
+// remaining value of 0, and error message starts with "API rate limit exceeded for ".
+type RateLimitError struct {
+	Rate     Rate           // Rate specifies last known rate limit for the client
+	Response *http.Response // HTTP response that caused this error
+	Message  string         `json:"message"` // error message
+}
+
+func (r *RateLimitError) Error() string {
+	return fmt.Sprintf("%v %v: %d %v %v",
+		r.Response.Request.Method, sanitizeURL(r.Response.Request.URL),
+		r.Response.StatusCode, r.Message, formatRateReset(r.Rate.Reset.Time.Sub(time.Now())))
+}
+
+// AcceptedError occurs when GitHub returns 202 Accepted response with an
+// empty body, which means a job was scheduled on the GitHub side to process
+// the information needed and cache it.
+// Technically, 202 Accepted is not a real error, it's just used to
+// indicate that results are not ready yet, but should be available soon.
+// The request can be repeated after some time.
+type AcceptedError struct{}
+
+func (*AcceptedError) Error() string {
+	return "job scheduled on GitHub side; try again later"
+}
+
+// AbuseRateLimitError occurs when GitHub returns 403 Forbidden response with the
+// "documentation_url" field value equal to "https://developer.github.com/v3/#abuse-rate-limits".
+type AbuseRateLimitError struct {
+	Response *http.Response // HTTP response that caused this error
+	Message  string         `json:"message"` // error message
+
+	// RetryAfter is provided with some abuse rate limit errors. If present,
+	// it is the amount of time that the client should wait before retrying.
+	// Otherwise, the client should try again later (after an unspecified amount of time).
+	RetryAfter *time.Duration
+}
+
+func (r *AbuseRateLimitError) Error() string {
+	return fmt.Sprintf("%v %v: %d %v",
+		r.Response.Request.Method, sanitizeURL(r.Response.Request.URL),
+		r.Response.StatusCode, r.Message)
+}
+
+// sanitizeURL redacts the client_secret parameter from the URL which may be
+// exposed to the user.
+func sanitizeURL(uri *url.URL) *url.URL {
+	if uri == nil {
+		return nil
+	}
+	params := uri.Query()
+	if len(params.Get("client_secret")) > 0 {
+		params.Set("client_secret", "REDACTED")
+		uri.RawQuery = params.Encode()
+	}
+	return uri
+}
+
+/*
+An Error reports more details on an individual error in an ErrorResponse.
+These are the possible validation error codes:
+
+    missing:
+        resource does not exist
+    missing_field:
+        a required field on a resource has not been set
+    invalid:
+        the formatting of a field is invalid
+    already_exists:
+        another resource has the same valid as this field
+    custom:
+        some resources return this (e.g. github.User.CreateKey()), additional
+        information is set in the Message field of the Error
+
+GitHub API docs: https://developer.github.com/v3/#client-errors
+*/
+type Error struct {
+	Resource string `json:"resource"` // resource on which the error occurred
+	Field    string `json:"field"`    // field on which the error occurred
+	Code     string `json:"code"`     // validation error code
+	Message  string `json:"message"`  // Message describing the error. Errors with Code == "custom" will always have this set.
+}
+
+func (e *Error) Error() string {
+	return fmt.Sprintf("%v error caused by %v field on %v resource",
+		e.Code, e.Field, e.Resource)
+}
+
+// CheckResponse checks the API response for errors, and returns them if
+// present. A response is considered an error if it has a status code outside
+// the 200 range or equal to 202 Accepted.
+// API error responses are expected to have either no response
+// body, or a JSON response body that maps to ErrorResponse. Any other
+// response body will be silently ignored.
+//
+// The error type will be *RateLimitError for rate limit exceeded errors,
+// *AcceptedError for 202 Accepted status codes,
+// and *TwoFactorAuthError for two-factor authentication errors.
+func CheckResponse(r *http.Response) error {
+	if r.StatusCode == http.StatusAccepted {
+		return &AcceptedError{}
+	}
+	if c := r.StatusCode; 200 <= c && c <= 299 {
+		return nil
+	}
+	errorResponse := &ErrorResponse{Response: r}
+	data, err := ioutil.ReadAll(r.Body)
+	if err == nil && data != nil {
+		json.Unmarshal(data, errorResponse)
+	}
+	switch {
+	case r.StatusCode == http.StatusUnauthorized && strings.HasPrefix(r.Header.Get(headerOTP), "required"):
+		return (*TwoFactorAuthError)(errorResponse)
+	case r.StatusCode == http.StatusForbidden && r.Header.Get(headerRateRemaining) == "0" && strings.HasPrefix(errorResponse.Message, "API rate limit exceeded for "):
+		return &RateLimitError{
+			Rate:     parseRate(r),
+			Response: errorResponse.Response,
+			Message:  errorResponse.Message,
+		}
+	case r.StatusCode == http.StatusForbidden && strings.HasSuffix(errorResponse.DocumentationURL, "/v3/#abuse-rate-limits"):
+		abuseRateLimitError := &AbuseRateLimitError{
+			Response: errorResponse.Response,
+			Message:  errorResponse.Message,
+		}
+		if v := r.Header["Retry-After"]; len(v) > 0 {
+			// According to GitHub support, the "Retry-After" header value will be
+			// an integer which represents the number of seconds that one should
+			// wait before resuming making requests.
+			retryAfterSeconds, _ := strconv.ParseInt(v[0], 10, 64) // Error handling is noop.
+			retryAfter := time.Duration(retryAfterSeconds) * time.Second
+			abuseRateLimitError.RetryAfter = &retryAfter
+		}
+		return abuseRateLimitError
+	default:
+		return errorResponse
+	}
+}
+
+// parseBoolResponse determines the boolean result from a GitHub API response.
+// Several GitHub API methods return boolean responses indicated by the HTTP
+// status code in the response (true indicated by a 204, false indicated by a
+// 404). This helper function will determine that result and hide the 404
+// error if present. Any other error will be returned through as-is.
+func parseBoolResponse(err error) (bool, error) {
+	if err == nil {
+		return true, nil
+	}
+
+	if err, ok := err.(*ErrorResponse); ok && err.Response.StatusCode == http.StatusNotFound {
+		// Simply false. In this one case, we do not pass the error through.
+		return false, nil
+	}
+
+	// some other real error occurred
+	return false, err
+}
+
+// Rate represents the rate limit for the current client.
+type Rate struct {
+	// The number of requests per hour the client is currently limited to.
+	Limit int `json:"limit"`
+
+	// The number of remaining requests the client can make this hour.
+	Remaining int `json:"remaining"`
+
+	// The time at which the current rate limit will reset.
+	Reset Timestamp `json:"reset"`
+}
+
+func (r Rate) String() string {
+	return Stringify(r)
+}
+
+// RateLimits represents the rate limits for the current client.
+type RateLimits struct {
+	// The rate limit for non-search API requests. Unauthenticated
+	// requests are limited to 60 per hour. Authenticated requests are
+	// limited to 5,000 per hour.
+	//
+	// GitHub API docs: https://developer.github.com/v3/#rate-limiting
+	Core *Rate `json:"core"`
+
+	// The rate limit for search API requests. Unauthenticated requests
+	// are limited to 10 requests per minutes. Authenticated requests are
+	// limited to 30 per minute.
+	//
+	// GitHub API docs: https://developer.github.com/v3/search/#rate-limit
+	Search *Rate `json:"search"`
+}
+
+func (r RateLimits) String() string {
+	return Stringify(r)
+}
+
+type rateLimitCategory uint8
+
+const (
+	coreCategory rateLimitCategory = iota
+	searchCategory
+
+	categories // An array of this length will be able to contain all rate limit categories.
+)
+
+// category returns the rate limit category of the endpoint, determined by Request.URL.Path.
+func category(path string) rateLimitCategory {
+	switch {
+	default:
+		return coreCategory
+	case strings.HasPrefix(path, "/search/"):
+		return searchCategory
+	}
+}
+
+// RateLimits returns the rate limits for the current client.
+func (c *Client) RateLimits(ctx context.Context) (*RateLimits, *Response, error) {
+	req, err := c.NewRequest("GET", "rate_limit", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	response := new(struct {
+		Resources *RateLimits `json:"resources"`
+	})
+	resp, err := c.Do(ctx, req, response)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if response.Resources != nil {
+		c.rateMu.Lock()
+		if response.Resources.Core != nil {
+			c.rateLimits[coreCategory] = *response.Resources.Core
+		}
+		if response.Resources.Search != nil {
+			c.rateLimits[searchCategory] = *response.Resources.Search
+		}
+		c.rateMu.Unlock()
+	}
+
+	return response.Resources, resp, nil
+}
+
+/*
+UnauthenticatedRateLimitedTransport allows you to make unauthenticated calls
+that need to use a higher rate limit associated with your OAuth application.
+
+	t := &github.UnauthenticatedRateLimitedTransport{
+		ClientID:     "your app's client ID",
+		ClientSecret: "your app's client secret",
+	}
+	client := github.NewClient(t.Client())
+
+This will append the querystring params client_id=xxx&client_secret=yyy to all
+requests.
+
+See https://developer.github.com/v3/#unauthenticated-rate-limited-requests for
+more information.
+*/
+type UnauthenticatedRateLimitedTransport struct {
+	// ClientID is the GitHub OAuth client ID of the current application, which
+	// can be found by selecting its entry in the list at
+	// https://github.com/settings/applications.
+	ClientID string
+
+	// ClientSecret is the GitHub OAuth client secret of the current
+	// application.
+	ClientSecret string
+
+	// Transport is the underlying HTTP transport to use when making requests.
+	// It will default to http.DefaultTransport if nil.
+	Transport http.RoundTripper
+}
+
+// RoundTrip implements the RoundTripper interface.
+func (t *UnauthenticatedRateLimitedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.ClientID == "" {
+		return nil, errors.New("t.ClientID is empty")
+	}
+	if t.ClientSecret == "" {
+		return nil, errors.New("t.ClientSecret is empty")
+	}
+
+	// To set extra querystring params, we must make a copy of the Request so
+	// that we don't modify the Request we were given. This is required by the
+	// specification of http.RoundTripper.
+	//
+	// Since we are going to modify only req.URL here, we only need a deep copy
+	// of req.URL.
+	req2 := new(http.Request)
+	*req2 = *req
+	req2.URL = new(url.URL)
+	*req2.URL = *req.URL
+
+	q := req2.URL.Query()
+	q.Set("client_id", t.ClientID)
+	q.Set("client_secret", t.ClientSecret)
+	req2.URL.RawQuery = q.Encode()
+
+	// Make the HTTP request.
+	return t.transport().RoundTrip(req2)
+}
+
+// Client returns an *http.Client that makes requests which are subject to the
+// rate limit of your OAuth application.
+func (t *UnauthenticatedRateLimitedTransport) Client() *http.Client {
+	return &http.Client{Transport: t}
+}
+
+func (t *UnauthenticatedRateLimitedTransport) transport() http.RoundTripper {
+	if t.Transport != nil {
+		return t.Transport
+	}
+	return http.DefaultTransport
+}
+
+// BasicAuthTransport is an http.RoundTripper that authenticates all requests
+// using HTTP Basic Authentication with the provided username and password. It
+// additionally supports users who have two-factor authentication enabled on
+// their GitHub account.
+type BasicAuthTransport struct {
+	Username string // GitHub username
+	Password string // GitHub password
+	OTP      string // one-time password for users with two-factor auth enabled
+
+	// Transport is the underlying HTTP transport to use when making requests.
+	// It will default to http.DefaultTransport if nil.
+	Transport http.RoundTripper
+}
+
+// RoundTrip implements the RoundTripper interface.
+func (t *BasicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// To set extra headers, we must make a copy of the Request so
+	// that we don't modify the Request we were given. This is required by the
+	// specification of http.RoundTripper.
+	//
+	// Since we are going to modify only req.Header here, we only need a deep copy
+	// of req.Header.
+	req2 := new(http.Request)
+	*req2 = *req
+	req2.Header = make(http.Header, len(req.Header))
+	for k, s := range req.Header {
+		req2.Header[k] = append([]string(nil), s...)
+	}
+
+	req2.SetBasicAuth(t.Username, t.Password)
+	if t.OTP != "" {
+		req2.Header.Set(headerOTP, t.OTP)
+	}
+	return t.transport().RoundTrip(req2)
+}
+
+// Client returns an *http.Client that makes requests that are authenticated
+// using HTTP Basic Authentication.
+func (t *BasicAuthTransport) Client() *http.Client {
+	return &http.Client{Transport: t}
+}
+
+func (t *BasicAuthTransport) transport() http.RoundTripper {
+	if t.Transport != nil {
+		return t.Transport
+	}
+	return http.DefaultTransport
+}
+
+// formatRateReset formats d to look like "[rate reset in 2s]" or
+// "[rate reset in 87m02s]" for the positive durations. And like "[rate limit was reset 87m02s ago]"
+// for the negative cases.
+func formatRateReset(d time.Duration) string {
+	isNegative := d < 0
+	if isNegative {
+		d *= -1
+	}
+	secondsTotal := int(0.5 + d.Seconds())
+	minutes := secondsTotal / 60
+	seconds := secondsTotal - minutes*60
+
+	var timeString string
+	if minutes > 0 {
+		timeString = fmt.Sprintf("%dm%02ds", minutes, seconds)
+	} else {
+		timeString = fmt.Sprintf("%ds", seconds)
+	}
+
+	if isNegative {
+		return fmt.Sprintf("[rate limit was reset %v ago]", timeString)
+	}
+	return fmt.Sprintf("[rate reset in %v]", timeString)
+}
+
+// Bool is a helper routine that allocates a new bool value
+// to store v and returns a pointer to it.
+func Bool(v bool) *bool { return &v }
+
+// Int is a helper routine that allocates a new int value
+// to store v and returns a pointer to it.
+func Int(v int) *int { return &v }
+
+// Int64 is a helper routine that allocates a new int64 value
+// to store v and returns a pointer to it.
+func Int64(v int64) *int64 { return &v }
+
+// String is a helper routine that allocates a new string value
+// to store v and returns a pointer to it.
+func String(v string) *string { return &v }
