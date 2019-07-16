@@ -13,13 +13,13 @@ import (
 	"github.com/Dids/clobber/util"
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/gobuffalo/packr/v2"
-	"github.com/sirupsen/logrus"
+	"github.com/mholt/archiver"
+	logrus "github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
-	"github.com/mholt/archiver"
 	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 )
@@ -76,6 +76,23 @@ type ClobberLogFormatter struct {
 // Format formats logs with the custom log format
 func (f *ClobberLogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	return []byte(entry.Message + "\n"), nil
+}
+
+// ErrorWriterHook handles logging errors in quiet/non-verbose mode
+type ErrorWriterHook struct {
+	Writer    io.Writer
+	LogLevels []logrus.Level
+}
+
+// Fire formats the error log and writes it to the output
+func (hook *ErrorWriterHook) Fire(entry *logrus.Entry) error {
+	_, err := hook.Writer.Write([]byte("\n\n" + entry.Message + "\n\nSee the log file for more details:\n" + util.GetLogFilePath() + "\n"))
+	return err
+}
+
+// Levels define on which log levels this hook would trigger
+func (hook *ErrorWriterHook) Levels() []logrus.Level {
+	return hook.LogLevels
 }
 
 // rootCmd is the Cobra command object
@@ -228,10 +245,13 @@ var rootCmd = &cobra.Command{
 				Spinner.Prefix = formatSpinnerText("Building mtoc", true)
 			}
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
-				log.Debug("Building nasm..")
-				Spinner.Prefix = formatSpinnerText("Building nasm", false)
-				runCommand(util.GetCloverPath() + "/buildnasm.sh")
-				Spinner.Prefix = formatSpinnerText("Building nasm", true)
+				log.Debug("Linking nasm..")
+				Spinner.Prefix = formatSpinnerText("Linking nasm", false)
+				runCommand("brew link nasm --force")
+				defer runCommand("brew unlink nasm")
+				runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin")
+				runCommand("ln -sf /usr/local/bin/nasm " + util.GetSourcePath() + "/opt/local/bin/nasm")
+				Spinner.Prefix = formatSpinnerText("Linking nasm", true)
 			}
 
 			// Apply EDK patches
@@ -243,31 +263,105 @@ var rootCmd = &cobra.Command{
 				log.Fatal("Error: Failed to copy EDK patches: ", copyErr)
 			}
 
-			// NOTE: Disabled because ebuild.sh was officially "fixed" again..
-			/* // Patch the Clover build script
+			// Patch Clover.dsc (eg. skip building ApfsDriverLoader)
 			log.Debug("Patching Clover build script..")
 			Spinner.Prefix = formatSpinnerText("Patching Clover build script", false)
-			if err := patches.Patch(packedPatches, "ebuild", util.GetCloverPath()+"/ebuild.sh"); err != nil {
+			if err := patches.Patch(packedPatches, "Clover.dsc", util.GetCloverPath()+"/Clover.dsc"); err != nil {
 				log.Fatal("Error: Failed to patch Clover build script: ", err)
 			}
-			Spinner.Prefix = formatSpinnerText("Patching Clover build script", true) */
+			Spinner.Prefix = formatSpinnerText("Patching Clover build script", true)
 
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
 			Spinner.Prefix = formatSpinnerText("Building Clover", false)
-			runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall") // TODO: Should this technically be ignored when using --no-clean?
-			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
-			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb --ext-co -D NO_GRUB_DRIVERS_EMBEDDED")
+			runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall")                                          // TODO: Should this technically be ignored when using --no-clean?
+			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 -D NO_GRUB_DRIVERS_EMBEDDED")              // 64-bit (boot6, default)
+			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb -D NO_GRUB_DRIVERS_EMBEDDED") // 64-bit (boot7, MCP/BiosBlockIO)
 			Spinner.Prefix = formatSpinnerText("Building Clover", true)
 		}
 
 		// Handle special cases when using BuildOnly/UpdateOnly
 		if !BuildOnly && !InstallerOnly {
-			// TODO: Add error handling for when HFSPlus.efi doesn't exist but running in BuildOnly mode?
 			// Download and install extra EFI drivers
 			log.Debug("Updating extra EFI drivers..")
 			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", false)
-			util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/drivers-Off/drivers64UEFI/HFSPlus.efi")
+
+			// Download and copy HFSPlus.efi
+			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/HFSPlus.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/HFSPlus.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+
+			// Download Acidanthera drivers
+			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AppleSupportPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AppleSupportPkg.zip"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
+			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AptioFixPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AptioFixPkg.zip"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			defer os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
+
+			// Extract Acidanthera drivers
+			if err := archiver.Unarchive(os.TempDir()+"AppleSupportPkg.zip", os.TempDir()+"AppleSupportPkg"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg")
+			if err := archiver.Unarchive(os.TempDir()+"AptioFixPkg.zip", os.TempDir()+"AptioFixPkg"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			defer os.RemoveAll(os.TempDir() + "AptioFixPkg")
+
+			// Copy ApfsDriverLoader.efi
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/ApfsDriverLoader.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/ApfsDriverLoader.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+
+			// Copy AppleUiSupport.efi
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/AppleUiSupport.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileVault2/AppleUiSupport.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/AppleUiSupport.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileVault2/AppleUiSupport.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			// }
+
+			// Copy UsbKbDxe.efi
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/UsbKbDxe.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/UsbKbDxe.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/UsbKbDxe.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/HID/UsbKbDxe.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			// }
+
+			// Copy VBoxHfs.efi
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/VBoxHfs.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/VBoxHfs.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+
+			// Copy AptioInputFix.efi
+			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioInputFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/AptioInputFix.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioInputFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/HID/AptioInputFix.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			// }
+
+			// Copy AptioMemoryFix.efi
+			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/MemoryFix/AptioMemoryFix.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			}
+			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/MemoryFix/AptioMemoryFix.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			// }
+
 			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", true)
 		}
 
@@ -317,14 +411,11 @@ var rootCmd = &cobra.Command{
 				}
 			}
 
-			// FIXME: When using "log.Fatal(...)" and running non-verbosely, the errors aren't shown to the user,
-			//        but they are written to the log file, but we really need the user to know what's wrong too..
-
 			// Patch the Clover installer package
-			if patchErr := patches.Patch(packedPatches, "buildpkg5", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
+			if patchErr := patches.Patch(packedPatches, "buildpkg6", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
 				log.Fatal("Error: Failed to patch Clover installer (patch buildpkg.sh): ", patchErr)
 			}
-			// Load the patch
+			// Load the installer image asset
 			backgroundPatch, backgroundPatchErr := packedAssets.Find("background.tiff")
 			if backgroundPatchErr != nil {
 				log.Fatal("Error: Failed to patch Clover installer (load background.tiff): ", backgroundPatchErr)
@@ -369,6 +460,7 @@ var rootCmd = &cobra.Command{
 				log.Debug("Building Clover ISO image..")
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", false)
 				runCommand(util.GetCloverPath() + "/CloverPackage/makeiso")
+				// FIXME: Error: don't call the '/Users/dids/.clobber/src/edk2/Clover/CloverPackage/makeiso' script directly !
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
 			}
 		}
@@ -410,22 +502,8 @@ func customInit() {
 	// Enable showing a proper timestamp
 	formatter.FullTimestamp = true
 
-	/*// Change the log format based on the current verbosity
-	if Verbose {
-		// Enable showing a proper timestamp
-		formatter.FullTimestamp = true
-	} else {
-		// Hide timestamp when running in non-verbose mode
-		formatter.DisableTimestamp = true
-	}*/
-
 	// Assign our logger to use the custom formatter
 	log.Formatter = formatter
-	/*if Verbose && !Quiet {
-		log.Formatter = formatter
-	} else if !Verbose && !Quiet {
-		log.Formatter = new(ClobberLogFormatter)
-	}*/
 
 	// Ensure the log file folder exists
 	mkdirErr := os.MkdirAll(util.GetLogsPath(), 0755)
@@ -444,19 +522,25 @@ func customInit() {
 	lumberjackLogger.Rotate()
 	logMultiWriter := io.MultiWriter(os.Stdout, lumberjackLogger)
 	if Quiet || !Verbose {
-		// Disable logging to console if running in quiet mode
+		// Disable logging to console if running in quiet/non-verbose mode
 		logMultiWriter = io.MultiWriter(ioutil.Discard, lumberjackLogger)
 	}
 	log.SetOutput(logMultiWriter)
-	//log.WriterLevel(logrus.DebugLevel)
 
-	// Set log level
+	// Set default log level
 	log.Level = logrus.DebugLevel
-	/*if Verbose == true {
-		log.Level = logrus.DebugLevel
-	} else {
-		log.Level = logrus.InfoLevel
-	}*/
+
+	// Setup our custom error writer hook, which prints errors in quiet/non-verbose mode
+	if Quiet || !Verbose {
+		log.AddHook(&ErrorWriterHook{
+			Writer: os.Stderr,
+			LogLevels: []logrus.Level{
+				logrus.PanicLevel,
+				logrus.FatalLevel,
+				logrus.ErrorLevel,
+			},
+		})
+	}
 }
 
 func runCommand(command string) {
@@ -476,9 +560,7 @@ func runCommand(command string) {
 		argsString = ""
 	}
 
-	//if Verbose {
 	log.Debug("Running command: '" + cmd + " " + argsString + "'")
-	//}
 
 	var (
 		cmdOut []byte
@@ -487,9 +569,16 @@ func runCommand(command string) {
 	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
 		log.Fatal("Error: Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
 	}
-	//if Verbose {
 	log.Debug("Command finished with output:\n" + string(cmdOut))
-	//}
+}
+
+func getGitHubReleaseLink(url string, filter string) string {
+	cmd := "curl -s " + url + " | grep \"" + filter + "\" | cut -d : -f 2,3 | tr -d \\\""
+	out, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		return fmt.Sprintf("Failed to execute command: %s", cmd)
+	}
+	return strings.TrimSpace(string(out))
 }
 
 func formatSpinnerText(text string, done bool) string {

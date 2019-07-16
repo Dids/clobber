@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"regexp"
 	"strings"
 	"time"
@@ -193,6 +194,68 @@ func DownloadFile(url string, path string) error {
 	return nil
 }
 
+// CopyFile will copy a single file from the source path
+// to the destination path
+func CopyFile(source string, destination string) error {
+	// Open the source file
+	sourceFile, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	// Create the destination file
+	destinationFile, err := os.Create(destination)
+	if err != nil {
+		return err
+	}
+	defer destinationFile.Close()
+
+	// Copy the source file to the destination file
+	if _, err := io.Copy(destinationFile, sourceFile); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CopyFiles will copy all files from the source directory,
+// to the destination directory (non-recursive, one level deep only)
+func CopyFiles(source string, destination string) error {
+	// Verify that the source exists
+	if _, err := os.Stat(source); err != nil {
+		return err
+	}
+
+	// Verify that the destination exists
+	if _, err := os.Stat(destination); err != nil {
+		return err
+	}
+
+	// Get details on the source directory
+	sourceInfo, err := ioutil.ReadDir(source)
+	if err != nil {
+		return err
+	}
+
+	// Loop through all source files
+	for _, sourceFileInfo := range sourceInfo {
+		// Verify that this is a file
+		if !sourceFileInfo.IsDir() {
+			// Get the source and destination file paths
+			sourceFilePath := path.Join(source, sourceFileInfo.Name())
+			destinationFilePath := path.Join(destination, sourceFileInfo.Name())
+
+			// Copy the file from source to destination
+			if err := CopyFile(sourceFilePath, destinationFilePath); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 // GenerateTimeString generates a human readable time string (eg. "1 hour, 2 minutes and 12 seconds")
 func GenerateTimeString(duration time.Duration) string {
 	// Create an empty time string
@@ -271,6 +334,20 @@ func GenerateTimeString(duration time.Duration) string {
 	}
 
 	return timeString
+}
+
+// GetLastLogLine returns the last line from the log file
+func GetLastLogLine() (string, error) {
+	file, err := os.Open(GetLogFilePath())
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	buffer := make([]byte, 62)
+	stat, err := os.Stat(GetLogFilePath())
+	start := stat.Size() - 62
+	_, err = file.ReadAt(buffer, start)
+	return string(buffer), err
 }
 
 // FIXME: Using GitHub API to check for updates might not be plausible,

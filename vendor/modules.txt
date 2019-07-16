@@ -17,30 +17,24 @@ github.com/dsnet/compress
 github.com/fatih/color
 # github.com/gobuffalo/envy v1.7.0
 github.com/gobuffalo/envy
-# github.com/gobuffalo/genny v0.1.1
-github.com/gobuffalo/genny
-# github.com/gobuffalo/gogen v0.1.1
-github.com/gobuffalo/gogen
-github.com/gobuffalo/gogen/goimports
-github.com/gobuffalo/gogen/gomods
-# github.com/gobuffalo/logger v0.0.0-20190315122211-86e12af44bc2
+# github.com/gobuffalo/logger v1.0.1
 github.com/gobuffalo/logger
-# github.com/gobuffalo/mapi v1.0.2
-github.com/gobuffalo/mapi
-# github.com/gobuffalo/packd v0.1.0
+# github.com/gobuffalo/packd v0.3.0
 github.com/gobuffalo/packd
-# github.com/gobuffalo/packr/v2 v2.3.2
+github.com/gobuffalo/packd/internal/takeon/github.com/markbates/errx
+# github.com/gobuffalo/packr/v2 v2.5.2
 github.com/gobuffalo/packr/v2
 github.com/gobuffalo/packr/v2/file
 github.com/gobuffalo/packr/v2/file/resolver
+github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/oncer
+github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/safe
 github.com/gobuffalo/packr/v2/jam/parser
 github.com/gobuffalo/packr/v2/plog
 github.com/gobuffalo/packr/v2/file/resolver/encoding/hex
-# github.com/gobuffalo/syncx v0.0.0-20190224160051-33c29581e754
-github.com/gobuffalo/syncx
+github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/errx
 # github.com/gogits/git-module v0.0.0-20190412001904-d1773fe06f37
 github.com/gogits/git-module
-# github.com/golang/protobuf v1.3.1
+# github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
 # github.com/golang/snappy v0.0.1
 github.com/golang/snappy
@@ -56,14 +50,10 @@ github.com/inconshreveable/go-update/internal/osext
 github.com/inconshreveable/mousetrap
 # github.com/joho/godotenv v1.3.0
 github.com/joho/godotenv
-# github.com/karrick/godirwalk v1.10.3
+# github.com/karrick/godirwalk v1.10.12
 github.com/karrick/godirwalk
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/markbates/oncer v0.0.0-20181203154359-bf2de49a0be2
-github.com/markbates/oncer
-# github.com/markbates/safe v1.0.1
-github.com/markbates/safe
 # github.com/mattn/go-colorable v0.1.2
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.8
@@ -83,8 +73,6 @@ github.com/otiai10/copy
 # github.com/pierrec/lz4 v2.0.5+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
-# github.com/pkg/errors v0.8.1
-github.com/pkg/errors
 # github.com/rhysd/go-github-selfupdate v1.1.0
 github.com/rhysd/go-github-selfupdate/selfupdate
 # github.com/rogpeppe/go-internal v1.3.0
@@ -108,29 +96,17 @@ github.com/ulikunitz/xz/internal/hash
 github.com/x-cray/logrus-prefixed-formatter
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 github.com/xi2/xz
-# golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
+# golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20190607181551-461777fb6f67
+# golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/context
 # golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20190610200419-93c9922d18ae
+# golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/tools v0.0.0-20190610231749-f8d1dee965f7
-golang.org/x/tools/go/ast/astutil
-golang.org/x/tools/imports
-golang.org/x/tools/internal/imports
-golang.org/x/tools/go/packages
-golang.org/x/tools/internal/gopathwalk
-golang.org/x/tools/internal/module
-golang.org/x/tools/go/gcexportdata
-golang.org/x/tools/go/internal/packagesdriver
-golang.org/x/tools/internal/semver
-golang.org/x/tools/internal/fastwalk
-golang.org/x/tools/go/internal/gcimporter
 # google.golang.org/appengine v1.6.1
 google.golang.org/appengine/urlfetch
 google.golang.org/appengine/internal
