@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Dids/clobber/patches"
+	"github.com/Dids/clobber/snake"
 	"github.com/Dids/clobber/util"
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/gobuffalo/packr/v2"
@@ -50,6 +51,9 @@ var NoClean bool
 
 // Spinner is the CLI spinner/activity indicator
 var Spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+
+// Hiss hiss, said the snake
+var Hiss bool
 
 // Create a new logger
 var log = logrus.New()
@@ -102,6 +106,14 @@ var rootCmd = &cobra.Command{
 	Long: `Clobber is a command-line application for building Clover.
 				 Built by @Dids with tons of love, sweat and tears.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// FIXME: Integrate this with the builder?!
+		if Hiss {
+			game := snake.NewGame()
+			game.Start()
+			log.Println("Clobber exiting")
+			return
+		}
+
 		// Measure execution time
 		executionStartTime := time.Now()
 
@@ -493,6 +505,11 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
 	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
 	rootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
+
+	// TODO: Enable this for public builds once it's done/working
+	if Version == "0.0.0" {
+		rootCmd.PersistentFlags().BoolVarP(&Hiss, "hiss", "", false, "that's Sir Hiss to you")
+	}
 }
 
 func customInit() {
