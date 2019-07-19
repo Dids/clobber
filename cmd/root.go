@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/Dids/clobber/patches"
@@ -54,6 +56,9 @@ var Spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
 // Hiss hiss, said the snake
 var Hiss bool
+
+// Controls whether to patch buildpkg.sh or not
+var patchBuildPkg = true
 
 // Create a new logger
 var log = logrus.New()
@@ -106,6 +111,14 @@ var rootCmd = &cobra.Command{
 	Long: `Clobber is a command-line application for building Clover.
 				 Built by @Dids with tons of love, sweat and tears.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// Setup graceful shutdown support
+		c := make(chan os.Signal)
+		signal.Notify(c, os.Interrupt, syscall.SIGINT)
+		go func() {
+			<-c
+			log.Fatal("CTRL-C detected, aborting..")
+		}()
+
 		// FIXME: Integrate this with the builder?!
 		if Hiss {
 			game := snake.NewGame()
@@ -299,38 +312,42 @@ var rootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", false)
 
 			// Download and copy HFSPlus.efi
-			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/HFSPlus.efi"); err != nil {
+			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/HFSPlus.efi"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
-			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/HFSPlus.efi"); err != nil {
+			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/BIOS/HFSPlus.efi"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 
 			// Download Acidanthera drivers
+			os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
 			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AppleSupportPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AppleSupportPkg.zip"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
+			os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
 			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AptioFixPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AptioFixPkg.zip"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
 
 			// Extract Acidanthera drivers
+			os.RemoveAll(os.TempDir() + "AppleSupportPkg")
 			if err := archiver.Unarchive(os.TempDir()+"AppleSupportPkg.zip", os.TempDir()+"AppleSupportPkg"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg")
+			os.RemoveAll(os.TempDir() + "AptioFixPkg")
 			if err := archiver.Unarchive(os.TempDir()+"AptioFixPkg.zip", os.TempDir()+"AptioFixPkg"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AptioFixPkg")
 
 			// Copy ApfsDriverLoader.efi
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/ApfsDriverLoader.efi"); err != nil {
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/ApfsDriverLoader.efi"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/ApfsDriverLoader.efi"); err != nil {
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/BIOS/ApfsDriverLoader.efi"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 
@@ -367,7 +384,7 @@ var rootCmd = &cobra.Command{
 			// }
 
 			// Copy AptioMemoryFix.efi
-			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/MemoryFix/AptioMemoryFix.efi"); err != nil {
+			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/AptioMemoryFix.efi"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/MemoryFix/AptioMemoryFix.efi"); err != nil {
@@ -424,8 +441,10 @@ var rootCmd = &cobra.Command{
 			}
 
 			// Patch the Clover installer package
-			if patchErr := patches.Patch(packedPatches, "buildpkg6", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
-				log.Fatal("Error: Failed to patch Clover installer (patch buildpkg.sh): ", patchErr)
+			if patchBuildPkg {
+				if patchErr := patches.Patch(packedPatches, "buildpkg6", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
+					log.Fatal("Error: Failed to patch Clover installer (patch buildpkg.sh): ", patchErr)
+				}
 			}
 			// Load the installer image asset
 			backgroundPatch, backgroundPatchErr := packedAssets.Find("background.tiff")
