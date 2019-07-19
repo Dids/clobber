@@ -60,6 +60,10 @@ var Hiss bool
 // Controls whether to patch buildpkg.sh or not
 var patchBuildPkg = true
 
+// TODO: Enable this for public builds once it's done/working
+// Controls the experimental hiss command
+var hissEnabled = false
+
 // Create a new logger
 var log = logrus.New()
 
@@ -120,7 +124,7 @@ var rootCmd = &cobra.Command{
 		}()
 
 		// FIXME: Integrate this with the builder?!
-		if Hiss {
+		if Hiss && hissEnabled {
 			game := snake.NewGame()
 			game.Start()
 			log.Println("Clobber exiting")
@@ -525,8 +529,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
 	rootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
 
-	// TODO: Enable this for public builds once it's done/working
-	if Version == "0.0.0" {
+	if hissEnabled {
 		rootCmd.PersistentFlags().BoolVarP(&Hiss, "hiss", "", false, "that's Sir Hiss to you")
 	}
 }
@@ -609,7 +612,11 @@ func runCommand(command string) {
 }
 
 func getGitHubReleaseLink(url string, filter string) string {
-	cmd := "curl -s " + url + " | grep \"" + filter + "\" | cut -d : -f 2,3 | tr -d \\\""
+	cmd := "curl"
+	if len(os.Getenv("GITHUB_API_TOKEN")) > 0 {
+		cmd += " -H \"Authorization: token " + os.Getenv("GITHUB_API_TOKEN") + "\""
+	}
+	cmd += " -s " + url + " | grep \"" + filter + "\" | cut -d : -f 2,3 | tr -d \\\""
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		return fmt.Sprintf("Failed to execute command: %s", cmd)

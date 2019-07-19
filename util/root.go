@@ -182,7 +182,11 @@ func DownloadFile(url string, path string) error {
 		return err
 	}
 	defer out.Close()
-	resp, err := http.Get(url)
+	req, err := http.NewRequest("GET", url, nil)
+	// if len(os.Getenv("GITHUB_API_TOKEN")) > 0 {
+	// 	req.Header.Set("Authorization", "token "+string(os.Getenv("GITHUB_API_TOKEN")))
+	// }
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
