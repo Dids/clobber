@@ -58,6 +58,8 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.8
 github.com/mattn/go-isatty
+# github.com/mattn/go-runewidth v0.0.4
+github.com/mattn/go-runewidth
 # github.com/mcuadros/go-version v0.0.0-20190308113854-92cdf37c5b75
 github.com/mcuadros/go-version
 # github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
@@ -66,6 +68,8 @@ github.com/mgutz/ansi
 github.com/mholt/archiver
 # github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
+# github.com/nsf/termbox-go v0.0.0-20190624072549-eeb6cd0a1762
+github.com/nsf/termbox-go
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
 # github.com/otiai10/copy v1.0.1

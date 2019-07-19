@@ -3,7 +3,7 @@ module github.com/Dids/clobber
 go 1.12
 
 require (
-	cloud.google.com/go v0.41.0 // indirect
+	cloud.google.com/go v0.43.0 // indirect
 	github.com/Unknwon/com v0.0.0-20190321035513-0fed4efef755 // indirect
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/briandowns/spinner v1.6.1
@@ -66,14 +66,12 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.etcd.io/bbolt v1.3.3 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
-	golang.org/x/exp v0.0.0-20190627132806-fd42eb6b336f // indirect
+	golang.org/x/exp v0.0.0-20190718202018-cfdd5522f6f6 // indirect
 	golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9 // indirect
-	golang.org/x/mobile v0.0.0-20190711165009-e47acb2ca7f9 // indirect
-	golang.org/x/mod v0.1.0 // indirect
+	golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
-	golang.org/x/tools v0.0.0-20190717194535-128ec6dfca09 // indirect
-	google.golang.org/genproto v0.0.0-20190716160619-c506a9f90610 // indirect
+	golang.org/x/tools v0.0.0-20190719005602-e377ae9d6386 // indirect
 	google.golang.org/grpc v1.22.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	honnef.co/go/tools v0.0.0-20190607181801-497c8f037f5a // indirect
