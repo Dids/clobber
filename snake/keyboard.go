@@ -9,29 +9,11 @@ import (
 // ListenKeyboard will start listening for keyboard events,
 // then emit them on the supplied channel as keys
 func ListenKeyboard(event chan termbox.Key) {
-	// TODO: What does this do?
 	termbox.SetInputMode(termbox.InputEsc)
-
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
-			event <- ev.Key // GetInputDirection(ev.Key)
-			// switch ev.Key {
-			// case termbox.KeyArrowLeft:
-			// 	event <- keyboardEvent{eventType: MOVE, key: ev.Key}
-			// case termbox.KeyArrowDown:
-			// 	event <- keyboardEvent{eventType: MOVE, key: ev.Key}
-			// case termbox.KeyArrowRight:
-			// 	event <- keyboardEvent{eventType: MOVE, key: ev.Key}
-			// case termbox.KeyArrowUp:
-			// 	event <- keyboardEvent{eventType: MOVE, key: ev.Key}
-			// case termbox.KeyEsc:
-			// 	event <- keyboardEvent{eventType: END, key: ev.Key}
-			// default:
-			// 	if ev.Ch == 'r' {
-			// 		event <- keyboardEvent{eventType: RETRY, key: ev.Key}
-			// 	}
-			// }
+			event <- ev.Key
 		case termbox.EventError:
 			log.Fatal(ev.Err)
 		}

@@ -67,6 +67,11 @@ func GetHomePath() string {
 	return home
 }
 
+// GetScorePath returns the path to the highscore file
+func GetScorePath() string {
+	return GetClobberPath() + "/.score"
+}
+
 // GetVersionDump returns a multi-line string containing the versions/commits
 // for important dependencies and environments, like OS and LLVM versions
 func GetVersionDump() string {

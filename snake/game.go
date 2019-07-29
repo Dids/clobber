@@ -3,20 +3,25 @@ package snake
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/nsf/termbox-go"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-const simulateMilliseconds = 100
+const millisecondsPerFrame = 16 // 16ms == 60fps
 
 // Game of sneaky snakey goodness
 type Game struct {
 	level *Level
 
-	// Score of the current game
-	score int // TODO: Add current and previous "highscore"
+	// Score information for the current game
+	score *Score
+
+	// Size of the terminal
+	size Size
 
 	// Done status of the game
 	done bool
@@ -30,7 +35,7 @@ type Game struct {
 func NewGame() *Game {
 	game := &Game{}
 
-	game.score = 0
+	game.score = NewScore()
 	game.done = false
 	game.exit = make(chan bool)
 	game.input = make(chan termbox.Key)
@@ -49,6 +54,7 @@ func NewGame() *Game {
 	if err != nil {
 		log.Fatal(err)
 	}
+	game.size = Size{terminalWidth, terminalHeight}
 
 	// FIXME: We might be able to call terminal.setSize() to control the size of our game, which would override resizing?
 
@@ -60,6 +66,11 @@ func NewGame() *Game {
 	if terminalHeight%2 != 0 {
 		terminalHeight--
 	}
+
+	// Adjust height for UI elements
+	// NOTE: Hyper works with -1, but Terminal requires -2
+	terminalHeight--
+	terminalHeight--
 
 	// Create the level, which creates the snake, apple etc.
 	game.level = NewLevel(game, Size{terminalWidth, terminalHeight}) // Divide by two to account for display character width
@@ -74,7 +85,7 @@ func NewGame() *Game {
 func (game *Game) IncrementScore() {
 	// log.Println("Incrementing game score from", game.score, "to", game.score+1)
 
-	game.score++
+	game.score.IncrementScore()
 }
 
 // Start will run the update loop in a goroutine
@@ -96,6 +107,18 @@ func (game *Game) Start() {
 	<-game.exit
 
 	log.Println("Game is ending")
+}
+
+// Restart the game
+func (game *Game) Restart() {
+	// Reset the game score
+	game.score = NewScore()
+
+	// Recreate the level
+	game.level = NewLevel(game, game.level.size)
+
+	// Clear the terminal screen to avoid artefacting
+	clearScreen()
 }
 
 // Update loop for the game
@@ -120,21 +143,44 @@ func (game *Game) update() {
 				return
 			}
 
+			// Keep track of the frame start time
+			frameStartTime := time.Now()
+
 			// Clear the terminal screen
 			clearScreen()
 
-			// Draw the score
-			fmt.Println("SCORE:", game.score)
+			// Update the level
+			game.level.Update()
+
+			// Draw the scores
+			scoreString := "SCORE: " + strconv.Itoa(game.score.GetScore())
+			if game.score.GetHighscore() > 0 {
+				scoreString += " (HIGHSCORE: " + strconv.Itoa(game.score.GetHighscore()) + ")"
+			}
+			scoreString = CenterAlignString(scoreString, game.size.Width-len(scoreString))
+			scoreStringLength := len(scoreString)
+			paddedScoreString := scoreString
+			if scoreStringLength < game.size.Width {
+				for i := 0; i < game.size.Width-scoreStringLength; i++ {
+					paddedScoreString += " "
+				}
+			}
+			scoreString = "\033[47;30m" + paddedScoreString + "\033[0m"
+			fmt.Println(scoreString)
 
 			// Draw the level
 			fmt.Println(game.level.Render())
 			// fmt.Printf(game.level.Render())
 
-			// Artificially delay the render/update loop
-			time.Sleep(time.Millisecond * simulateMilliseconds)
-
-			// Update the level
-			game.level.Update()
+			// Artificially delay the event loop to constrain the frames per second
+			time.Sleep(frameStartTime.Add(time.Millisecond * millisecondsPerFrame).Sub(time.Now()))
 		}
 	}
+}
+
+// CenterAlignString will align the input string in
+// the middle, based on the supplied width
+func CenterAlignString(input string, width int) string {
+	divider := width / 2
+	return strings.Repeat(" ", divider) + input + strings.Repeat(" ", divider)
 }
