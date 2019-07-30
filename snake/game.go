@@ -28,7 +28,8 @@ type Game struct {
 
 	exit chan bool
 
-	input chan termbox.Key
+	input  chan termbox.Key
+	resize chan Size
 }
 
 // NewGame starts a new game of Snake (bet you didn't guess that!)
@@ -39,6 +40,7 @@ func NewGame() *Game {
 	game.done = false
 	game.exit = make(chan bool)
 	game.input = make(chan termbox.Key)
+	game.resize = make(chan Size)
 
 	// // Add support for graceful shutdown with CTRL-C
 	// c := make(chan os.Signal)
@@ -49,34 +51,7 @@ func NewGame() *Game {
 	// 	game.exit <- true
 	// }()
 
-	// Get the terminal size
-	terminalWidth, terminalHeight, err := terminal.GetSize(0)
-	if err != nil {
-		log.Fatal(err)
-	}
-	game.size = Size{terminalWidth, terminalHeight}
-
-	// FIXME: We might be able to call terminal.setSize() to control the size of our game, which would override resizing?
-
-	// Calculate the width and height of the game, as well as taking into account power of two
-	terminalWidth /= 2
-	if terminalWidth%2 != 0 {
-		terminalWidth--
-	}
-	if terminalHeight%2 != 0 {
-		terminalHeight--
-	}
-
-	// Adjust height for UI elements
-	// NOTE: Hyper works with -1, but Terminal requires -2
-	terminalHeight--
-	terminalHeight--
-
-	// Create the level, which creates the snake, apple etc.
-	game.level = NewLevel(game, Size{terminalWidth, terminalHeight}) // Divide by two to account for display character width
-
-	// Offset the level to make room for UI elements
-	// game.level.offset = Position{0, 1}
+	game.Resize()
 
 	return game
 }
@@ -98,8 +73,8 @@ func (game *Game) Start() {
 	}
 	defer termbox.Close()
 
-	// Start listening for keyboard input
-	go ListenKeyboard(game.input)
+	// Start listening for events
+	go ListenEvents(game.input, game.resize)
 
 	go game.update()
 
@@ -121,6 +96,37 @@ func (game *Game) Restart() {
 	clearScreen()
 }
 
+// Resize adjusts the size of the game and level
+func (game *Game) Resize() {
+	// Get the terminal size
+	terminalWidth, terminalHeight, err := terminal.GetSize(0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	game.size = Size{terminalWidth, terminalHeight}
+
+	levelWidth := game.size.Width
+	levelHeight := game.size.Height
+
+	// Calculate the width and height of the game, as well as taking into account power of two
+	levelWidth /= 2
+	if levelWidth%2 != 0 {
+		levelWidth--
+	}
+	if levelHeight%2 != 0 {
+		levelHeight--
+	}
+
+	// Adjust height for UI elements
+	// NOTE: Hyper works with -1, but Terminal requires -2
+	levelHeight--
+	levelHeight--
+
+	// Update the level size
+	game.level = NewLevel(game, Size{levelWidth, levelHeight})
+}
+
 // Update loop for the game
 func (game *Game) update() {
 	for {
@@ -136,6 +142,9 @@ func (game *Game) update() {
 				game.exit <- true
 				return
 			}
+		case <-game.resize:
+			// Terminal resize event received, update accordingly
+			game.Resize()
 		default:
 			// Quit the game if it's done
 			if game.done {
@@ -157,11 +166,11 @@ func (game *Game) update() {
 			if game.score.GetHighscore() > 0 {
 				scoreString += " (HIGHSCORE: " + strconv.Itoa(game.score.GetHighscore()) + ")"
 			}
-			scoreString = CenterAlignString(scoreString, game.size.Width-len(scoreString))
+			scoreString = CenterAlignString(scoreString, (game.level.size.Width*2)-len(scoreString))
 			scoreStringLength := len(scoreString)
 			paddedScoreString := scoreString
-			if scoreStringLength < game.size.Width {
-				for i := 0; i < game.size.Width-scoreStringLength; i++ {
+			if scoreStringLength < (game.level.size.Width * 2) {
+				for i := 0; i < (game.level.size.Width*2)-scoreStringLength; i++ {
 					paddedScoreString += " "
 				}
 			}
@@ -170,10 +179,12 @@ func (game *Game) update() {
 
 			// Draw the level
 			fmt.Println(game.level.Render())
-			// fmt.Printf(game.level.Render())
 
 			// Artificially delay the event loop to constrain the frames per second
 			time.Sleep(frameStartTime.Add(time.Millisecond * millisecondsPerFrame).Sub(time.Now()))
+
+			// Fix resizing artefacts by flushing terminal back buffer
+			termbox.Flush()
 		}
 	}
 }

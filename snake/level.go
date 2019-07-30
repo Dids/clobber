@@ -101,17 +101,20 @@ func (level *Level) IsWall(pos Position) bool {
 	return false
 }
 
+// TODO: Should we run the update loop in a separate thread?
+//       If we do that, do we need to sync the threads with mutexes?
+
 // Update keeps things moving
 func (level *Level) Update() {
-	// Constrain the level update loop to run much slower than the game loop,
-	// but also increase the speed over time, based on the score
-	if level.lastUpdate.Add(time.Millisecond*time.Duration(updateIntervalMs-(level.game.score.GetScore()/2))).Sub(time.Now()) > 0 {
-		return
-	}
-	level.lastUpdate = time.Now()
+	// Constrain the snake movement to run much slower than the actual game loop,
+	// but also increase the snake speed over time, based on the score
+	if level.lastUpdate.Add(time.Millisecond*time.Duration(updateIntervalMs-(level.game.score.GetScore()/2))).Sub(time.Now()) <= 0 {
+		// Keep moving the snake
+		level.snake.Move()
 
-	// Keep moving the snake
-	level.snake.Move()
+		// Update the last update timestamp
+		level.lastUpdate = time.Now()
+	}
 
 	// Keep checking if the snake collides with the apple,
 	// then call EatApple() if it does

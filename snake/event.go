@@ -6,14 +6,16 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-// ListenKeyboard will start listening for keyboard events,
-// then emit them on the supplied channel as keys
-func ListenKeyboard(event chan termbox.Key) {
+// ListenEvents will start listening for keyboard and resize events,
+// then emit them on the supplied channels
+func ListenEvents(inputEvent chan termbox.Key, resizeEvent chan Size) {
 	termbox.SetInputMode(termbox.InputEsc)
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
-			event <- ev.Key
+			inputEvent <- ev.Key
+		case termbox.EventResize:
+			resizeEvent <- Size{ev.Width, ev.Height}
 		case termbox.EventError:
 			log.Fatal(ev.Err)
 		}

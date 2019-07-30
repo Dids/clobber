@@ -60,9 +60,8 @@ var Hiss bool
 // Controls whether to patch buildpkg.sh or not
 var patchBuildPkg = true
 
-// TODO: Enable this for public builds once it's done/working
 // Controls the experimental hiss command
-var hissEnabled = false
+var hissEnabled = true
 
 // Create a new logger
 var log = logrus.New()
