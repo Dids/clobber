@@ -58,15 +58,11 @@ func NewGame() *Game {
 
 // IncrementScore will increase the score of the current game
 func (game *Game) IncrementScore() {
-	// log.Println("Incrementing game score from", game.score, "to", game.score+1)
-
 	game.score.IncrementScore()
 }
 
 // Start will run the update loop in a goroutine
 func (game *Game) Start() {
-	log.Println("Game starting")
-
 	// Initialize termbox
 	if err := termbox.Init(); err != nil {
 		log.Fatal(err)
@@ -74,14 +70,12 @@ func (game *Game) Start() {
 	defer termbox.Close()
 
 	// Start listening for events
-	go ListenEvents(game.input, game.resize)
+	go ListenEvents(game, game.input, game.resize)
 
 	go game.update()
 
 	// Block until an exit signal is received
 	<-game.exit
-
-	log.Println("Game is ending")
 }
 
 // Restart the game
@@ -118,9 +112,13 @@ func (game *Game) Resize() {
 		levelHeight--
 	}
 
+	// TODO: This is likely a rounding issue of some sort?
 	// Adjust height for UI elements
 	// NOTE: Hyper works with -1, but Terminal requires -2
 	levelHeight--
+	levelHeight--
+
+	// Adjust height for Clover build process at the bottom
 	levelHeight--
 
 	// Update the level size
@@ -133,14 +131,8 @@ func (game *Game) update() {
 		select {
 		case key := <-game.input:
 			direction := GetInputDirection(key)
-			// log.Println("Direction:", direction)
 			if !direction.Zero() {
 				game.level.snake.UpdateDirection(direction)
-			} else if key == termbox.KeyEsc {
-				log.Println("Escape pressed, exiting")
-				game.done = true
-				game.exit <- true
-				return
 			}
 		case <-game.resize:
 			// Terminal resize event received, update accordingly
@@ -148,7 +140,7 @@ func (game *Game) update() {
 		default:
 			// Quit the game if it's done
 			if game.done {
-				log.Println("Game done, exiting")
+				//log.Println("Game done, skipping update")
 				return
 			}
 

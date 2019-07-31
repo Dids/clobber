@@ -8,13 +8,25 @@ import (
 
 // ListenEvents will start listening for keyboard and resize events,
 // then emit them on the supplied channels
-func ListenEvents(inputEvent chan termbox.Key, resizeEvent chan Size) {
+func ListenEvents(game *Game, inputEvent chan termbox.Key, resizeEvent chan Size) {
 	termbox.SetInputMode(termbox.InputEsc)
 	for {
+		if game.done {
+			//log.Print("Game done, stopping input handler")
+			return
+		}
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
+			log.Println("Termbox key event:", ev.Key)
+			if ev.Key == termbox.KeyEsc || ev.Key == termbox.KeyCtrlC {
+				//log.Println("ESC or CTRL-C pressed, stopping input handler")
+				game.done = true
+				game.exit <- true
+				return
+			}
 			inputEvent <- ev.Key
 		case termbox.EventResize:
+			//log.Println("Termbox resize event:", ev)
 			resizeEvent <- Size{ev.Width, ev.Height}
 		case termbox.EventError:
 			log.Fatal(ev.Err)

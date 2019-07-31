@@ -60,9 +60,6 @@ var Hiss bool
 // Controls whether to patch buildpkg.sh or not
 var patchBuildPkg = true
 
-// Controls the experimental hiss command
-var hissEnabled = true
-
 // Create a new logger
 var log = logrus.New()
 
@@ -122,22 +119,22 @@ var rootCmd = &cobra.Command{
 			log.Fatal("CTRL-C detected, aborting..")
 		}()
 
-		// FIXME: Integrate this with the builder?!
-		if Hiss && hissEnabled {
+		// FIXME: Integrate this with the building process
+		if Hiss {
 			game := snake.NewGame()
-			game.Start()
-			log.Println("Clobber exiting")
-			return
+			go game.Start()
 		}
 
 		// Measure execution time
 		executionStartTime := time.Now()
 
-		logo := figure.NewFigure("CLOBBER", "puffy", true)
-		logo.Print()
-		//fmt.Println()
-		fmt.Println("                                  v" + Version + " by @Dids")
-		fmt.Println()
+		// Print banner if not playing a game
+		if !Hiss {
+			logo := figure.NewFigure("CLOBBER", "puffy", true)
+			logo.Print()
+			fmt.Println("                                  v" + Version + " by @Dids")
+			fmt.Println()
+		}
 
 		// Don't allow a mixture of --build-only, --update-only and --installer-only to be used simultaneously
 		if BuildOnly && UpdateOnly {
@@ -527,10 +524,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
 	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
 	rootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
-
-	if hissEnabled {
-		rootCmd.PersistentFlags().BoolVarP(&Hiss, "hiss", "", false, "that's Sir Hiss to you")
-	}
+	rootCmd.PersistentFlags().BoolVarP(&Hiss, "hiss", "", false, "that's Sir Hiss to you")
 }
 
 func customInit() {
