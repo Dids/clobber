@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	cloud.google.com/go v0.43.0 // indirect
-	github.com/Unknwon/com v0.0.0-20190321035513-0fed4efef755 // indirect
+	github.com/unknwon/com v0.0.0-20190321035513-0fed4efef755 // indirect
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/briandowns/spinner v1.6.1
 	github.com/common-nighthawk/go-figure v0.0.0-20190529165535-67e0ed34491a

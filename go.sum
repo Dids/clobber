@@ -11,8 +11,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OneOfOne/xxhash v1.2.5/go.mod h1:eZbhyaAYD41SGSSsnmcpxVoRiQ/MPUTjUdIIOT9Um7Q=
-github.com/Unknwon/com v0.0.0-20190321035513-0fed4efef755 h1:1B7wb36fHLSwZfHg6ngZhhtIEHQjiC5H4p7qQGBEffg=
-github.com/Unknwon/com v0.0.0-20190321035513-0fed4efef755/go.mod h1:voKvFVpXBJxdIPeqjoJuLK+UVcRlo/JLjeToGxPYu68=
+github.com/unknwon/com v0.0.0-20190321035513-0fed4efef755 h1:1B7wb36fHLSwZfHg6ngZhhtIEHQjiC5H4p7qQGBEffg=
+github.com/unknwon/com v0.0.0-20190321035513-0fed4efef755/go.mod h1:voKvFVpXBJxdIPeqjoJuLK+UVcRlo/JLjeToGxPYu68=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
