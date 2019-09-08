@@ -186,7 +186,8 @@ var rootCmd = &cobra.Command{
 			log.Debug("EDK is missing, downloading..")
 			Spinner.Prefix = formatSpinnerText("Downloading EDK", false)
 			// git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
-			git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "edk2-stable201903", Bare: false, Quiet: Verbose})
+			// git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "edk2-stable201903", Bare: false, Quiet: Verbose})
+			git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "edk2-stable201905", Bare: false, Quiet: Verbose})
 			// git.Clone("https://github.com/acidanthera/audk", util.GetEdkPath(), git.CloneRepoOptions{Branch: "master", Bare: false, Quiet: Verbose})
 			Spinner.Prefix = formatSpinnerText("Downloading EDK", true)
 		}
@@ -351,10 +352,11 @@ var rootCmd = &cobra.Command{
 				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			}
 
-			// Copy AppleUiSupport.efi
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/AppleUiSupport.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileVault2/AppleUiSupport.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
-			}
+			// Deprecated and merged into OpenCore
+			// // Copy AppleUiSupport.efi
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/AppleUiSupport.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileVault2/AppleUiSupport.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+			// }
 			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/AppleUiSupport.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileVault2/AppleUiSupport.efi"); err != nil {
 			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
 			// }
