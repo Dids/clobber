@@ -245,6 +245,8 @@ var rootCmd = &cobra.Command{
 			// Build base tools
 			log.Debug("Building base tools..")
 			Spinner.Prefix = formatSpinnerText("Building base tools", false)
+			// FIXME: Refactor this so that if "make" fails, it'll retry by running "make clean" first
+			runCommand("make clean -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C")
 			runCommand("make -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C")
 			Spinner.Prefix = formatSpinnerText("Building base tools", true)
 
