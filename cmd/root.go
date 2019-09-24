@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -198,7 +199,9 @@ var rootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Verifying EDK is up to date", false)
 			// Disable cleaning up of extra files if the NoClean flag is set
 			if !NoClean {
-				runCommand("cd " + util.GetEdkPath() + " && git clean -fdx --exclude=\"Clover/\"")
+				if err := runCommand("cd " + util.GetEdkPath() + " && git clean -fdx --exclude=\"Clover/\""); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 			}
 			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "EDK"})
 			Spinner.Prefix = formatSpinnerText("Verifying EDK is up to date", true)
@@ -215,7 +218,9 @@ var rootCmd = &cobra.Command{
 			}
 			log.Debug("Clover is missing, downloading..")
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", false)
-			runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + util.GetCloverPath())
+			if err := runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", true)
 		}
 
@@ -225,11 +230,19 @@ var rootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
 			// Disable cleaning up of extra files if the NoClean flag is set
 			if !NoClean {
-				runCommand("svn cleanup " + util.GetCloverPath())
-				runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath())
-				runCommand("svn revert -R" + " " + util.GetCloverPath())
+				if err := runCommand("svn cleanup " + util.GetCloverPath()); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
+				if err := runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath()); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
+				if err := runCommand("svn revert -R" + " " + util.GetCloverPath()); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 			}
-			runCommand("svn up -r" + Revision + " " + util.GetCloverPath())
+			if err := runCommand("svn up -r" + Revision + " " + util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
 		}
 
@@ -245,40 +258,62 @@ var rootCmd = &cobra.Command{
 			// Build base tools
 			log.Debug("Building base tools..")
 			Spinner.Prefix = formatSpinnerText("Building base tools", false)
-			// FIXME: Refactor this so that if "make" fails, it'll retry by running "make clean" first
-			runCommand("make clean -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C")
-			runCommand("make -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C")
+			if err := runCommand("make -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C"); err != nil {
+				if err := runCommand("make clean -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
+				if err := runCommand("make -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
+			}
 			Spinner.Prefix = formatSpinnerText("Building base tools", true)
 
 			// Setup EDK
 			log.Debug("Setting up EDK..")
 			Spinner.Prefix = formatSpinnerText("Setting up EDK", false)
-			runCommand("cd " + util.GetEdkPath() + " && " + "source edksetup.sh")
+			if err := runCommand("cd " + util.GetEdkPath() + " && " + "source edksetup.sh"); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
 			Spinner.Prefix = formatSpinnerText("Setting up EDK", true)
 
 			// Build gettext, mtoc and nasm (if necessary)
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
 				log.Debug("Linking gettext..")
 				Spinner.Prefix = formatSpinnerText("Linking gettext", false)
-				runCommand("brew link gettext --force")
+				if err := runCommand("brew link gettext --force"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 				defer runCommand("brew unlink gettext")
-				runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin")
-				runCommand("ln -sf /usr/local/bin/gettext " + util.GetSourcePath() + "/opt/local/bin/gettext")
+				if err := runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
+				if err := runCommand("ln -sf /usr/local/bin/gettext " + util.GetSourcePath() + "/opt/local/bin/gettext"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 				Spinner.Prefix = formatSpinnerText("Linking gettext", true)
 			}
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
 				log.Debug("Building mtoc..")
 				Spinner.Prefix = formatSpinnerText("Building mtoc", false)
-				runCommand(util.GetCloverPath() + "/buildmtoc.sh")
+				if err := runCommand(util.GetCloverPath() + "/buildmtoc.sh"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 				Spinner.Prefix = formatSpinnerText("Building mtoc", true)
 			}
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
 				log.Debug("Linking nasm..")
 				Spinner.Prefix = formatSpinnerText("Linking nasm", false)
-				runCommand("brew link nasm --force")
+
+				if err := runCommand("brew link nasm --force"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 				defer runCommand("brew unlink nasm")
-				runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin")
-				runCommand("ln -sf /usr/local/bin/nasm " + util.GetSourcePath() + "/opt/local/bin/nasm")
+				if err := runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
+				if err := runCommand("ln -sf /usr/local/bin/nasm " + util.GetSourcePath() + "/opt/local/bin/nasm"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 				Spinner.Prefix = formatSpinnerText("Linking nasm", true)
 			}
 
@@ -302,9 +337,18 @@ var rootCmd = &cobra.Command{
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
 			Spinner.Prefix = formatSpinnerText("Building Clover", false)
-			runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall")                                          // TODO: Should this technically be ignored when using --no-clean?
-			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 -D NO_GRUB_DRIVERS_EMBEDDED")              // 64-bit (boot6, default)
-			runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb -D NO_GRUB_DRIVERS_EMBEDDED") // 64-bit (boot7, MCP/BiosBlockIO)
+			// TODO: Should this technically be ignored when using --no-clean?
+			if err := runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall"); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
+			// 64-bit (boot6, default)
+			if err := runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 -D NO_GRUB_DRIVERS_EMBEDDED"); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
+			// 64-bit (boot7, MCP/BiosBlockIO)
+			if err := runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb -D NO_GRUB_DRIVERS_EMBEDDED"); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
 			Spinner.Prefix = formatSpinnerText("Building Clover", true)
 		}
 
@@ -487,15 +531,19 @@ var rootCmd = &cobra.Command{
 			// Build the Clover installer package
 			log.Debug("Building Clover installer..")
 			Spinner.Prefix = formatSpinnerText("Building Clover installer", false)
-			runCommand(util.GetCloverPath() + "/CloverPackage/makepkg")
+			if err := runCommand(util.GetCloverPath() + "/CloverPackage/makepkg"); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
 			Spinner.Prefix = formatSpinnerText("Building Clover installer", true)
 
 			if !InstallerOnly {
 				// Build the Clover ISO image
 				log.Debug("Building Clover ISO image..")
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", false)
-				runCommand(util.GetCloverPath() + "/CloverPackage/makeiso")
 				// FIXME: Error: don't call the '/Users/dids/.clobber/src/edk2/Clover/CloverPackage/makeiso' script directly !
+				if err := runCommand(util.GetCloverPath() + "/CloverPackage/makeiso"); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
 			}
 		}
@@ -579,7 +627,7 @@ func customInit() {
 	}
 }
 
-func runCommand(command string) {
+func runCommand(command string) error {
 	// If there are no args (or no spaces), we need to deal with those situations too
 	var (
 		cmd        string
@@ -603,9 +651,13 @@ func runCommand(command string) {
 		err    error
 	)
 	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
-		log.Fatal("Error: Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
+		// log.Fatal("Error: Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
+		customErr := errors.New("Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
+		log.Warn("Warning: " + customErr.Error())
+		return customErr
 	}
 	log.Debug("Command finished with output:\n" + string(cmdOut))
+	return nil
 }
 
 func getGitHubReleaseLink(url string, filter string) string {
