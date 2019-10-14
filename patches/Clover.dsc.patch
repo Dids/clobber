@@ -1,13 +1,11 @@
 --- Clover.dsc
 +++ Clover.dsc
-@@ -352,7 +352,9 @@
+@@ -361,7 +361,7 @@
    #EmbeddedPkg/Universal/MmcDxe/MmcDxe.inf
-   #Clover/OsxMmcDxe/MmcDxe.inf
-   Clover/FileSystems/FatPkg/EnhancedFatDxe/Fat.inf
--  Clover/FileSystems/ApfsDriverLoader/ApfsDriverLoader.inf
-+  ### CLOBBER PATCH START ###
-+  # Clover/FileSystems/ApfsDriverLoader/ApfsDriverLoader.inf
-+  ### CLOBBER PATCH END   ###
+   #OsxMmcDxe/MmcDxe.inf
+   FileSystems/FatPkg/EnhancedFatDxe/Fat.inf
+-  FileSystems/ApfsDriverLoader/ApfsDriverLoader.inf
++  #FileSystems/ApfsDriverLoader/ApfsDriverLoader.inf
    # FS from grub
  !ifndef NO_GRUB_DRIVERS
-   Clover/FileSystems/GrubFS/src/EXFAT.inf
+   FileSystems/GrubFS/src/EXFAT.inf

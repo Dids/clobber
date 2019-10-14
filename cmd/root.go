@@ -24,7 +24,6 @@ import (
 
 	"github.com/briandowns/spinner"
 	git "github.com/gogits/git-module"
-	"github.com/otiai10/copy"
 	"github.com/spf13/cobra"
 )
 
@@ -161,10 +160,6 @@ var rootCmd = &cobra.Command{
 			log.Debug("Building with arguments:", args)
 		}
 
-		// FIXME: Ditch the "git" package and just use our custom exec-based logic, so it's more consistent across the app?
-
-		// TODO: Do we just blindly run everything here, or split stuff into their own packages and/or functions here?
-
 		// Make sure that the correct directory structure exists
 		//log.Info("Verifying folder structure..")
 		Spinner.Prefix = formatSpinnerText("Verifying folder structure", false)
@@ -175,40 +170,11 @@ var rootCmd = &cobra.Command{
 		}
 		Spinner.Prefix = formatSpinnerText("Verifying folder structure", true)
 
-		// Download EDK
-		if _, err := os.Stat(util.GetEdkPath() + "/.git"); os.IsNotExist(err) {
-			// If EDK is missing and we're only supposed to build, we can't continue any further
-			if BuildOnly {
-				log.Fatal("Error: EDK is missing and using --build-only, cannot continue")
-			}
-			if InstallerOnly {
-				log.Fatal("Error: EDK is missing and using --installer-only, cannot continue")
-			}
-			log.Debug("EDK is missing, downloading..")
-			Spinner.Prefix = formatSpinnerText("Downloading EDK", false)
-			// git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "UDK2018", Bare: false, Quiet: Verbose})
-			// git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "edk2-stable201903", Bare: false, Quiet: Verbose})
-			git.Clone("https://github.com/tianocore/edk2", util.GetEdkPath(), git.CloneRepoOptions{Branch: "edk2-stable201905", Bare: false, Quiet: Verbose})
-			// git.Clone("https://github.com/acidanthera/audk", util.GetEdkPath(), git.CloneRepoOptions{Branch: "master", Bare: false, Quiet: Verbose})
-			Spinner.Prefix = formatSpinnerText("Downloading EDK", true)
-		}
-
-		// Update EDK
-		if !BuildOnly && !InstallerOnly {
-			log.Debug("Verifying EDK is up to date..")
-			Spinner.Prefix = formatSpinnerText("Verifying EDK is up to date", false)
-			// Disable cleaning up of extra files if the NoClean flag is set
-			if !NoClean {
-				if err := runCommand("cd " + util.GetEdkPath() + " && git clean -fdx --exclude=\"Clover/\""); err != nil {
-					log.Fatal("Error: Failure detected, aborting")
-				}
-			}
-			git.Checkout(util.GetSourcePath(), git.CheckoutOptions{Branch: "EDK"})
-			Spinner.Prefix = formatSpinnerText("Verifying EDK is up to date", true)
-		}
+		// Remove any old edk2 installations
+		os.RemoveAll(util.GetSourcePath() + "/edk2")
 
 		// Download Clover
-		if _, err := os.Stat(util.GetCloverPath() + "/.svn"); os.IsNotExist(err) {
+		if _, err := os.Stat(util.GetCloverPath() + "/.git"); os.IsNotExist(err) {
 			// If Clover is missing and we're only supposed to build, we can't continue any further
 			if BuildOnly {
 				log.Fatal("Error: Clover is missing and using --build-only, cannot continue")
@@ -218,7 +184,7 @@ var rootCmd = &cobra.Command{
 			}
 			log.Debug("Clover is missing, downloading..")
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", false)
-			if err := runCommand("svn co " + "https://svn.code.sf.net/p/cloverefiboot/code" + " " + util.GetCloverPath()); err != nil {
+			if err := git.Clone("https://github.com/CloverHackyColor/CloverBootloader", util.GetCloverPath(), git.CloneRepoOptions{Branch: "master", Bare: false, Quiet: Verbose}); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", true)
@@ -230,17 +196,11 @@ var rootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
 			// Disable cleaning up of extra files if the NoClean flag is set
 			if !NoClean {
-				if err := runCommand("svn cleanup " + util.GetCloverPath()); err != nil {
-					log.Fatal("Error: Failure detected, aborting")
-				}
-				if err := runCommand("svn cleanup --remove-unversioned " + util.GetCloverPath()); err != nil {
-					log.Fatal("Error: Failure detected, aborting")
-				}
-				if err := runCommand("svn revert -R" + " " + util.GetCloverPath()); err != nil {
+				if err := runCommand("cd " + util.GetCloverPath() + " && git clean -fdx"); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 			}
-			if err := runCommand("svn up -r" + Revision + " " + util.GetCloverPath()); err != nil {
+			if err := git.Checkout(util.GetCloverPath(), git.CheckoutOptions{Branch: Revision}); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
@@ -255,14 +215,22 @@ var rootCmd = &cobra.Command{
 			log.Debug("Overriding TOOLCHAIN_DIR..")
 			os.Setenv("TOOLCHAIN_DIR", util.GetSourcePath()+"/opt/local")
 
+			// Override TOOLCHAIN environment variable
+			// log.Debug("Overriding TOOLCHAIN..")
+			// os.Setenv("TOOLCHAIN", "XCODE8")
+
+			// Override TOOLCHAIN environment variable
+			// log.Debug("Overriding EDK_TOOLS_PATH..")
+			// os.Setenv("EDK_TOOLS_PATH", util.GetCloverPath()+"/BaseTools/BuildEnv")
+
 			// Build base tools
 			log.Debug("Building base tools..")
 			Spinner.Prefix = formatSpinnerText("Building base tools", false)
-			if err := runCommand("make -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C"); err != nil {
-				if err := runCommand("make clean -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C"); err != nil {
+			if err := runCommand("make -C" + " " + util.GetCloverPath() + "/BaseTools/Source/C"); err != nil {
+				if err := runCommand("make clean -C" + " " + util.GetCloverPath() + "/BaseTools/Source/C"); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
-				if err := runCommand("make -C" + " " + util.GetEdkPath() + "/BaseTools/Source/C"); err != nil {
+				if err := runCommand("make -C" + " " + util.GetCloverPath() + "/BaseTools/Source/C"); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 			}
@@ -271,7 +239,7 @@ var rootCmd = &cobra.Command{
 			// Setup EDK
 			log.Debug("Setting up EDK..")
 			Spinner.Prefix = formatSpinnerText("Setting up EDK", false)
-			if err := runCommand("cd " + util.GetEdkPath() + " && " + "source edksetup.sh"); err != nil {
+			if err := runCommand("cd " + util.GetCloverPath() + " && " + "source edksetup.sh"); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
 			Spinner.Prefix = formatSpinnerText("Setting up EDK", true)
@@ -315,15 +283,6 @@ var rootCmd = &cobra.Command{
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				Spinner.Prefix = formatSpinnerText("Linking nasm", true)
-			}
-
-			// Apply EDK patches
-			log.Debug("Applying patches for EDK..")
-			Spinner.Prefix = formatSpinnerText("Applying EDK patches", false)
-			copyErr := copy.Copy(util.GetCloverPath()+"/Patches_for_EDK2", util.GetEdkPath())
-			Spinner.Prefix = formatSpinnerText("Applying EDK patches", true)
-			if copyErr != nil {
-				log.Fatal("Error: Failed to copy EDK patches: ", copyErr)
 			}
 
 			// Patch Clover.dsc (eg. skip building ApfsDriverLoader)
@@ -571,7 +530,7 @@ func init() {
 	// Add persistent flags that carry over to all commands
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "enable verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&Quiet, "quiet", "q", false, "silence all output")
-	rootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "HEAD", "Clover target revision")
+	rootCmd.PersistentFlags().StringVarP(&Revision, "revision", "r", "master", "Clover target revision")
 	rootCmd.PersistentFlags().BoolVarP(&BuildOnly, "build-only", "b", false, "only build (no update)")
 	rootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
 	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
