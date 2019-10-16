@@ -24,7 +24,7 @@ require (
 	github.com/nwaples/rardecode v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
-	github.com/otiai10/copy v1.0.1
+	github.com/otiai10/copy v1.0.1 // indirect
 	github.com/otiai10/curr v0.0.0-20190513014714-f5a3d24e5776 // indirect
 	github.com/pierrec/lz4 v2.2.6+incompatible // indirect
 	github.com/rhysd/go-github-selfupdate v1.1.0
@@ -41,7 +41,7 @@ require (
 	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect
-	golang.org/x/tools v0.0.0-20191014141550-5fa5b1782b2c // indirect
+	golang.org/x/tools v0.0.0-20191015211201-9c6d90b5a7d0 // indirect
 	google.golang.org/appengine v1.6.2 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0

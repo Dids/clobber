@@ -207,21 +207,18 @@ var rootCmd = &cobra.Command{
 		}
 
 		if !UpdateOnly && !InstallerOnly {
-			// Override HOME environment variable (use chroot-like logic for the build process)
-			log.Debug("Overriding HOME..")
+			// Override environment variable
+			log.Debug("Setting up environment variables..")
 			os.Setenv("HOME", util.GetClobberPath())
-
-			// Override TOOLCHAIR_DIR environment variable
-			log.Debug("Overriding TOOLCHAIN_DIR..")
 			os.Setenv("TOOLCHAIN_DIR", util.GetSourcePath()+"/opt/local")
-
-			// Override TOOLCHAIN environment variable
-			// log.Debug("Overriding TOOLCHAIN..")
-			// os.Setenv("TOOLCHAIN", "XCODE8")
-
-			// Override TOOLCHAIN environment variable
-			// log.Debug("Overriding EDK_TOOLS_PATH..")
-			// os.Setenv("EDK_TOOLS_PATH", util.GetCloverPath()+"/BaseTools/BuildEnv")
+			os.Setenv("DIR_MAIN", util.GetSourcePath())
+			os.Setenv("DIR_TOOLS", os.Getenv("DIR_MAIN")+"/tools")
+			os.Setenv("DIR_DOWNLOADS", os.Getenv("DIR_TOOLS")+"/download")
+			os.Setenv("DIR_LOGS", os.Getenv("DIR_TOOLS")+"/logs")
+			os.Setenv("PREFIX", os.Getenv("TOOLCHAIN_DIR"))
+			os.Setenv("EDK_TOOLS_PATH", util.GetCloverPath()+"/BaseTools")
+			os.Setenv("PATH", os.Getenv("PATH")+":"+util.GetCloverPath()+"/BaseTools/BinWrappers/PosixLike")
+			os.Setenv("GETTEXT_PREFIX", os.Getenv("TOOLCHAIN_DIR"))
 
 			// Build base tools
 			log.Debug("Building base tools..")
@@ -237,12 +234,12 @@ var rootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Building base tools", true)
 
 			// Setup EDK
-			log.Debug("Setting up EDK..")
-			Spinner.Prefix = formatSpinnerText("Setting up EDK", false)
-			if err := runCommand("cd " + util.GetCloverPath() + " && " + "source edksetup.sh"); err != nil {
-				log.Fatal("Error: Failure detected, aborting")
-			}
-			Spinner.Prefix = formatSpinnerText("Setting up EDK", true)
+			// log.Debug("Setting up EDK..")
+			// Spinner.Prefix = formatSpinnerText("Setting up EDK", false)
+			// if err := runCommand("cd " + util.GetCloverPath() + " && " + "source edksetup.sh" + " && " + "printenv"); err != nil {
+			// 	log.Fatal("Error: Failure detected, aborting")
+			// }
+			// Spinner.Prefix = formatSpinnerText("Setting up EDK", true)
 
 			// Build gettext, mtoc and nasm (if necessary)
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
