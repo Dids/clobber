@@ -243,7 +243,7 @@ var rootCmd = &cobra.Command{
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
 				log.Debug("Linking gettext..")
 				Spinner.Prefix = formatSpinnerText("Linking gettext", false)
-				if err := runCommand("brew link gettext --force", ""); err != nil {
+				if err := runCommand("brew link gettext --force --overwrite", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				defer runCommand("brew unlink gettext", "")
@@ -267,7 +267,7 @@ var rootCmd = &cobra.Command{
 				log.Debug("Linking nasm..")
 				Spinner.Prefix = formatSpinnerText("Linking nasm", false)
 
-				if err := runCommand("brew link nasm --force", ""); err != nil {
+				if err := runCommand("brew link nasm --force --overwrite", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				defer runCommand("brew unlink nasm", "")
