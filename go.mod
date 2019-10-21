@@ -40,8 +40,8 @@ require (
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
-	golang.org/x/sys v0.0.0-20191010194322-b09406accb47 // indirect
-	golang.org/x/tools v0.0.0-20191015211201-9c6d90b5a7d0 // indirect
+	golang.org/x/sys v0.0.0-20191020212454-3e7259c5e7c2 // indirect
+	golang.org/x/tools v0.0.0-20191018212557-ed542cd5b28a // indirect
 	google.golang.org/appengine v1.6.2 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0

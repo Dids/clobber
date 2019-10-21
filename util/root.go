@@ -100,7 +100,8 @@ func GetVersionDump() string {
 	result += string(clangVersion) + "\n"
 
 	// Get Clover version
-	getCloverVersionCommand := exec.Command("svn", "info", "--show-item", "revision")
+	// getCloverVersionCommand := exec.Command("svn", "info", "--show-item", "revision")
+	getCloverVersionCommand := exec.Command("bash", "-c", "git describe --tags")
 	getCloverVersionCommand.Dir = GetCloverPath()
 	cloverVersionOutput, cloverVersionErr := getCloverVersionCommand.CombinedOutput()
 	if cloverVersionErr != nil {

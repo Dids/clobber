@@ -196,7 +196,10 @@ var rootCmd = &cobra.Command{
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", false)
 			// Disable cleaning up of extra files if the NoClean flag is set
 			if !NoClean {
-				if err := runCommand("cd " + util.GetCloverPath() + " && git clean -fdx"); err != nil {
+				if err := runCommand("git reset --hard", util.GetCloverPath()); err != nil {
+					log.Fatal("Error: Failure detected, aborting")
+				}
+				if err := runCommand("git clean -fdx", util.GetCloverPath()); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 			}
@@ -207,52 +210,47 @@ var rootCmd = &cobra.Command{
 		}
 
 		if !UpdateOnly && !InstallerOnly {
-			// Override environment variable
-			log.Debug("Setting up environment variables..")
+			// Override HOME environment variable (use chroot-like logic for the build process)
+			log.Debug("Overriding HOME..")
 			os.Setenv("HOME", util.GetClobberPath())
+
+			// Override TOOLCHAIR_DIR environment variable
+			log.Debug("Overriding TOOLCHAIN_DIR..")
 			os.Setenv("TOOLCHAIN_DIR", util.GetSourcePath()+"/opt/local")
-			os.Setenv("DIR_MAIN", util.GetSourcePath())
-			os.Setenv("DIR_TOOLS", os.Getenv("DIR_MAIN")+"/tools")
-			os.Setenv("DIR_DOWNLOADS", os.Getenv("DIR_TOOLS")+"/download")
-			os.Setenv("DIR_LOGS", os.Getenv("DIR_TOOLS")+"/logs")
-			os.Setenv("PREFIX", os.Getenv("TOOLCHAIN_DIR"))
-			os.Setenv("EDK_TOOLS_PATH", util.GetCloverPath()+"/BaseTools")
-			os.Setenv("PATH", os.Getenv("PATH")+":"+util.GetCloverPath()+"/BaseTools/BinWrappers/PosixLike")
-			os.Setenv("GETTEXT_PREFIX", os.Getenv("TOOLCHAIN_DIR"))
 
 			// Build base tools
 			log.Debug("Building base tools..")
 			Spinner.Prefix = formatSpinnerText("Building base tools", false)
-			if err := runCommand("make -C" + " " + util.GetCloverPath() + "/BaseTools/Source/C"); err != nil {
-				if err := runCommand("make clean -C" + " " + util.GetCloverPath() + "/BaseTools/Source/C"); err != nil {
+			if err := runCommand("make -C BaseTools/Source/C", util.GetCloverPath()); err != nil {
+				if err := runCommand("make clean -C BaseTools/Source/C", util.GetCloverPath()); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
-				if err := runCommand("make -C" + " " + util.GetCloverPath() + "/BaseTools/Source/C"); err != nil {
+				if err := runCommand("make -C BaseTools/Source/C", util.GetCloverPath()); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 			}
 			Spinner.Prefix = formatSpinnerText("Building base tools", true)
 
 			// Setup EDK
-			// log.Debug("Setting up EDK..")
-			// Spinner.Prefix = formatSpinnerText("Setting up EDK", false)
-			// if err := runCommand("cd " + util.GetCloverPath() + " && " + "source edksetup.sh" + " && " + "printenv"); err != nil {
-			// 	log.Fatal("Error: Failure detected, aborting")
-			// }
-			// Spinner.Prefix = formatSpinnerText("Setting up EDK", true)
+			log.Debug("Setting up EDK..")
+			Spinner.Prefix = formatSpinnerText("Setting up EDK", false)
+			if err := runCommand("source ./edksetup.sh BaseTools", util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
+			Spinner.Prefix = formatSpinnerText("Setting up EDK", true)
 
 			// Build gettext, mtoc and nasm (if necessary)
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/gettext"); os.IsNotExist(err) {
 				log.Debug("Linking gettext..")
 				Spinner.Prefix = formatSpinnerText("Linking gettext", false)
-				if err := runCommand("brew link gettext --force"); err != nil {
+				if err := runCommand("brew link gettext --force", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
-				defer runCommand("brew unlink gettext")
-				if err := runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin"); err != nil {
+				defer runCommand("brew unlink gettext", "")
+				if err := runCommand("mkdir -p "+util.GetSourcePath()+"/opt/local/bin", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
-				if err := runCommand("ln -sf /usr/local/bin/gettext " + util.GetSourcePath() + "/opt/local/bin/gettext"); err != nil {
+				if err := runCommand("ln -sf /usr/local/bin/gettext "+util.GetSourcePath()+"/opt/local/bin/gettext", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				Spinner.Prefix = formatSpinnerText("Linking gettext", true)
@@ -260,7 +258,7 @@ var rootCmd = &cobra.Command{
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/mtoc.NEW"); os.IsNotExist(err) {
 				log.Debug("Building mtoc..")
 				Spinner.Prefix = formatSpinnerText("Building mtoc", false)
-				if err := runCommand(util.GetCloverPath() + "/buildmtoc.sh"); err != nil {
+				if err := runCommand(util.GetCloverPath()+"/buildmtoc.sh", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				Spinner.Prefix = formatSpinnerText("Building mtoc", true)
@@ -269,14 +267,14 @@ var rootCmd = &cobra.Command{
 				log.Debug("Linking nasm..")
 				Spinner.Prefix = formatSpinnerText("Linking nasm", false)
 
-				if err := runCommand("brew link nasm --force"); err != nil {
+				if err := runCommand("brew link nasm --force", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
-				defer runCommand("brew unlink nasm")
-				if err := runCommand("mkdir -p " + util.GetSourcePath() + "/opt/local/bin"); err != nil {
+				defer runCommand("brew unlink nasm", "")
+				if err := runCommand("mkdir -p "+util.GetSourcePath()+"/opt/local/bin", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
-				if err := runCommand("ln -sf /usr/local/bin/nasm " + util.GetSourcePath() + "/opt/local/bin/nasm"); err != nil {
+				if err := runCommand("ln -sf /usr/local/bin/nasm "+util.GetSourcePath()+"/opt/local/bin/nasm", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				Spinner.Prefix = formatSpinnerText("Linking nasm", true)
@@ -285,24 +283,30 @@ var rootCmd = &cobra.Command{
 			// Patch Clover.dsc (eg. skip building ApfsDriverLoader)
 			log.Debug("Patching Clover build script..")
 			Spinner.Prefix = formatSpinnerText("Patching Clover build script", false)
-			if err := patches.Patch(packedPatches, "Clover.dsc", util.GetCloverPath()+"/Clover.dsc"); err != nil {
-				log.Fatal("Error: Failed to patch Clover build script: ", err)
+			if err := runCommand("sed -i '' -e 's/^[^#]*ApfsDriverLoader/#&/' Clover.dsc", util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
+			if err := runCommand("sed -i '' -e 's/^[^#]*AptioMemoryFix/#&/' Clover.dsc", util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
+			if err := runCommand("sed -i '' -e 's/^[^#]*AptioInputFix/#&/' Clover.dsc", util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
 			}
 			Spinner.Prefix = formatSpinnerText("Patching Clover build script", true)
 
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
 			Spinner.Prefix = formatSpinnerText("Building Clover", false)
-			// TODO: Should this technically be ignored when using --no-clean?
-			if err := runCommand(util.GetCloverPath() + "/ebuild.sh -cleanall"); err != nil {
+			// TODO: Shouldn't this technically be ignored when using --no-clean?
+			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -cleanall || true", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
 			// 64-bit (boot6, default)
-			if err := runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64 -D NO_GRUB_DRIVERS_EMBEDDED"); err != nil {
+			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -fr -D NO_GRUB_DRIVERS_EMBEDDED", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
 			// 64-bit (boot7, MCP/BiosBlockIO)
-			if err := runCommand(util.GetCloverPath() + "/ebuild.sh -fr --x64-mcp --no-usb -D NO_GRUB_DRIVERS_EMBEDDED"); err != nil {
+			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -fr --x64-mcp --no-usb -D NO_GRUB_DRIVERS_EMBEDDED", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
 			Spinner.Prefix = formatSpinnerText("Building Clover", true)
@@ -314,86 +318,93 @@ var rootCmd = &cobra.Command{
 			log.Debug("Updating extra EFI drivers..")
 			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", false)
 
+			// Make sure the driver paths exist (especially important when update only and on a clean install)
+			os.MkdirAll(util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI", 0700)
+			os.MkdirAll(util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/BIOS", 0700)
+			os.MkdirAll(util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem", 0700)
+			os.MkdirAll(util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem", 0700)
+
 			// Download and copy HFSPlus.efi
 			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/HFSPlus.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (download HFSPlus): ", err)
 			}
 			if err := util.DownloadFile("https://github.com/Micky1979/Build_Clover/raw/work/Files/HFSPlus_x64.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/BIOS/HFSPlus.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (download HFSPlus): ", err)
 			}
 
 			// Download Acidanthera drivers
 			os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
 			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AppleSupportPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AppleSupportPkg.zip"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (download AppleSupportPkg): ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
+
 			os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
 			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AptioFixPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AptioFixPkg.zip"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (download AptioFixPkg): ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
+			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/ReddestDream/OcQuirks/releases/latest", "browser_download_url.*.zip"), os.TempDir()+"OcQuirks.zip"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers (download OcQuirks): ", err)
+			}
+			defer os.RemoveAll(os.TempDir() + "OcQuirks.zip")
 
 			// Extract Acidanthera drivers
 			os.RemoveAll(os.TempDir() + "AppleSupportPkg")
 			if err := archiver.Unarchive(os.TempDir()+"AppleSupportPkg.zip", os.TempDir()+"AppleSupportPkg"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (unzip AppleSupportPkg): ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg")
 			os.RemoveAll(os.TempDir() + "AptioFixPkg")
 			if err := archiver.Unarchive(os.TempDir()+"AptioFixPkg.zip", os.TempDir()+"AptioFixPkg"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (unzip AptioFixPkg): ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "AptioFixPkg")
+			if err := archiver.Unarchive(os.TempDir()+"OcQuirks.zip", os.TempDir()+"OcQuirks"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers (unzip OcQuirks): ", err)
+			}
+			defer os.RemoveAll(os.TempDir() + "OcQuirks")
 
 			// Copy ApfsDriverLoader.efi
 			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/ApfsDriverLoader.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (copy ApfsDriverLoader.efi): ", err)
 			}
 			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/BIOS/ApfsDriverLoader.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (copy ApfsDriverLoader.efi): ", err)
 			}
-
-			// Deprecated and merged into OpenCore
-			// // Copy AppleUiSupport.efi
-			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/AppleUiSupport.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileVault2/AppleUiSupport.efi"); err != nil {
-			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
-			// }
-			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/AppleUiSupport.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileVault2/AppleUiSupport.efi"); err != nil {
-			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
-			// }
 
 			// Copy UsbKbDxe.efi
 			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/UsbKbDxe.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/UsbKbDxe.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (copy UsbKbDxe.efi): ", err)
 			}
-			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/UsbKbDxe.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/HID/UsbKbDxe.efi"); err != nil {
-			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
-			// }
 
 			// Copy VBoxHfs.efi
 			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/VBoxHfs.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (copy VBoxHfs.efi): ", err)
 			}
 			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/VBoxHfs.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (copy VBoxHfs.efi): ", err)
 			}
 
 			// Copy AptioInputFix.efi
 			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioInputFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/AptioInputFix.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (copy AptioInputFix.efi): ", err)
 			}
-			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioInputFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/HID/AptioInputFix.efi"); err != nil {
-			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
-			// }
 
 			// Copy AptioMemoryFix.efi
 			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/AptioMemoryFix.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers: ", err)
+				log.Fatal("Error: Failed to update extra EFI drivers (copy AptioMemoryFix.efi): ", err)
 			}
-			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/MemoryFix/AptioMemoryFix.efi"); err != nil {
-			// 	log.Fatal("Error: Failed to update extra EFI drivers: ", err)
-			// }
+
+			// Copy FwRuntimeServices.efi
+			if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/FwRuntimeServices.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/FwRuntimeServices.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers (copy FwRuntimeServices.efi): ", err)
+			}
+
+			// Copy OcQuirks.efi
+			if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/OcQuirks.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/OcQuirks.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers (copy OcQuirks.efi): ", err)
+			}
 
 			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", true)
 		}
@@ -487,7 +498,7 @@ var rootCmd = &cobra.Command{
 			// Build the Clover installer package
 			log.Debug("Building Clover installer..")
 			Spinner.Prefix = formatSpinnerText("Building Clover installer", false)
-			if err := runCommand(util.GetCloverPath() + "/CloverPackage/makepkg"); err != nil {
+			if err := runCommand("./CloverPackage/makepkg", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
 			Spinner.Prefix = formatSpinnerText("Building Clover installer", true)
@@ -496,8 +507,7 @@ var rootCmd = &cobra.Command{
 				// Build the Clover ISO image
 				log.Debug("Building Clover ISO image..")
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", false)
-				// FIXME: Error: don't call the '/Users/dids/.clobber/src/edk2/Clover/CloverPackage/makeiso' script directly !
-				if err := runCommand(util.GetCloverPath() + "/CloverPackage/makeiso"); err != nil {
+				if err := runCommand("./CloverPackage/makeiso", util.GetCloverPath()); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
@@ -583,7 +593,7 @@ func customInit() {
 	}
 }
 
-func runCommand(command string) error {
+func runCommand(command string, dir string) error {
 	// If there are no args (or no spaces), we need to deal with those situations too
 	var (
 		cmd        string
@@ -602,11 +612,17 @@ func runCommand(command string) error {
 
 	log.Debug("Running command: '" + cmd + " " + argsString + "'")
 
+	// runCmd := exec.Command(cmd, args...)
+	runCmd := exec.Command("bash", "-c", cmd+" "+argsString)
+	if len(dir) > 0 {
+		runCmd.Dir = dir
+	}
+
 	var (
 		cmdOut []byte
 		err    error
 	)
-	if cmdOut, err = exec.Command(cmd, args...).CombinedOutput(); err != nil {
+	if cmdOut, err = runCmd.CombinedOutput(); err != nil {
 		// log.Fatal("Error: Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
 		customErr := errors.New("Failed to run '" + cmd + " " + argsString + "':\n" + string(cmdOut))
 		log.Warn("Warning: " + customErr.Error())
