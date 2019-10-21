@@ -507,7 +507,8 @@ var rootCmd = &cobra.Command{
 				// Build the Clover ISO image
 				log.Debug("Building Clover ISO image..")
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", false)
-				if err := runCommand("./CloverPackage/makeiso", util.GetCloverPath()); err != nil {
+				// if err := runCommand("./CloverPackage/makeiso", util.GetCloverPath()); err != nil {
+				if err := runCommand("make iso", util.GetCloverPath()+"/CloverPackage"); err != nil {
 					log.Fatal("Error: Failure detected, aborting")
 				}
 				Spinner.Prefix = formatSpinnerText("Building Clover ISO image", true)
