@@ -296,6 +296,12 @@ var rootCmd = &cobra.Command{
 			if err := runCommand("git describe --tags | tr -d '\n' > vers.txt", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
+			// FIXME: Implement, maybe by overriding rEFIt_UEFI/Version.h or something?
+			// FIXME: Theres's a lot of new version logic in ebuild.sh, unfortunately..
+			// Patch old vers.txt logic back to ebuild.sh
+			if err := runCommand("", util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
 			Spinner.Prefix = formatSpinnerText("Patching", true)
 
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
