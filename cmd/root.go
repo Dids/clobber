@@ -281,7 +281,7 @@ var rootCmd = &cobra.Command{
 			}
 
 			// Patch Clover.dsc (eg. skip building ApfsDriverLoader)
-			log.Debug("Patching Clover build script..")
+			log.Debug("Patching Clover..")
 			Spinner.Prefix = formatSpinnerText("Patching Clover build script", false)
 			if err := runCommand("sed -i '' -e 's/^[^#]*ApfsDriverLoader/#&/' Clover.dsc", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
@@ -292,7 +292,11 @@ var rootCmd = &cobra.Command{
 			if err := runCommand("sed -i '' -e 's/^[^#]*AptioInputFix/#&/' Clover.dsc", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting")
 			}
-			Spinner.Prefix = formatSpinnerText("Patching Clover build script", true)
+			// Patch vers.txt (current version is statically embedded for some dumb reason)
+			if err := runCommand("git describe --tags | tr -d '\n' > vers.txt", util.GetCloverPath()); err != nil {
+				log.Fatal("Error: Failure detected, aborting")
+			}
+			Spinner.Prefix = formatSpinnerText("Patching", true)
 
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
