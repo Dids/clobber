@@ -1,6 +1,6 @@
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
-# github.com/briandowns/spinner v1.6.1
+# github.com/briandowns/spinner v1.7.0
 github.com/briandowns/spinner
 # github.com/common-nighthawk/go-figure v0.0.0-20190529165535-67e0ed34491a
 github.com/common-nighthawk/go-figure
@@ -31,8 +31,6 @@ github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/oncer
 github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/safe
 github.com/gobuffalo/packr/v2/jam/parser
 github.com/gobuffalo/packr/v2/plog
-# github.com/gogits/git-module v0.0.0-20190806040916-9f607e8d6040
-github.com/gogits/git-module
 # github.com/golang/protobuf v1.3.2
 github.com/golang/protobuf/proto
 # github.com/golang/snappy v0.0.1
@@ -51,25 +49,23 @@ github.com/inconshreveable/mousetrap
 github.com/joho/godotenv
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/mattn/go-colorable v0.1.2
+# github.com/mattn/go-colorable v0.1.4
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.8
+# github.com/mattn/go-isatty v0.0.10
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.4
 github.com/mattn/go-runewidth
-# github.com/mcuadros/go-version v0.0.0-20190308113854-92cdf37c5b75
-github.com/mcuadros/go-version
 # github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 github.com/mgutz/ansi
 # github.com/mholt/archiver v3.1.1+incompatible
 github.com/mholt/archiver
 # github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
-# github.com/nsf/termbox-go v0.0.0-20190624072549-eeb6cd0a1762
+# github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317
 github.com/nsf/termbox-go
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/pierrec/lz4 v2.2.6+incompatible
+# github.com/pierrec/lz4 v2.3.0+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
 # github.com/rhysd/go-github-selfupdate v1.1.0
@@ -91,24 +87,22 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
-# github.com/unknwon/com v0.0.0-20190804042917-757f69c95f3e
-github.com/unknwon/com
 # github.com/x-cray/logrus-prefixed-formatter v0.5.2
 github.com/x-cray/logrus-prefixed-formatter
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 github.com/xi2/xz
 # golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297
+# golang.org/x/net v0.0.0-20191021144547-ec77196f6094
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 # golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20191020212454-3e7259c5e7c2
+# golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# google.golang.org/appengine v1.6.2
+# google.golang.org/appengine v1.6.5
 google.golang.org/appengine/internal
 google.golang.org/appengine/internal/base
 google.golang.org/appengine/internal/datastore

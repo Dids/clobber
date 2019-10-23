@@ -23,7 +23,6 @@ import (
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/briandowns/spinner"
-	git "github.com/gogits/git-module"
 	"github.com/spf13/cobra"
 )
 
@@ -187,7 +186,10 @@ var rootCmd = &cobra.Command{
 			}
 			log.Debug("Clover is missing, downloading..")
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", false)
-			if err := git.Clone("https://github.com/CloverHackyColor/CloverBootloader", util.GetCloverPath(), git.CloneRepoOptions{Branch: "master", Bare: false, Quiet: Verbose}); err != nil {
+			// if err := git.Clone("https://github.com/CloverHackyColor/CloverBootloader", util.GetCloverPath(), git.CloneRepoOptions{Branch: "master", Bare: false, Quiet: Verbose}); err != nil {
+			// 	log.Fatal("Error: Failure detected, aborting\n", err)
+			// }
+			if err := runCommand("git clone -b "+Revision+" https://github.com/CloverHackyColor/CloverBootloader Clover", util.GetSourcePath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", true)
@@ -206,7 +208,10 @@ var rootCmd = &cobra.Command{
 					log.Fatal("Error: Failure detected, aborting\n", err)
 				}
 			}
-			if err := git.Checkout(util.GetCloverPath(), git.CheckoutOptions{Branch: Revision}); err != nil {
+			// if err := git.Checkout(util.GetCloverPath(), git.CheckoutOptions{Branch: Revision}); err != nil {
+			// 	log.Fatal("Error: Failure detected, aborting\n", err)
+			// }
+			if err := runCommand("git checkout "+Revision, util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
 			Spinner.Prefix = formatSpinnerText("Verifying Clover is up to date", true)
@@ -285,7 +290,7 @@ var rootCmd = &cobra.Command{
 
 			// Patch Clover.dsc (eg. skip building ApfsDriverLoader)
 			log.Debug("Patching Clover..")
-			Spinner.Prefix = formatSpinnerText("Patching Clover build script", false)
+			Spinner.Prefix = formatSpinnerText("Patching Clover", false)
 			if err := runCommand("sed -i '' -e 's/^[^#]*ApfsDriverLoader/#&/' Clover.dsc", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
@@ -305,7 +310,7 @@ var rootCmd = &cobra.Command{
 			// 		log.Fatal("Error: Failure detected, aborting\n", err)
 			// 	}
 			// }
-			Spinner.Prefix = formatSpinnerText("Patching", true)
+			Spinner.Prefix = formatSpinnerText("Patching Clover", true)
 
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
 			log.Debug("Building Clover..")
