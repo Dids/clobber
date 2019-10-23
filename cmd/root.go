@@ -163,7 +163,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Make sure that the correct directory structure exists
-		//log.Info("Verifying folder structure..")
+		log.Debug("Verifying folder structure..")
 		Spinner.Prefix = formatSpinnerText("Verifying folder structure", false)
 		time.Sleep(100 * time.Millisecond)
 		mkdirErr := os.MkdirAll(util.GetSourcePath(), 0755)
@@ -186,9 +186,6 @@ var rootCmd = &cobra.Command{
 			}
 			log.Debug("Clover is missing, downloading..")
 			Spinner.Prefix = formatSpinnerText("Downloading Clover", false)
-			// if err := git.Clone("https://github.com/CloverHackyColor/CloverBootloader", util.GetCloverPath(), git.CloneRepoOptions{Branch: "master", Bare: false, Quiet: Verbose}); err != nil {
-			// 	log.Fatal("Error: Failure detected, aborting\n", err)
-			// }
 			if err := runCommand("git clone -b "+Revision+" https://github.com/CloverHackyColor/CloverBootloader Clover", util.GetSourcePath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
@@ -208,9 +205,6 @@ var rootCmd = &cobra.Command{
 					log.Fatal("Error: Failure detected, aborting\n", err)
 				}
 			}
-			// if err := git.Checkout(util.GetCloverPath(), git.CheckoutOptions{Branch: Revision}); err != nil {
-			// 	log.Fatal("Error: Failure detected, aborting\n", err)
-			// }
 			if err := runCommand("git checkout "+Revision, util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
