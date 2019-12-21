@@ -21,6 +21,9 @@ The reason for this prompt comes from building `gettext`, so it's an unfortunate
 You can also install the latest development version:  
 > brew install clobber --HEAD  
 
+If you want to use gcc instead of Xcode as the toolchain, install clobber with the following flag:  
+> brew install clobber --with-gcc  
+
 ### Usage
 
 Build the latest version of Clover:  
@@ -28,6 +31,9 @@ Build the latest version of Clover:
 
 Build a specific Clover version/revision:  
 > clobber --revision 1234  
+
+Build Clover with a different toolchain:  
+> clobber --toolchain GCC53  
 
 View all the available options:  
 > clobber --help  

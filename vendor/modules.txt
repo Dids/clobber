@@ -1,6 +1,6 @@
 # github.com/blang/semver v3.5.1+incompatible
 github.com/blang/semver
-# github.com/briandowns/spinner v1.7.0
+# github.com/briandowns/spinner v1.8.0
 github.com/briandowns/spinner
 # github.com/common-nighthawk/go-figure v0.0.0-20190529165535-67e0ed34491a
 github.com/common-nighthawk/go-figure
@@ -13,9 +13,9 @@ github.com/dsnet/compress/internal/errors
 github.com/dsnet/compress/internal/prefix
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/gobuffalo/envy v1.7.1
+# github.com/gobuffalo/envy v1.8.1
 github.com/gobuffalo/envy
-# github.com/gobuffalo/logger v1.0.1
+# github.com/gobuffalo/logger v1.0.3
 github.com/gobuffalo/logger
 # github.com/gobuffalo/packd v0.3.0
 github.com/gobuffalo/packd
@@ -51,9 +51,9 @@ github.com/joho/godotenv
 github.com/konsorten/go-windows-terminal-sequences
 # github.com/mattn/go-colorable v0.1.4
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.10
+# github.com/mattn/go-isatty v0.0.11
 github.com/mattn/go-isatty
-# github.com/mattn/go-runewidth v0.0.4
+# github.com/mattn/go-runewidth v0.0.7
 github.com/mattn/go-runewidth
 # github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 github.com/mgutz/ansi
@@ -65,12 +65,12 @@ github.com/mitchellh/go-homedir
 github.com/nsf/termbox-go
 # github.com/nwaples/rardecode v1.0.0
 github.com/nwaples/rardecode
-# github.com/pierrec/lz4 v2.3.0+incompatible
+# github.com/pierrec/lz4 v2.4.0+incompatible
 github.com/pierrec/lz4
 github.com/pierrec/lz4/internal/xxh32
-# github.com/rhysd/go-github-selfupdate v1.1.0
+# github.com/rhysd/go-github-selfupdate v1.2.1
 github.com/rhysd/go-github-selfupdate/selfupdate
-# github.com/rogpeppe/go-internal v1.5.0
+# github.com/rogpeppe/go-internal v1.5.1
 github.com/rogpeppe/go-internal/modfile
 github.com/rogpeppe/go-internal/module
 github.com/rogpeppe/go-internal/semver
@@ -91,15 +91,15 @@ github.com/ulikunitz/xz/lzma
 github.com/x-cray/logrus-prefixed-formatter
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 github.com/xi2/xz
-# golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+# golang.org/x/crypto v0.0.0-20191219195013-becbf705a915
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20191021144547-ec77196f6094
+# golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
-# golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+# golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7
+# golang.org/x/sys v0.0.0-20191220220014-0732a990476f
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # google.golang.org/appengine v1.6.5

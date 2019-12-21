@@ -50,6 +50,9 @@ var InstallerOnly bool
 // NoClean skips cleaning of dirty files
 var NoClean bool
 
+// Toolchain to use when building Clover
+var Toolchain string
+
 // Spinner is the CLI spinner/activity indicator
 var Spinner = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 
@@ -253,6 +256,7 @@ var rootCmd = &cobra.Command{
 					log.Fatal("Error: Failure detected, aborting\n", err)
 				}
 				if err := runCommand("ln -sf /usr/local/bin/gettext "+util.GetSourcePath()+"/opt/local/bin/gettext", ""); err != nil {
+					// if err := runCommand("ln -sf $(which gettext) "+util.GetSourcePath()+"/opt/local/bin/gettext", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting\n", err)
 				}
 				Spinner.Prefix = formatSpinnerText("Linking gettext", true)
@@ -268,7 +272,7 @@ var rootCmd = &cobra.Command{
 			if _, err := os.Stat(util.GetSourcePath() + "/opt/local/bin/nasm"); os.IsNotExist(err) {
 				log.Debug("Linking nasm..")
 				Spinner.Prefix = formatSpinnerText("Linking nasm", false)
-
+				// TODO: This could be done better, checking if linking/unlinking is even necessary
 				if err := runCommand("brew link nasm --force --overwrite", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting\n", err)
 				}
@@ -277,9 +281,31 @@ var rootCmd = &cobra.Command{
 					log.Fatal("Error: Failure detected, aborting\n", err)
 				}
 				if err := runCommand("ln -sf /usr/local/bin/nasm "+util.GetSourcePath()+"/opt/local/bin/nasm", ""); err != nil {
+					// if err := runCommand("ln -sf $(which nasm) "+util.GetSourcePath()+"/opt/local/bin/nasm", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting\n", err)
 				}
 				Spinner.Prefix = formatSpinnerText("Linking nasm", true)
+			}
+			if Toolchain != "XCODE8" {
+				if err := runCommand("mkdir -p "+util.GetSourcePath()+"/opt/local/cross/bin", ""); err != nil {
+					log.Fatal("Error: Failure detected, aborting\n", err)
+				}
+				if _, err := os.Stat(util.GetSourcePath() + "/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc"); os.IsNotExist(err) {
+					log.Debug("Linking gcc..")
+					Spinner.Prefix = formatSpinnerText("Linking gcc", false)
+					if err := runCommand("ln -sf /usr/local/bin/gcc-9 "+util.GetSourcePath()+"/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc", ""); err != nil {
+						// if err := runCommand("ln -sf $(which gcc) "+util.GetSourcePath()+"/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc", ""); err != nil {
+						log.Fatal("Error: Failure detected, aborting\n", err)
+					}
+					Spinner.Prefix = formatSpinnerText("Linking gcc", true)
+				}
+
+				// TODO: Add "x86_64-clover-linux-gnu-gcc" to PATH
+				os.Setenv("PATH", os.Getenv("PATH")+":"+util.GetSourcePath()+"/opt/local/cross/bin")
+				log.Info("Path:", os.Getenv("PATH"))
+
+				// FIXME: ccache: error: Could not find compiler "x86_64-clover-linux-gnu-gcc" in PATH
+				os.Setenv("GCC53_BIN", "gcc")
 			}
 
 			// Patch Clover.dsc (eg. skip building ApfsDriverLoader)
@@ -310,15 +336,15 @@ var rootCmd = &cobra.Command{
 			log.Debug("Building Clover..")
 			Spinner.Prefix = formatSpinnerText("Building Clover", false)
 			// TODO: Shouldn't this technically be ignored when using --no-clean?
-			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -cleanall || true", util.GetCloverPath()); err != nil {
+			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -cleanall -t "+Toolchain+" || true", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
 			// 64-bit (boot6, default)
-			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -fr -D NO_GRUB_DRIVERS_EMBEDDED", util.GetCloverPath()); err != nil {
+			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -fr -D NO_GRUB_DRIVERS_EMBEDDED -t "+Toolchain, util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
 			// 64-bit (boot7, MCP/BiosBlockIO)
-			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -fr --x64-mcp --no-usb -D NO_GRUB_DRIVERS_EMBEDDED", util.GetCloverPath()); err != nil {
+			if err := runCommand("source edksetup.sh BaseTools; ./ebuild.sh -fr --x64-mcp --no-usb -D NO_GRUB_DRIVERS_EMBEDDED -t "+Toolchain, util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
 			Spinner.Prefix = formatSpinnerText("Building Clover", true)
@@ -408,14 +434,15 @@ var rootCmd = &cobra.Command{
 				log.Fatal("Error: Failed to update extra EFI drivers (copy AptioMemoryFix.efi): ", err)
 			}
 
-			// Copy FwRuntimeServices.efi
-			if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/FwRuntimeServices.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/FwRuntimeServices.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy FwRuntimeServices.efi): ", err)
+			// Copy everything from OcQuirks
+			// if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/OcQuirks.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/OcQuirks.efi"); err != nil {
+			if err := util.CopyFiles(os.TempDir()+"OcQuirks/OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers (copy OcQuirks): ", err)
 			}
 
-			// Copy OcQuirks.efi
-			if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/OcQuirks.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/OcQuirks.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy OcQuirks.efi): ", err)
+			// Copy FwRuntimeServices.efi (do this after OcQuirks)
+			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/FwRuntimeServices.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/FwRuntimeServices.efi"); err != nil {
+				log.Fatal("Error: Failed to update extra EFI drivers (copy FwRuntimeServices.efi): ", err)
 			}
 
 			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", true)
@@ -555,6 +582,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
 	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
 	rootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
+	rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "XCODE8", "toolchain to use for building")
 	rootCmd.PersistentFlags().BoolVarP(&Hiss, "hiss", "", false, "that's Sir Hiss to you")
 }
 

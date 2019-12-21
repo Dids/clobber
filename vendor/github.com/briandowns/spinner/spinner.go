@@ -274,6 +274,10 @@ func (s *Spinner) Start() {
 				default:
 					s.lock.Lock()
 					s.erase()
+					if !s.active {
+						return
+					}
+
 					var outColor string
 					if runtime.GOOS == "windows" {
 						if s.Writer == os.Stderr {
@@ -369,7 +373,7 @@ func (s *Spinner) UpdateCharSet(cs []string) {
 func (s *Spinner) erase() {
 	n := utf8.RuneCountInString(s.lastOutput)
 	if runtime.GOOS == "windows" {
-		var clearString string
+		clearString := "\r"
 		for i := 0; i < n; i++ {
 			clearString += " "
 		}
