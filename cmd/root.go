@@ -223,6 +223,10 @@ var rootCmd = &cobra.Command{
 			log.Debug("Overriding TOOLCHAIN_DIR..")
 			os.Setenv("TOOLCHAIN_DIR", util.GetSourcePath()+"/opt/local")
 
+			// Override WORKSPACE environment variable
+			log.Debug("Overriding WORKSPACE..")
+			os.Setenv("WORKSPACE", util.GetCloverPath())
+
 			// Build base tools
 			log.Debug("Building base tools..")
 			Spinner.Prefix = formatSpinnerText("Building base tools", false)
@@ -293,11 +297,20 @@ var rootCmd = &cobra.Command{
 				if _, err := os.Stat(util.GetSourcePath() + "/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc"); os.IsNotExist(err) {
 					log.Debug("Linking gcc..")
 					Spinner.Prefix = formatSpinnerText("Linking gcc", false)
-					if err := runCommand("ln -sf /usr/local/bin/gcc-9 "+util.GetSourcePath()+"/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc", ""); err != nil {
+					if err := runCommand("ln -sf /usr/local/bin/gcc-8 "+util.GetSourcePath()+"/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc", ""); err != nil {
 						// if err := runCommand("ln -sf $(which gcc) "+util.GetSourcePath()+"/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc", ""); err != nil {
 						log.Fatal("Error: Failure detected, aborting\n", err)
 					}
 					Spinner.Prefix = formatSpinnerText("Linking gcc", true)
+				}
+				if _, err := os.Stat(util.GetSourcePath() + "/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc-ar"); os.IsNotExist(err) {
+					log.Debug("Linking gcc-ar..")
+					Spinner.Prefix = formatSpinnerText("Linking gcc-ar", false)
+					if err := runCommand("ln -sf /usr/local/bin/gcc-ar-8 "+util.GetSourcePath()+"/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc-ar", ""); err != nil {
+						// if err := runCommand("ln -sf $(which gcc) "+util.GetSourcePath()+"/opt/local/cross/bin/x86_64-clover-linux-gnu-gcc", ""); err != nil {
+						log.Fatal("Error: Failure detected, aborting\n", err)
+					}
+					Spinner.Prefix = formatSpinnerText("Linking gcc-ar", true)
 				}
 
 				// TODO: Add "x86_64-clover-linux-gnu-gcc" to PATH
@@ -582,7 +595,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
 	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
 	rootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
-	rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "XCODE8", "toolchain to use for building")
+	//rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "XCODE8", "toolchain to use for building")
+	rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "GCC53", "toolchain to use for building")
 	rootCmd.PersistentFlags().BoolVarP(&Hiss, "hiss", "", false, "that's Sir Hiss to you")
 }
 
