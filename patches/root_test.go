@@ -10,7 +10,7 @@ var packedPatches = packr.New("patches", "../patches")
 var packedAssets = packr.New("assets", "../assets")
 
 func TestPackedPatches(t *testing.T) {
-	if _, err := packedPatches.FindString("buildpkg5.patch"); err != nil {
+	if _, err := packedPatches.FindString("buildpkg6.patch"); err != nil {
 		t.Errorf("Failed to load packr asset: %s", err)
 	}
 }

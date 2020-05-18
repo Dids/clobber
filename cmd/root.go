@@ -384,79 +384,85 @@ var rootCmd = &cobra.Command{
 			}
 
 			// Download Acidanthera drivers
-			os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
-			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AppleSupportPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AppleSupportPkg.zip"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (download AppleSupportPkg): ", err)
-			}
-			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
+			// os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
+			// if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AppleSupportPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AppleSupportPkg.zip"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (download AppleSupportPkg): ", err)
+			// }
+			// defer os.RemoveAll(os.TempDir() + "AppleSupportPkg.zip")
 
-			os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
-			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AptioFixPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AptioFixPkg.zip"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (download AptioFixPkg): ", err)
-			}
-			defer os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
+			// os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
+			// if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/acidanthera/AptioFixPkg/releases/latest", "browser_download_url.*RELEASE.zip"), os.TempDir()+"AptioFixPkg.zip"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (download AptioFixPkg): ", err)
+			// }
+			// defer os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
+
+			os.RemoveAll(os.TempDir() + "OcQuirks.zip")
 			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/ReddestDream/OcQuirks/releases/latest", "browser_download_url.*.zip"), os.TempDir()+"OcQuirks.zip"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers (download OcQuirks): ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "OcQuirks.zip")
 
 			// Extract Acidanthera drivers
-			os.RemoveAll(os.TempDir() + "AppleSupportPkg")
-			if err := archiver.Unarchive(os.TempDir()+"AppleSupportPkg.zip", os.TempDir()+"AppleSupportPkg"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (unzip AppleSupportPkg): ", err)
-			}
-			defer os.RemoveAll(os.TempDir() + "AppleSupportPkg")
-			os.RemoveAll(os.TempDir() + "AptioFixPkg")
-			if err := archiver.Unarchive(os.TempDir()+"AptioFixPkg.zip", os.TempDir()+"AptioFixPkg"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (unzip AptioFixPkg): ", err)
-			}
-			defer os.RemoveAll(os.TempDir() + "AptioFixPkg")
+			// os.RemoveAll(os.TempDir() + "AppleSupportPkg")
+			// if err := archiver.Unarchive(os.TempDir()+"AppleSupportPkg.zip", os.TempDir()+"AppleSupportPkg"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (unzip AppleSupportPkg): ", err)
+			// }
+			// defer os.RemoveAll(os.TempDir() + "AppleSupportPkg")
+
+			// os.RemoveAll(os.TempDir() + "AptioFixPkg")
+			// if err := archiver.Unarchive(os.TempDir()+"AptioFixPkg.zip", os.TempDir()+"AptioFixPkg"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (unzip AptioFixPkg): ", err)
+			// }
+			// defer os.RemoveAll(os.TempDir() + "AptioFixPkg")
+
+			os.RemoveAll(os.TempDir() + "OcQuirks")
 			if err := archiver.Unarchive(os.TempDir()+"OcQuirks.zip", os.TempDir()+"OcQuirks"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers (unzip OcQuirks): ", err)
 			}
 			defer os.RemoveAll(os.TempDir() + "OcQuirks")
 
 			// Copy ApfsDriverLoader.efi
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/ApfsDriverLoader.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy ApfsDriverLoader.efi): ", err)
-			}
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/BIOS/ApfsDriverLoader.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy ApfsDriverLoader.efi): ", err)
-			}
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/ApfsDriverLoader.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy ApfsDriverLoader.efi): ", err)
+			// }
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/BIOS/ApfsDriverLoader.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy ApfsDriverLoader.efi): ", err)
+			// }
 
 			// Copy UsbKbDxe.efi
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/UsbKbDxe.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/UsbKbDxe.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy UsbKbDxe.efi): ", err)
-			}
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/UsbKbDxe.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/UsbKbDxe.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy UsbKbDxe.efi): ", err)
+			// }
 
 			// Copy VBoxHfs.efi
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/VBoxHfs.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy VBoxHfs.efi): ", err)
-			}
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/VBoxHfs.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy VBoxHfs.efi): ", err)
-			}
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/FileSystem/VBoxHfs.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy VBoxHfs.efi): ", err)
+			// }
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/VBoxHfs.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/BIOS/FileSystem/VBoxHfs.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy VBoxHfs.efi): ", err)
+			// }
 
 			// Copy AptioInputFix.efi
-			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioInputFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/AptioInputFix.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy AptioInputFix.efi): ", err)
-			}
+			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioInputFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/off/UEFI/HID/AptioInputFix.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy AptioInputFix.efi): ", err)
+			// }
 
 			// Copy AptioMemoryFix.efi
-			if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/AptioMemoryFix.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy AptioMemoryFix.efi): ", err)
-			}
+			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/AptioMemoryFix.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy AptioMemoryFix.efi): ", err)
+			// }
 
 			// Copy everything from OcQuirks
 			// if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/OcQuirks.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/OcQuirks.efi"); err != nil {
-			if err := util.CopyFiles(os.TempDir()+"OcQuirks/OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
+			// if err := util.CopyFiles(os.TempDir()+"OcQuirks/OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
+			if err := util.CopyFiles(os.TempDir()+"OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers (copy OcQuirks): ", err)
 			}
 
 			// Copy FwRuntimeServices.efi (do this after OcQuirks)
-			if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/FwRuntimeServices.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/FwRuntimeServices.efi"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy FwRuntimeServices.efi): ", err)
-			}
+			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/FwRuntimeServices.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/FwRuntimeServices.efi"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy FwRuntimeServices.efi): ", err)
+			// }
 
 			Spinner.Prefix = formatSpinnerText("Updating extra EFI drivers", true)
 		}

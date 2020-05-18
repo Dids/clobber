@@ -14,12 +14,12 @@ func TestGetCloverPath(t *testing.T) {
 	}
 }
 
-func TestGetEdkPath(t *testing.T) {
-	path := GetEdkPath()
-	if !isValidPath(path) {
-		t.Errorf("Invalid path: %s", path)
-	}
-}
+// func TestGetEdkPath(t *testing.T) {
+// 	path := GetEdkPath()
+// 	if !isValidPath(path) {
+// 		t.Errorf("Invalid path: %s", path)
+// 	}
+// }
 
 func TestGetSourcePath(t *testing.T) {
 	path := GetSourcePath()
