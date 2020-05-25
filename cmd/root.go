@@ -63,7 +63,7 @@ var Hiss bool
 var patchBuildPkg = true
 
 // Controls whether to patch ebuild.sh or not
-// var patchEbuild = true
+var patchEbuild = false // NOTE: This is no longer necessary
 
 // Create a new logger
 var log = logrus.New()
@@ -290,6 +290,9 @@ var rootCmd = &cobra.Command{
 				}
 				Spinner.Prefix = formatSpinnerText("Linking nasm", true)
 			}
+
+			// FIXME: GCC building doesn't work yet
+			// Build with GCC instead of XCODE
 			if Toolchain != "XCODE8" {
 				if err := runCommand("mkdir -p "+util.GetSourcePath()+"/opt/local/cross/bin", ""); err != nil {
 					log.Fatal("Error: Failure detected, aborting\n", err)
@@ -337,12 +340,13 @@ var rootCmd = &cobra.Command{
 			if err := runCommand("git describe --tags | tr -d '\n' > vers.txt", util.GetCloverPath()); err != nil {
 				log.Fatal("Error: Failure detected, aborting\n", err)
 			}
+			// NOTE: This is no longer necessary
 			// Patch old vers.txt logic back in to ebuild.sh
-			// if patchEbuild {
-			// 	if err := patches.Patch(packedPatches, "ebuild", util.GetCloverPath()+"/ebuild.sh"); err != nil {
-			// 		log.Fatal("Error: Failure detected, aborting\n", err)
-			// 	}
-			// }
+			if patchEbuild {
+				if err := patches.Patch(packedPatches, "ebuild", util.GetCloverPath()+"/ebuild.sh"); err != nil {
+					log.Fatal("Error: Failure detected, aborting\n", err)
+				}
+			}
 			Spinner.Prefix = formatSpinnerText("Patching Clover", true)
 
 			// Build Clover (clean & build, with extras like ApfsDriverLoader checked out and compiled)
@@ -400,6 +404,7 @@ var rootCmd = &cobra.Command{
 			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/ReddestDream/OcQuirks/releases/latest", "browser_download_url.*.zip"), os.TempDir()+"OcQuirks.zip"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers (download OcQuirks): ", err)
 			}
+			log.Debug("Downloaded OcQuirks to ", os.TempDir()+"OcQuirks.zip")
 			defer os.RemoveAll(os.TempDir() + "OcQuirks.zip")
 
 			// Extract Acidanthera drivers
@@ -419,6 +424,7 @@ var rootCmd = &cobra.Command{
 			if err := archiver.Unarchive(os.TempDir()+"OcQuirks.zip", os.TempDir()+"OcQuirks"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers (unzip OcQuirks): ", err)
 			}
+			log.Debug("Unzipped OcQuirks to ", os.TempDir()+"OcQuirks")
 			defer os.RemoveAll(os.TempDir() + "OcQuirks")
 
 			// Copy ApfsDriverLoader.efi
@@ -454,8 +460,8 @@ var rootCmd = &cobra.Command{
 
 			// Copy everything from OcQuirks
 			// if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/OcQuirks.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/OcQuirks.efi"); err != nil {
-			// if err := util.CopyFiles(os.TempDir()+"OcQuirks/OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
-			if err := util.CopyFiles(os.TempDir()+"OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
+			if err := util.CopyFiles(os.TempDir()+"OcQuirks/OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
+				// if err := util.CopyFiles(os.TempDir()+"OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
 				log.Fatal("Error: Failed to update extra EFI drivers (copy OcQuirks): ", err)
 			}
 
@@ -515,7 +521,7 @@ var rootCmd = &cobra.Command{
 
 			// Patch the Clover installer package
 			if patchBuildPkg {
-				if patchErr := patches.Patch(packedPatches, "buildpkg6", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
+				if patchErr := patches.Patch(packedPatches, "buildpkg", util.GetCloverPath()+"/CloverPackage/package/buildpkg.sh"); patchErr != nil {
 					log.Fatal("Error: Failed to patch Clover installer (patch buildpkg.sh): ", patchErr)
 				}
 			}
@@ -601,8 +607,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&UpdateOnly, "update-only", "u", false, "only update (no build)")
 	rootCmd.PersistentFlags().BoolVarP(&InstallerOnly, "installer-only", "i", false, "only build the installer")
 	rootCmd.PersistentFlags().BoolVarP(&NoClean, "no-clean", "n", false, "skip cleaning of dirty files")
-	//rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "XCODE8", "toolchain to use for building")
-	rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "GCC53", "toolchain to use for building")
+	rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "XCODE8", "toolchain to use for building")
+	// rootCmd.PersistentFlags().StringVarP(&Toolchain, "toolchain", "t", "GCC53", "toolchain to use for building")
 	rootCmd.PersistentFlags().BoolVarP(&Hiss, "hiss", "", false, "that's Sir Hiss to you")
 }
 
