@@ -399,13 +399,14 @@ var rootCmd = &cobra.Command{
 			// 	log.Fatal("Error: Failed to update extra EFI drivers (download AptioFixPkg): ", err)
 			// }
 			// defer os.RemoveAll(os.TempDir() + "AptioFixPkg.zip")
-
-			os.RemoveAll(os.TempDir() + "OcQuirks.zip")
-			if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/ReddestDream/OcQuirks/releases/latest", "browser_download_url.*.zip"), os.TempDir()+"OcQuirks.zip"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (download OcQuirks): ", err)
-			}
-			log.Debug("Downloaded OcQuirks to ", os.TempDir()+"OcQuirks.zip")
-			defer os.RemoveAll(os.TempDir() + "OcQuirks.zip")
+			
+			// NOTE: Disabled as Clover now includes OcQuirks on its own
+			// os.RemoveAll(os.TempDir() + "OcQuirks.zip")
+			// if err := util.DownloadFile(getGitHubReleaseLink("https://api.github.com/repos/ReddestDream/OcQuirks/releases/latest", "browser_download_url.*.zip"), os.TempDir()+"OcQuirks.zip"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (download OcQuirks): ", err)
+			// }
+			// log.Debug("Downloaded OcQuirks to ", os.TempDir()+"OcQuirks.zip")
+			// defer os.RemoveAll(os.TempDir() + "OcQuirks.zip")
 
 			// Extract Acidanthera drivers
 			// os.RemoveAll(os.TempDir() + "AppleSupportPkg")
@@ -420,12 +421,13 @@ var rootCmd = &cobra.Command{
 			// }
 			// defer os.RemoveAll(os.TempDir() + "AptioFixPkg")
 
-			os.RemoveAll(os.TempDir() + "OcQuirks")
-			if err := archiver.Unarchive(os.TempDir()+"OcQuirks.zip", os.TempDir()+"OcQuirks"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (unzip OcQuirks): ", err)
-			}
-			log.Debug("Unzipped OcQuirks to ", os.TempDir()+"OcQuirks")
-			defer os.RemoveAll(os.TempDir() + "OcQuirks")
+			// NOTE: Disabled as Clover now includes OcQuirks on its own
+			// os.RemoveAll(os.TempDir() + "OcQuirks")
+			// if err := archiver.Unarchive(os.TempDir()+"OcQuirks.zip", os.TempDir()+"OcQuirks"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (unzip OcQuirks): ", err)
+			// }
+			// log.Debug("Unzipped OcQuirks to ", os.TempDir()+"OcQuirks")
+			// defer os.RemoveAll(os.TempDir() + "OcQuirks")
 
 			// Copy ApfsDriverLoader.efi
 			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/ApfsDriverLoader.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/ApfsDriverLoader.efi"); err != nil {
@@ -457,13 +459,14 @@ var rootCmd = &cobra.Command{
 			// if err := util.CopyFile(os.TempDir()+"AptioFixPkg/Drivers/AptioMemoryFix.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/AptioMemoryFix.efi"); err != nil {
 			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy AptioMemoryFix.efi): ", err)
 			// }
-
+			
+			// NOTE: Disabled as Clover now includes OcQuirks on its own
 			// Copy everything from OcQuirks
 			// if err := util.CopyFile(os.TempDir()+"OcQuirks/OcQuirks/OcQuirks.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/OcQuirks.efi"); err != nil {
-			if err := util.CopyFiles(os.TempDir()+"OcQuirks/OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
-				// if err := util.CopyFiles(os.TempDir()+"OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
-				log.Fatal("Error: Failed to update extra EFI drivers (copy OcQuirks): ", err)
-			}
+			// if err := util.CopyFiles(os.TempDir()+"OcQuirks/OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
+			// 	// if err := util.CopyFiles(os.TempDir()+"OcQuirks", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI"); err != nil {
+			// 	log.Fatal("Error: Failed to update extra EFI drivers (copy OcQuirks): ", err)
+			// }
 
 			// Copy FwRuntimeServices.efi (do this after OcQuirks)
 			// if err := util.CopyFile(os.TempDir()+"AppleSupportPkg/Drivers/FwRuntimeServices.efi", util.GetCloverPath()+"/CloverPackage/CloverV2/EFI/CLOVER/drivers/UEFI/FwRuntimeServices.efi"); err != nil {

@@ -2,7 +2,7 @@
 github.com/blang/semver
 # github.com/briandowns/spinner v1.11.1
 github.com/briandowns/spinner
-# github.com/common-nighthawk/go-figure v0.0.0-20190529165535-67e0ed34491a
+# github.com/common-nighthawk/go-figure v0.0.0-20200609044655-c4b36f998cf2
 github.com/common-nighthawk/go-figure
 # github.com/dsnet/compress v0.0.1
 github.com/dsnet/compress
@@ -39,7 +39,7 @@ github.com/inconshreveable/go-update/internal/binarydist
 github.com/inconshreveable/go-update/internal/osext
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
-# github.com/karrick/godirwalk v1.15.6
+# github.com/karrick/godirwalk v1.16.1
 github.com/karrick/godirwalk
 # github.com/konsorten/go-windows-terminal-sequences v1.0.3
 github.com/konsorten/go-windows-terminal-sequences
@@ -49,13 +49,13 @@ github.com/markbates/errx
 github.com/markbates/oncer
 # github.com/markbates/safe v1.0.1
 github.com/markbates/safe
-# github.com/mattn/go-colorable v0.1.6
+# github.com/mattn/go-colorable v0.1.7
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.12
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.9
 github.com/mattn/go-runewidth
-# github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
+# github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 github.com/mgutz/ansi
 # github.com/mholt/archiver v3.1.1+incompatible
 github.com/mholt/archiver
@@ -78,7 +78,7 @@ github.com/spf13/cobra
 github.com/spf13/pflag
 # github.com/tcnksm/go-gitconfig v0.1.2
 github.com/tcnksm/go-gitconfig
-# github.com/ulikunitz/xz v0.5.7
+# github.com/ulikunitz/xz v0.5.8
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
@@ -87,7 +87,7 @@ github.com/ulikunitz/xz/lzma
 github.com/x-cray/logrus-prefixed-formatter
 # github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8
 github.com/xi2/xz
-# golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
+# golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 golang.org/x/crypto/cast5
 golang.org/x/crypto/openpgp
 golang.org/x/crypto/openpgp/armor
@@ -96,13 +96,13 @@ golang.org/x/crypto/openpgp/errors
 golang.org/x/crypto/openpgp/packet
 golang.org/x/crypto/openpgp/s2k
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
+# golang.org/x/net v0.0.0-20200904194848-62affa334b73
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
-# golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+# golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20200523222454-059865788121
+# golang.org/x/sys v0.0.0-20200909081042-eff7692f9009
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -114,7 +114,7 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/protobuf v1.23.0
+# google.golang.org/protobuf v1.25.0
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
@@ -125,12 +125,11 @@ google.golang.org/protobuf/internal/encoding/messageset
 google.golang.org/protobuf/internal/encoding/tag
 google.golang.org/protobuf/internal/encoding/text
 google.golang.org/protobuf/internal/errors
-google.golang.org/protobuf/internal/fieldnum
 google.golang.org/protobuf/internal/fieldsort
 google.golang.org/protobuf/internal/filedesc
 google.golang.org/protobuf/internal/filetype
 google.golang.org/protobuf/internal/flags
-google.golang.org/protobuf/internal/genname
+google.golang.org/protobuf/internal/genid
 google.golang.org/protobuf/internal/impl
 google.golang.org/protobuf/internal/mapsort
 google.golang.org/protobuf/internal/pragma
