@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/Dids/clobber)
+
 [![Build Status](https://travis-ci.org/Dids/clobber.svg?branch=master)](https://travis-ci.org/Dids/clobber)
 
 <a href="https://github.com/Dids/clobber"><img alt="Clobber" src="https://repository-images.githubusercontent.com/138838737/0b263100-7e70-11e9-8223-f6d177e88cca" width="640" height="320"/></a>
